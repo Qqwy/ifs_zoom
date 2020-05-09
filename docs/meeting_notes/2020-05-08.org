@@ -1,0 +1,58 @@
+#+TITLE: Notes of video-meeting wrapping up SPP and beginning Bachelor's Project
+#+DATE: 2020-06-08
+#+AUTHOR: Wiebe-Marten Wijnja and Jiři Kosinka
+#+OPTIONS: toc:nil
+#+LATEX_HEADER: \usepackage[a4paper, total={7in, 9in}]{geometry}
+
+
+* Short Programming Project
+** Wrapping up the SPP
+*** Presentation
+
+   The group still meets (digitally?) every two weeks, so presentation is possible.
+
+- about 15 minutes
+- with slides
+
+** Turning the SPP into a paper
+/thorough notes about this are in the shared OverLeaf document/.
+
+- Sections should be balanced
+
+* Bachelor's Project
+** Theme
+Visualizing Iterated Function Systems when zooming in.
+
+*** Ideas:
+Two ideas W-M has:
+
+**** Render points using 'chaos game' in 2D point-cloud
+These points can then be re-used between frames.
+Goal: less work per rendered frame and thus faster speeds.
+
+**** Move zoomed-in camera to shallower viewport that is identical because of self-similarity
+Goal: Keeping the camera from zooming in too far, which allows us to keep re-using points.
+
+** Suggestions by Jiři 
+*** Maybe investigate 'IFS flattening'?
+Turning multiple layers of transformations into a single (wider) layer of transformations
+in a 'preparation' step before running e.g. the chaos game.
+
+*** Point cloud splatting
+It might make sense to look into how modern GPUs do (3D) point-cloud rendering
+because that might be of use to how to efficiently do 2D point-cloud rendering.
+
+** Formalities
+*** Info
+    - The bachelor's project takes roughly 10-12 weeks full-time.
+    - The starting form can be found in Nestor.
+    - After 6 weeks there is a formal 'midterm review' (with separate form).
+
+*** Decisions
+
+W-M will start with the project next week, and therefore try to finish around week 32 (beginning of August).
+
+*** Second Supervisor
+
+Jiři will ask PhD-student Gerben Hettinga. Hope he says yes!
+
