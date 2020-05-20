@@ -1,0 +1,34 @@
+This document contains a semi-ordered set of notes and ideas,
+which are stored here for safekeeping (combatting my forgetfulness) and percolating.
+
+* Iterated Functions Zooming
+** Info obtained from papers
+*** All papers about IFS rendering target a 2D rasterized picture/texture
+**** The main advantage here is that two points ending up in the same pixel do not take up more memory. In other words: Rendering 1M points to 100x100 pixels requires only to keep the 100x100 pixels in memory.
+**** The immediate disadvantage is that it is impossible to zoom into this without seeing rendering artefacts.
+
+*** All papers about IFS rendering read so far, with one exception (Green 2005 AKA 'GPU-accelerated IFS'), target rendering the IFS to a single, static image.
+**** [Green05] re-renders the IFS at every frame using a 2D floating-point texture in a GPGPU algorithm.
+***** This is because they desire to support arbitrary 'changing parameters over time'.
+** New ideas
+*** What about using a (2D) point cloud to store the points in?
+**** Advantage: Re-usable regardless of zoom level.
+**** Disadvantage: Takes more memory.
+     Other notes: to speed up point-cloud -> pixelspace we might put the point cloud in e.g. a kD-tree.
+     Other fancy techniques to work with point clouds exist (all of them targeting 3D rather than 2D however).
+     They might be overkill (either too much work during bachelor's project, or too complex to speed up something based on the chaos game in the first place.)
+*** Zooming 'out' when zoomed in far enough in self-similar IFS
+**** This /requires/ self-similarity. For many IFSs this is true. Essentially only IFSs that are not contractive are not self-similar. 
+     There are cases in which those non-contractive IFSs are used, for instance when creating a 'digest image' by driving a random number generator using a deterministic sequence on the non-contracting 'Square' IFS for fingerprints or DNA.
+
+
+* IFS rendering techniques
+** The 'Deterministic Algorithm'
+** (Nondeterministic) Chaos Game
+** Deterministic Chaos Game based on 'de Bruijn' sequences (calculatable using finite fields).
+** Optimizations on the 'Deterministic Algortihm' that do not iterate deeper than required.
+
+
+
+
+** There are ways of obtaining better probability values for the chaos game using one of the deterministic algorithms.
