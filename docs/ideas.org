@@ -20,7 +20,10 @@ which are stored here for safekeeping (combatting my forgetfulness) and percolat
 *** Zooming 'out' when zoomed in far enough in self-similar IFS
 **** This /requires/ self-similarity. For many IFSs this is true. Essentially only IFSs that are not contractive are not self-similar. 
      There are cases in which those non-contractive IFSs are used, for instance when creating a 'digest image' by driving a random number generator using a deterministic sequence on the non-contracting 'Square' IFS for fingerprints or DNA.
+*** Using a point cloud stored in e.g. a kD-tree where we store information of contained points in each inner node.
+    Idea is that this tree in many cases does not need to be evaluated all the way to individual points: if the points are closer to each-other than one pixel for a certain zoom-depth, we can stop early.
 
+    On the other hand, if points are outside of camera range, we can drop them early from the search during rendering too.
 
 * IFS rendering techniques
 ** The 'Deterministic Algorithm'
