@@ -26,12 +26,42 @@ which are stored here for safekeeping (combatting my forgetfulness) and percolat
     On the other hand, if points are outside of camera range, we can drop them early from the search during rendering too.
 
 * IFS rendering techniques
-** The 'Deterministic Algorithm'
-** (Nondeterministic) Chaos Game
-** Deterministic Chaos Game based on 'de Bruijn' sequences (calculatable using finite fields).
-** Optimizations on the 'Deterministic Algortihm' that do not iterate deeper than required.
+** Described:
+*** The 'Deterministic Algorithm'
+Described in 'Fractals Everywhere' and many other places.
+*** (Nondeterministic) Chaos Game
+Described in 'Fractals Everywhere' and many other places.
+*** Deterministic Chaos Game based on 'de Bruijn' sequences (calculatable using finite fields).
+Described in 'Fractals, Graphs, and Fields'
+*** Optimizations on the 'Deterministic Algortihm' that do not iterate deeper than required. ("Adaptive Cut")
+Is described in one of the paper 'Rendering Methods for Iterated Function Systems'. See pages 7-11 (section 2.1).
+*** Ray-tracing using nested spheres
+See section 2.5 of 'Rendering Methods for Iterated Function Systems'.
 
+** Side notes
+*** There are ways of obtaining better probability values for the chaos game using one of the deterministic algorithms.
+    Is described in one of the paper 'Rendering Methods for Iterated Function Systems', section 2.4.
+*** Contraction can be estimated
+See section 2.2. of 'Rendering Methods'.
 
+Perfect answer: `\rho(F) = sqrt(max(eigenvalues of transpose(A)*A))` where 'A' is the non-translation part of the affine transformation `F(x) = Ax+B`.
+Rough but fast estimation: \rho(FG) = \rho(F)*\rho(G).
+TODO comprehend intermediatly detailed estimation.
 
+** New Ideas
+*** The 'Penultimate(Squaring)' of my SPP can be used also to (deterministically) collapse the whole tree of iterated-transformations.
+Since we however need to keep all possibilities, this will, for e.g. an IFS with 4 functions:
+- (depth 0) single point
+- (depth 1) 4 functions ('starting position')
+- (depth 2) 16 functions (depth 1 * depth 1)
+- (depth 4) 256 functions (depth 2 * depth 2)
+- (depth 8) 65536 functions (depth 4 * depth 4)
+- (depth 16) 4294967296 functions (depth 8 * depth 8) <- This might still be too low for many screens.
+- (depth 32) 18446744073709551616 functions (depth 16 * depth 16) <- This is probably enough for most screens + zooms.
+etc.
 
-** There are ways of obtaining better probability values for the chaos game using one of the deterministic algorithms.
+We might of course stop sooner which will still require log2(depth) steps to run but result in fewer functions.
+
+Interestingly we do not need to keep the functions at the final layer in memory, since we can forget a function at the final depth once we have computed it and used it on a single point.
+
+We might maybe be able to remove functions from the 'go-deeper' part when we find out that they are alraedy so contractive that they'd map to e.g. a single pixel?
