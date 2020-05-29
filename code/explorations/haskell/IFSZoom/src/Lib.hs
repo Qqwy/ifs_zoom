@@ -1,4 +1,5 @@
 {-# LANGUAGE RebindableSyntax #-}
+{-# LANGUAGE ViewPatterns #-}
 -- |
 -- Module      : Lib
 -- Copyright   : [2020] Wiebe-Marten Wijnja
@@ -39,12 +40,11 @@ binarySearch' arr target =
     initial = lift (0, length arr - 1)
 
     check :: Exp (Int, Int) -> Exp Bool
-    check bounds = (arr !! fst bounds) < (arr !! snd bounds)
+    check (unlift -> (left, right)) = (arr !! left) < (arr !! right)
 
     body :: Exp (Int, Int) -> Exp (Int, Int)
-    body bounds =
+    body (unlift -> (left, right)) =
       let
-        (left, right) = unlift bounds
         middle = (left + right) `quot` 2
         elem = arr !! middle
       in
