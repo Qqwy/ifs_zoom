@@ -17,6 +17,7 @@ import Text.Printf
 import Prelude                                                      as P
 
 import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate.Interpreter                            as Interpreter
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 import Data.Array.Accelerate.LLVM.Native                            as CPU
 #endif
@@ -40,6 +41,7 @@ main = do
   printf "the function to execute:\n"
   printf "%s\n\n" (show dotp)
 
+  printf "result with interpreter backend: dotp xs ys = %s\n" (show (Interpreter.runN dotp xs ys))
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
   printf "result with CPU backend: dotp xs ys = %s\n" (show (CPU.runN dotp xs ys))
 #endif

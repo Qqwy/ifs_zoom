@@ -20,4 +20,4 @@ import Data.Array.Accelerate
 -- | A simple vector inner product
 --
 dotp :: Acc (Vector Double) -> Acc (Vector Double) -> Acc (Scalar Double)
-dotp xs ys = fold (+) 0 ( zipWith (*) xs ys)
+dotp xs ys = fold (*) 1 ( zipWith (+) xs ys)
