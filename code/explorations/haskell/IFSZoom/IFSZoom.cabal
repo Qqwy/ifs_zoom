@@ -26,7 +26,8 @@ library
   hs-source-dirs:       src
 
   exposed-modules:
-        Lib
+        Lib,
+        Pipe
 
   build-depends:
         base                        >= 4.7 && < 5

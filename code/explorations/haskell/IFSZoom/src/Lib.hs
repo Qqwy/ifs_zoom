@@ -17,6 +17,7 @@ module Lib (
 
 ) where
 
+import Pipe
 import Data.Array.Accelerate
 
 -- | A simple vector inner product
@@ -26,28 +27,24 @@ dotp xs ys = fold (*) 1 ( zipWith (+) xs ys)
 
 
 binarySearch :: Ord a => Acc (Vector a) -> Acc (Scalar a) -> Acc (Scalar Int)
-binarySearch arr target =
-  let
-    target' = the target
-  in
-    unit $ fst $ binarySearch' arr target'
+binarySearch arr (the -> target) =
+  initial_bounds
+  |> while targetNotFound halveBounds
+  |> fst
+  |> unit
+      where
+        initial_bounds :: Exp (Int, Int)
+        initial_bounds = lift (0, length arr - 1)
 
-binarySearch' :: Ord a => Acc (Vector a) -> Exp a -> Exp (Int, Int)
-binarySearch' arr target =
-    while check body initial
-  where
-    initial :: Exp (Int, Int)
-    initial = lift (0, length arr - 1)
+        targetNotFound :: Exp (Int, Int) -> Exp Bool
+        targetNotFound (unlift -> (left, right)) = (arr !! left) < (arr !! right)
 
-    check :: Exp (Int, Int) -> Exp Bool
-    check (unlift -> (left, right)) = (arr !! left) < (arr !! right)
-
-    body :: Exp (Int, Int) -> Exp (Int, Int)
-    body (unlift -> (left, right)) =
-      let
-        middle = (left + right) `quot` 2
-        elem = arr !! middle
-      in
-        if      elem < target then lift $ (middle + 1, right)
-        else if elem > target then lift $ (left, middle - 1)
-        else                       lift $ (middle, middle)
+        halveBounds :: Exp (Int, Int) -> Exp (Int, Int)
+        halveBounds (unlift -> (left, right)) =
+          let
+            middle = (left + right) `quot` 2
+            elem = arr !! middle
+          in
+            if      elem < target then lift $ (middle + 1, right)
+            else if elem > target then lift $ (left, middle - 1)
+            else                       lift $ (middle, middle)
