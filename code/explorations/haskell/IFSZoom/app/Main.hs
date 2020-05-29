@@ -60,7 +60,7 @@ runExample = do
 runBinarySearch = do
   let
     arr :: Acc (Vector Int)
-    arr = use $ fromList (Z:.10000) [1,3..]
+    arr = use $ fromList (Z:.10) [1,3..]
     elem = unit 122
     acc_ast = binarySearch
 

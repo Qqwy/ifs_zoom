@@ -24,77 +24,30 @@ dotp :: Acc (Vector Int) -> Acc (Vector Int) -> Acc (Scalar Int)
 dotp xs ys = fold (*) 1 ( zipWith (+) xs ys)
 
 
-binarySearch :: Acc (Vector Int) -> Acc (Scalar Int) -> Acc (Scalar Int)
-binarySearch arr wrapped_target =
+binarySearch :: Ord a => Acc (Vector a) -> Acc (Scalar a) -> Acc (Scalar Int)
+binarySearch arr target =
   let
-    target = the wrapped_target
-    index = fst $ binarySearch' arr target 0 (length arr - 1)
+    target' = the target
   in
-    unit index
+    unit $ fst $ binarySearch' arr target'
 
-binarySearch' :: Acc (Vector Int) -> Exp Int -> Exp Int -> Exp Int -> Exp (Int, Int)
-binarySearch' arr target left right =
-  let
+binarySearch' :: Ord a => Acc (Vector a) -> Exp a -> Exp (Int, Int)
+binarySearch' arr target =
+    while check body initial
+  where
     initial :: Exp (Int, Int)
-    initial = liftedPair left right
+    initial = lift (0, length arr - 1)
 
     check :: Exp (Int, Int) -> Exp Bool
-    check pair =
-      let
-        (left, right) = unlift pair
-      in
-        (arr !! left) < (arr !! right)
+    check bounds = (arr !! fst bounds) < (arr !! snd bounds)
 
     body :: Exp (Int, Int) -> Exp (Int, Int)
-    body pair =
+    body bounds =
       let
-        (left, right) = unlift pair
+        (left, right) = unlift bounds
         middle = (left + right) `quot` 2
+        elem = arr !! middle
       in
-        -- case (compare (arr !! middle) target :: Ordering) of
-        --   LT ->
-        --     liftedPair (middle + 1) right
-        --   GT ->
-        --     liftedPair left (middle - 1)
-        --   EQ ->
-        --     liftedPair middle middle
-        caseof (compare (arr !! middle) target)
-        [
-          ((== constant LT), liftedPair (middle + 1) right),
-          ((== constant GT), liftedPair left (middle - 1))
-        ]
-        (liftedPair middle middle)
-
-  in
-    while check body initial
-  -- let
-  --   check :: Exp (DIM1, DIM1) -> Exp Bool
-  --   check (left, right) = (arr ! left) < (arr ! right)
-  -- in
-  --   while _
-  --   (\tuple ->
-  --     let
-  --       (left, right) = unlift tuple :: (Exp DIM1, Exp DIM1)
-  --       middle :: Exp DIM1
-  --       middle = (left + right) `div` 2
-  --   in
-  --       _
-  --     -- lift $ case compare (arr ! middle) target of
-  --     --   LT ->
-  --     --     (middle + 1, right)
-  --     --   GT ->
-  --     --     (left, middle - 1)
-  --     --   EQ ->
-  --     --     (middle, middle)
-  --     )
-  --   (unlift (left, right))
-
--- arrsize :: Acc (Vector Int) -> Exp DIM1
--- arrsize arr = lift $ (\i -> Z :. i) $ length $ arr
-
-liftedPair :: Exp Int -> Exp Int -> Exp (Int, Int)
-liftedPair a b =
-  let
-    pair = (a, b) :: (Exp Int, Exp Int)
-  in
-    lift pair
+        if      elem < target then lift $ (middle + 1, right)
+        else if elem > target then lift $ (left, middle - 1)
+        else                       lift $ (middle, middle)
