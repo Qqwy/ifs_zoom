@@ -27,7 +27,8 @@ library
 
   exposed-modules:
         Lib,
-        Pipe
+        Pipe,
+        Helper
 
   build-depends:
         base                        >= 4.7 && < 5

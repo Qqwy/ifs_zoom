@@ -18,11 +18,14 @@ module Lib (
   xorShift,
   wordToDouble,
   randomVector,
-  radixSort
+  radixSort,
+  radixSortBit
 
 ) where
 
 import qualified Prelude as P
+import qualified Data.List as DL
+import qualified Helper as Helper
 import Pipe
 import Data.Array.Accelerate
 import Data.Bits as Bits
@@ -134,12 +137,9 @@ randomVector length seed =
 -- where we can create an unrolled version of something that would be horrible to write by hand.
 radixSort :: Acc (Vector Word) -> Acc (Vector Word)
 radixSort vector =
-  bits
+  Helper.bitsList
   |> P.map Lib.radixSortBit
-  |> P.foldl (|>) vector
-  where
-    bits = [0..63]
-
+  |> DL.foldl' (|>) vector
 
 -- | One step of parallel radix sort, for a single bit.
 radixSortBit :: Int -> Acc (Vector Word) -> Acc (Vector Word)
@@ -147,7 +147,7 @@ radixSortBit bit vector =
   vector
   |> scatter sorted_indexes vector
   where
-    ones = map (\elem -> if ABits.testBit elem bit then 1 else 0) vector
+    ones = map (\elem -> if ABits.testBit elem (constant bit) then 1 else 0) vector
     zeroes = map (\elem -> 1 - elem) ones
     (ones_sum, n_ones) = (afst res, res |> asnd |> the)
       where

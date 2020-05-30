@@ -31,7 +31,8 @@ main :: IO ()
 main = do
 
   -- runExample
-  runBinarySearch
+  -- runBinarySearch
+  runSort
 
 -- runExample = do
 --   let
@@ -57,26 +58,36 @@ main = do
 -- #endif
 
 -- runBinarySearch :: (Acc (Vector Int) -> Exp Int -> Acc (Scalar Int)) -> Acc (Vector Int) -> Exp Int -> IO ()
-runBinarySearch = do
+-- runBinarySearch = do
+--   let
+--     arr :: Acc (Vector Int)
+--     arr = use $ fromList (Z:.10) [1,3..]
+--     elem = unit 122 :: Acc (Scalar Int)
+--     acc_ast = binarySearch
+
+--   printf "the function to execute:\n"
+--   printf "%s\n\n" (show acc_ast)
+
+--   -- printf "the input to execute:\n"
+--   -- printf "%s\n\n" (show input)
+
+--   printf "result with interpreter backend: %s\n" (show (Interpreter.runN $ acc_ast elem arr))
+--   let
+--     res = (Interpreter.runN $ acc_ast elem arr)
+--   printf "result: %s\n" (show (res S.! Z))
+-- #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
+--   printf "result with CPU backend: %s\n" (show (CPU.runN $ acc_ast elem arr))
+-- #endif
+-- #ifdef ACCELERATE_LLVM_PTX_BACKEND
+--   printf "result with PTX backend: %s\n" (show (PTX.runN $ acc_ast elem arr))
+-- #endif
+
+runSort = do
   let
-    arr :: Acc (Vector Int)
-    arr = use $ fromList (Z:.10) [1,3..]
-    elem = unit 122 :: Acc (Scalar Int)
-    acc_ast = binarySearch
+    arr :: Acc (Vector Word)
+    arr = use $ fromList (Z :. 100) ([100, 99..])
 
-  printf "the function to execute:\n"
-  printf "%s\n\n" (show acc_ast)
-
-  -- printf "the input to execute:\n"
-  -- printf "%s\n\n" (show input)
-
-  printf "result with interpreter backend: %s\n" (show (Interpreter.runN $ acc_ast elem arr))
-  let
-    res = (Interpreter.runN $ acc_ast elem arr)
-  printf "result: %s\n" (show (res S.! Z))
-#ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-  printf "result with CPU backend: %s\n" (show (CPU.runN $ acc_ast elem arr))
-#endif
-#ifdef ACCELERATE_LLVM_PTX_BACKEND
-  printf "result with PTX backend: %s\n" (show (PTX.runN $ acc_ast elem arr))
-#endif
+  printf "as input: %s\n" (show arr)
+  -- printf "result with interpreter backend: %s\n" (show (Interpreter.runN $ Lib.radixSort arr))
+  printf "result with CPU backend: %s\n" (show (CPU.runN $ Lib.radixSort arr))
+  printf "result with PTX backend: %s\n" (show (PTX.runN $ Lib.radixSort arr))
