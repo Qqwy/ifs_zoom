@@ -30,6 +30,11 @@ library
         Pipe,
         Helper
 
+  other-modules:
+    Lib.MortonCode,
+    Lib.Random,
+    Lib.Sort
+
   build-depends:
         base                        >= 4.7 && < 5
       , accelerate                  >= 1.0
@@ -43,6 +48,7 @@ executable IFSZoom-exe
         base
       , IFSZoom
       , accelerate
+      , linear-accelerate
 
   ghc-options:
       -O2
