@@ -139,7 +139,7 @@ radixSort :: Acc (Vector Word) -> Acc (Vector Word)
 radixSort vector =
   Helper.bitsList
   |> P.map Lib.radixSortBit
-  |> DL.foldl' (|>) vector
+  |> DL.foldl' (\input next -> input |> compute |>next) vector
 
 -- | One step of parallel radix sort, for a single bit.
 radixSortBit :: Int -> Acc (Vector Word) -> Acc (Vector Word)
@@ -149,16 +149,12 @@ radixSortBit bit vector =
   where
     ones = map (\elem -> if ABits.testBit elem (constant bit) then 1 else 0) vector
     zeroes = map (\elem -> 1 - elem) ones
-    (ones_sum, n_ones) = (afst res, res |> asnd |> the)
-      where
-        res = scanl' (+) 0 ones
-    (zeroes_sum, n_zeroes) = (afst res, res |> asnd |> the)
-      where
-        res = scanl' (+) 0 zeroes
+    (zeroes_sum, n_zeroes) = let res = scanl' (+) 0 zeroes in (afst res, the (asnd res))
+    ones_sum = scanl (+) 0 ones
     sorted_indexes =
       zip3 ones zeroes_sum ones_sum
-      |> map (\(unlift -> (isone, ifzero_idx, ifone_idx)) ->
+      |> map (\(unlift -> (isone, ifzero_index, ifone_index)) ->
                 if isone == 1
-                then n_zeroes + ifone_idx
-                else ifzero_idx
+                then n_zeroes + ifone_index
+                else ifzero_index
              )
