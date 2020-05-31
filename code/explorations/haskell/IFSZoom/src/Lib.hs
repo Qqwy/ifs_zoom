@@ -19,7 +19,9 @@ module Lib (
   wordToDouble,
   randomVector,
   radixSort,
-  radixSortBit
+  radixSortBit,
+  expandBits,
+  interleaveBits
 
 ) where
 
@@ -28,8 +30,7 @@ import qualified Data.List as DL
 import qualified Helper as Helper
 import Pipe
 import Data.Array.Accelerate
-import Data.Bits as Bits
-import Data.Array.Accelerate.Data.Bits as ABits
+import Data.Array.Accelerate.Data.Bits
 
 -- | A simple vector inner product
 --
@@ -102,12 +103,12 @@ chaosGame nThreads nPointsPerThread transformations =
 -- Note that XorShift is an _ok_ RNG but not a very high-quality one:
 -- Specifically, it will fail certain statistical tests.
 -- Also, it will never return `0` (if given any number except `0`).
-xorShift :: ABits.Bits a => Exp a -> Exp a
+xorShift :: Bits a => Exp a -> Exp a
 xorShift a =
   let
-    b = a `ABits.xor` (ABits.shiftL a 13)
-    c = b `ABits.xor` (ABits.shiftR b  7)
-    d = c `ABits.xor` (ABits.shiftL c 17)
+    b = a `xor` (shiftL a 13)
+    c = b `xor` (shiftR b  7)
+    d = c `xor` (shiftL c 17)
   in
     d
 
@@ -147,7 +148,7 @@ radixSortBit bit vector =
   vector
   |> scatter sorted_indexes vector
   where
-    ones = map (\elem -> if ABits.testBit elem (constant bit) then 1 else 0) vector
+    ones = map (\elem -> if testBit elem (constant bit) then 1 else 0) vector
     zeroes = map (\elem -> 1 - elem) ones
     (zeroes_sum, n_zeroes) = let res = scanl' (+) 0 zeroes in (afst res, the (asnd res))
     ones_sum = scanl (+) 0 ones
@@ -158,3 +159,36 @@ radixSortBit bit vector =
                 then n_zeroes + ifone_index
                 else ifzero_index
              )
+
+-- | Returns a single 64-bit number where all even-indexed bits are set to the bits of `a`.
+--
+-- So the MSB is 0, the next bit is the MSB of `a`, the next is 0, the next is next-highest bit of `a` etc.
+--
+-- Kudos to https://lemire.me/blog/2018/01/08/how-fast-can-you-bit-interleave-32-bit-integers/
+-- for explaining this bit-twiddling technique in detail.
+expandBits :: Exp Word32 -> Exp Word64
+expandBits a =
+  let
+    constants =
+      [
+        (16, 0x0000ffff0000ffff),
+        (8, 0x00FF00FF00FF00FF),
+        (4, 0x0F0F0F0F0F0F0F0F),
+        (2, 0x3333333333333333),
+        (1, 0x5555555555555555)
+      ]
+    step num (offset, mask) = (num `xor` (num `shiftL` offset)) .&. mask
+  in
+    DL.foldl step (fromIntegral a) constants
+
+-- | Returns the morton-code interleaving
+--
+-- where from MSB to LSB we have one bit of y and then of x
+-- (and then the next-highest bit of y and then the next-highest bit of x etc).
+interleaveBits :: Exp Word32 -> Exp Word32 -> Exp Word64
+interleaveBits x y =
+  let
+    x' = expandBits x
+    y' = expandBits y
+  in
+    x' .|. (y' `shiftL` 1)
