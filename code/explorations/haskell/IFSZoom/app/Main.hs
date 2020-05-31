@@ -11,6 +11,7 @@
 
 module Main where
 
+import Pipe
 import Lib
 
 import Text.Printf
@@ -84,10 +85,13 @@ main = do
 
 runSort = do
   let
-    arr :: Acc (Vector Word)
-    arr = use $ fromList (Z :. 100) ([100, 99..])
+    arr :: Acc (Vector (Float, Float))
+    -- arr = use $ fromList (Z :. 100) ([100, 99..])
+    arr = use $ fromList (Z :. 10000) ([(x,y) | x <- [100,99..1], y <- [100,99..1]])
+    -- program = arr |> A.map (A.uncurry Lib.interleaveBits) |> Lib.radixSort |> A.map Lib.deinterleaveBits
+    program = arr |> Lib.sortPoints
 
   printf "as input: %s\n" (show arr)
   -- printf "result with interpreter backend: %s\n" (show (Interpreter.runN $ Lib.radixSort arr))
-  printf "result with CPU backend: %s\n" (show (CPU.runN $ Lib.radixSort arr))
-  printf "result with PTX backend: %s\n" (show (PTX.runN $ Lib.radixSort arr))
+  printf "result with CPU backend: %s\n" (show (CPU.runN $ program))
+  printf "result with PTX backend: %s\n" (show (PTX.runN $ program))

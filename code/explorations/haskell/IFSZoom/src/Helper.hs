@@ -6,6 +6,7 @@ module Helper (
   deinterleaveBits
   ) where
 
+import Data.Foldable
 import Data.Bits
 import Data.Word
 
@@ -27,7 +28,7 @@ expandBits input =
   |> fromIntegral
   |> expand
   where
-    expand num = foldl expandStep num constants
+    expand num = foldl' expandStep num constants
       where
         expandStep a (offset, mask) = (a `xor` (a `shiftL` offset)) .&. mask
         constants =
@@ -59,7 +60,7 @@ shrinkBits input =
   |> fromIntegral
   where
     maskOddBits num = num .&. 0x5555555555555555
-    shrink num = foldl shrinkStep num constants
+    shrink num = foldl' shrinkStep num constants
       where
         shrinkStep a (offset, mask) = (a `xor` (a `shiftR` offset)) .&. mask
         constants =
