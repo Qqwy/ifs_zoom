@@ -26,14 +26,14 @@ library
   hs-source-dirs:       src
 
   exposed-modules:
-        Lib,
-        Pipe,
-        Helper
+      Lib
+    , Pipe
 
   other-modules:
-    Lib.MortonCode,
-    Lib.Random,
-    Lib.Sort
+      Lib.MortonCode
+    , Lib.Random
+    , Lib.Sort
+    , Helper
 
   build-depends:
         base                        >= 4.7 && < 5
@@ -49,7 +49,9 @@ executable IFSZoom-exe
       , IFSZoom
       , accelerate
       , linear-accelerate
-
+      , accelerate-io
+      , colour-accelerate
+      , gloss-accelerate
   ghc-options:
       -O2
       -threaded
@@ -69,20 +71,51 @@ executable IFSZoom-exe
     build-depends:
         accelerate-llvm-ptx         >= 1.0
 
-test-suite IFSZoom-test
-  default-language:     Haskell2010
-  type:                 exitcode-stdio-1.0
-  hs-source-dirs:       test
-  main-is:              Test.hs
+-- test-suite IFSZoom-test
+--   default-language:     Haskell2010
+--   type:                 exitcode-stdio-1.0
+--   hs-source-dirs:       test
+--   main-is:              Test.hs
 
+--   build-depends:
+--         base
+--       , IFSZoom
+
+--   ghc-options:
+--       -O2
+--       -threaded
+--       -rtsopts
+
+test-suite doctest
   build-depends:
         base
-      , IFSZoom
+      , doctest == 0.16.*
+      , Glob == 0.10.*
+  default-language: Haskell2010
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test
+  main-is:          DocTest.hs
 
   ghc-options:
       -O2
       -threaded
       -rtsopts
+
+test-suite hspec
+  build-depends:
+        base
+      , hspec
+  default-language: Haskell2010
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test
+  main-is:          Spec.hs
+
+  ghc-options:
+      -O2
+      -threaded
+      -rtsopts
+
+
 
 source-repository head
   type:     git

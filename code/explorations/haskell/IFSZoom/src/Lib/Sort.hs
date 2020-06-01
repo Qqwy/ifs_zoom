@@ -23,6 +23,13 @@ import Data.Array.Accelerate.Data.Bits
 -- The nice thing about using Accelerate
 -- is that we can manipulate the AST creation using techniques like this one
 -- where we can create an unrolled version of something that would be horrible to write by hand.
+--
+-- ## Examples
+--
+-- >>> import Data.Array.Accelerate.LLVM.Native as CPU
+-- >>> arr = use $ fromList (Z :. 10) ([10, 9..]) :: Acc (Vector Word64)
+-- >>> CPU.run $ Lib.Sort.radixSort arr
+-- Vector (Z :. 10) [1,2,3,4,5,6,7,8,9,10]
 radixSort :: Acc (Vector Word64) -> Acc (Vector Word64)
 radixSort vector =
   Helper.bitsList

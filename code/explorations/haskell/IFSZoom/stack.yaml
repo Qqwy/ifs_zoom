@@ -56,6 +56,9 @@ extra-deps:
 - accelerate-llvm-1.2.0.1@sha256:e794b1abfea5424671d84d5d69bb9ccf468af9adaa481f9adaa78c42538a9cda,7206
 - accelerate-llvm-native-1.2.0.1@sha256:d98c01bc08c6923270e50c5f032f3f816ceee4daddee98ced6e2f2440889f03f,7282
 - accelerate-llvm-ptx-1.2.0.1@sha256:0ddd8f0f8a379a400dd82ad01c319fa4b13a64146b4e05beed5c486f1f2269f7,7020
+- accelerate-io-1.2.0.0@sha256:38c70d38ec7ea48b5b8cf1c5e6add0a3285db95593d844243bccb0702e201e71,3556
+- colour-accelerate-0.3.0.0@sha256:968922b620c5ffc4365df2b33e7ff273e6ae77611a7be3db43d8a4d11b4f7fd5,1866
+- gloss-accelerate-2.0.0.1@sha256:526a203bdda7a50f18a8d0004556215083fb576ce1e44d7e15281fdbbff7890c,1288
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

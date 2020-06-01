@@ -39,6 +39,27 @@ packages:
       sha256: d99b9fb448b8d82c7e8406c78a720bc0a3b3840481ae0a8be0480e6275444523
   original:
     hackage: accelerate-llvm-ptx-1.2.0.1@sha256:0ddd8f0f8a379a400dd82ad01c319fa4b13a64146b4e05beed5c486f1f2269f7,7020
+- completed:
+    hackage: accelerate-io-1.2.0.0@sha256:38c70d38ec7ea48b5b8cf1c5e6add0a3285db95593d844243bccb0702e201e71,3556
+    pantry-tree:
+      size: 1911
+      sha256: 1540bba87fec735d25597d34259a3e53ba7e5e2a910c5355d5541c0f4141b0cf
+  original:
+    hackage: accelerate-io-1.2.0.0@sha256:38c70d38ec7ea48b5b8cf1c5e6add0a3285db95593d844243bccb0702e201e71,3556
+- completed:
+    hackage: colour-accelerate-0.3.0.0@sha256:968922b620c5ffc4365df2b33e7ff273e6ae77611a7be3db43d8a4d11b4f7fd5,1866
+    pantry-tree:
+      size: 14788
+      sha256: 7b43107775b3f8c891053222acb80406a51fb069176b0dfb6ea9b1d3affd3230
+  original:
+    hackage: colour-accelerate-0.3.0.0@sha256:968922b620c5ffc4365df2b33e7ff273e6ae77611a7be3db43d8a4d11b4f7fd5,1866
+- completed:
+    hackage: gloss-accelerate-2.0.0.1@sha256:526a203bdda7a50f18a8d0004556215083fb576ce1e44d7e15281fdbbff7890c,1288
+    pantry-tree:
+      size: 370
+      sha256: 7ac4a1a33d3f4a190dc30ab26bff4700eba59abc022d833b7e88bd2f5766ac91
+  original:
+    hackage: gloss-accelerate-2.0.0.1@sha256:526a203bdda7a50f18a8d0004556215083fb576ce1e44d7e15281fdbbff7890c,1288
 snapshots:
 - completed:
     size: 524996
