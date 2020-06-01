@@ -28,9 +28,7 @@ library
   exposed-modules:
       Lib
     , Pipe
-
-  other-modules:
-      Lib.MortonCode
+    , Lib.MortonCode
     , Lib.Random
     , Lib.Sort
     , Helper
@@ -105,6 +103,15 @@ test-suite hspec
   build-depends:
         base
       , hspec
+      , hspec-discover
+      , QuickCheck
+      , accelerate
+      , accelerate-llvm
+      , accelerate-llvm-native
+      , accelerate-llvm-ptx
+      , IFSZoom
+  other-modules:
+      Lib.SortSpec
   default-language: Haskell2010
   type:             exitcode-stdio-1.0
   hs-source-dirs:   test

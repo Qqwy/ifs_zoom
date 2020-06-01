@@ -26,7 +26,7 @@ import Data.Array.Accelerate.Data.Bits
 --
 -- ## Examples
 --
--- >>> import Data.Array.Accelerate.LLVM.Native as CPU
+-- >>> import qualified Data.Array.Accelerate.LLVM.Native as CPU
 -- >>> arr = use $ fromList (Z :. 10) ([10, 9..]) :: Acc (Vector Word64)
 -- >>> CPU.run $ Lib.Sort.radixSort arr
 -- Vector (Z :. 10) [1,2,3,4,5,6,7,8,9,10]
@@ -38,11 +38,11 @@ radixSort vector =
 
 -- | One step of parallel radix sort, for a single bit.
 radixSortBit :: Int -> Acc (Vector Word64) -> Acc (Vector Word64)
-radixSortBit bit vector =
+radixSortBit sort_bit vector =
   vector
   |> scatter sorted_indexes vector
   where
-    ones = map (\elem -> if testBit elem (constant bit) then 1 else 0) vector
+    ones = map (\elem -> if testBit elem (constant sort_bit) then 1 else 0) vector
     zeroes = map (\elem -> 1 - elem) ones
     (zeroes_sum, n_zeroes) = let res = scanl' (+) 0 zeroes in (afst res, the (asnd res))
     ones_sum = scanl (+) 0 ones
