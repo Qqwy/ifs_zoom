@@ -13,6 +13,7 @@ module Main where
 
 import Pipe
 import Lib
+import qualified Lib.ChaosGame
 
 import Text.Printf
 import Prelude                                                      as P
@@ -32,19 +33,36 @@ import Graphics.Gloss
 
 
 main :: IO ()
-main =
+main = do
   --display (InWindow "Nice Window" (800, 600) (10, 10)) black (Color white $ Circle 80)
+  -- let
+  --   mycircle = Circle 80 |> Color white
+  --   dimensions = (800, 600)
+  --   position = (10, 10)
+  --   window = (InWindow "Iterated Function Systems Exploration" dimensions position)
+
+  -- (mycircle |> display window black)
+
+  runChaosGame
+
+
+runChaosGame :: IO ()
+runChaosGame = do
   let
-    mycircle = Circle 80 |> Color white
-    dimensions = (800, 600)
-    position = (10, 10)
-    window = (InWindow "Iterated Function Systems Exploration" dimensions position)
-  in
-    mycircle
-    |> display window black
+    transformations =
+      [ (0,0,0,0.16,0.0, 0)
+      , (0.85,0.04, -0.04, 0.85,  0, 1.60)
+      , (0.20, -0.26, 0.23, 0.22, 0, 1.60)
+      , (-0.15, 0.28, 0.26, 0.24, 0, 0.45)
+      ]
+      |> fromList (Z :. 4)
+      |> use
+      |> A.map (Lib.ChaosGame.transformationFromSixtuple)
+    program = Lib.ChaosGame.chaosGame transformations 4096 42
+    result = PTX.run program
 
-
-
+  printf "program: %s\n" (show program)
+  printf "output (first 10 elements): %s\n" (result |> A.toList |> P.take 10 |> show)
 
   
   -- runExample

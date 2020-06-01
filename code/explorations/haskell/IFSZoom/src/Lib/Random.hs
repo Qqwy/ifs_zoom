@@ -32,7 +32,7 @@ import Data.Array.Accelerate.Data.Bits
 import Lib.MortonCode
 
 -- | Fills a vector of `length` length with random numbers using `seed` as starting seed.
-randomVector :: Int -> Word -> Acc (Vector Word)
+randomVector :: Int -> Word64 -> Acc (Vector Word64)
 randomVector length seed =
   emptyVector
   |> scanl (\ prev _-> xorShift prev) seed'
@@ -47,7 +47,7 @@ randomVector length seed =
 --
 -- If better RNG is needed, we might be able to use something like the `jump`
 -- mentioned on http://prng.di.unimi.it/
-randomMatrix :: Int -> Int -> Word -> Acc (Matrix Word)
+randomMatrix :: Int -> Int -> Word64 -> Acc (Matrix Word64)
 randomMatrix n_cols n_rows seed =
     nums
     |> fillFirstColumn
