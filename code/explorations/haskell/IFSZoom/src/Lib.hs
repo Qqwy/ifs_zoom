@@ -63,25 +63,6 @@ buildBinarySearchTree points =
   where
     buildInplaceBinarySearchTree = undefined
 
--- | Sorts an array of points by the Z-order curve (AKA morton code)
---
--- This is done by transforming the pair of 32-bit floats to 32-bit unsigned int,
--- and combining them to get one unsigned 64-bit int.
--- After sorting, this transformation is reversed.
-sortPoints :: Acc (Vector (Float, Float)) -> Acc (Vector (Float, Float))
-sortPoints points =
-  points
-  |> map floatPairToWord32Pair
-  |> map (uncurry interleaveBits)
-  |> radixSort
-  |> map deinterleaveBits
-  |> map word32ToFloatPair
-  where
-    floatPairToWord32Pair :: Exp (Float, Float) -> Exp (Word32, Word32)
-    floatPairToWord32Pair (unlift -> (x, y)) = lift (bitcast x, bitcast y)
-    word32ToFloatPair :: Exp (Word32, Word32) -> Exp (Float, Float)
-    word32ToFloatPair (unlift -> (x, y)) = lift (bitcast x, bitcast y)
-
 
 -- | An implementation of Binary Search
 -- Returns the index at which `target` appears in `arr`.

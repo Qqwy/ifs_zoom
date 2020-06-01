@@ -1,5 +1,21 @@
 {-# LANGUAGE ViewPatterns #-}
 
+{-|
+ Module      : Lib.Random
+ Copyright   : [2020] Wiebe-Marten Wijnja
+ License     : BSD3
+
+ Maintainer  : Wiebe-Marten Wijnja <w-m@wmcode.nl>
+ Stability   : experimental
+ Portability : non-portable (GHC extensions)
+
+Generate random data in parallel on the GPU, based on a single seed.
+
+We use the `xorShift` method to generate data. This is not a very high-quality generator,
+but it should be good enough for our purposes.
+ -}
+
+
 module Lib.Random
   (
     randomVector,

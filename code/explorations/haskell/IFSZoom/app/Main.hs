@@ -28,12 +28,28 @@ import Data.Array.Accelerate.LLVM.PTX                               as PTX
 
 import Data.Array.Accelerate.Array.Sugar                        as S
 
-main :: IO ()
-main = do
+import Graphics.Gloss
 
+
+main :: IO ()
+main =
+  --display (InWindow "Nice Window" (800, 600) (10, 10)) black (Color white $ Circle 80)
+  let
+    mycircle = Circle 80 |> Color white
+    dimensions = (800, 600)
+    position = (10, 10)
+    window = (InWindow "Iterated Function Systems Exploration" dimensions position)
+  in
+    mycircle
+    |> display window black
+
+
+
+
+  
   -- runExample
   -- runBinarySearch
-  runSort
+  -- runSort
 
 -- runExample = do
 --   let
@@ -83,16 +99,16 @@ main = do
 --   printf "result with PTX backend: %s\n" (show (PTX.runN $ acc_ast elem arr))
 -- #endif
 
-runSort = do
-  let
+-- runSort = do
+--   let
     -- arr :: Acc (Vector (Float, Float))
     -- -- arr = use $ fromList (Z :. 100) ([100, 99..])
     -- arr = use $ fromList (Z :. 10000) ([(x,y) | x <- [100,99..1], y <- [100,99..1]])
     -- program = arr |> A.map (A.uncurry Lib.interleaveBits) |> Lib.radixSort |> A.map Lib.deinterleaveBits
     -- program = arr |> Lib.sortPoints
-    program = randomMatrix 10 10 20
+  --   program = randomMatrix 10 10 20
 
-  -- printf "as input: %s\n" (show arr)
-  -- printf "result with interpreter backend: %s\n" (show (Interpreter.runN $ Lib.radixSort arr))
-  printf "result with CPU backend: %s\n" (show (CPU.runN $ program))
-  printf "result with PTX backend: %s\n" (show (PTX.runN $ program))
+  -- -- printf "as input: %s\n" (show arr)
+  -- -- printf "result with interpreter backend: %s\n" (show (Interpreter.runN $ Lib.radixSort arr))
+  -- printf "result with CPU backend: %s\n" (show (CPU.runN $ program))
+  -- printf "result with PTX backend: %s\n" (show (PTX.runN $ program))

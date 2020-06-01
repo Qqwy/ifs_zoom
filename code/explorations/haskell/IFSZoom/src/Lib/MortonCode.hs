@@ -1,17 +1,52 @@
-module Lib.MortonCode (
-  expandBits,
-  interleaveBits,
-  shrinkBits,
-  deinterleaveBits,
-    ) where
+{-# LANGUAGE ViewPatterns #-}
 
-import qualified Prelude as P
+{-|
+ Module      : Lib.MortonCode
+ Copyright   : [2020] Wiebe-Marten Wijnja
+ License     : BSD3
+
+ Maintainer  : Wiebe-Marten Wijnja <w-m@wmcode.nl>
+ Stability   : experimental
+ Portability : non-portable (GHC extensions)
+
+This module allows you to transform a (Word32, Word32) <-> Word64 on the GPU.
+It is a building block of a parallel algorithm that works with morton encoding/decoding.
+ -}
+
+
+module Lib.MortonCode
+  ( pointToMorton
+  , mortonToPoint
+  , interleaveBits
+  , deinterleaveBits
+  , expandBits
+  , shrinkBits
+  ) where
+
+import qualified Prelude
 import qualified Data.List as DL
-import qualified Helper as Helper
 import Pipe
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Data.Bits
 
+pointToMorton :: Exp (Float, Float) -> Exp Word64
+pointToMorton point =
+  point
+  |> floatPairToWord32Pair
+  |> uncurry interleaveBits
+  where
+    floatPairToWord32Pair :: Exp (Float, Float) -> Exp (Word32, Word32)
+    floatPairToWord32Pair (unlift -> (x, y)) = lift (bitcast x, bitcast y)
+
+
+mortonToPoint ::  Exp Word64 -> Exp (Float, Float)
+mortonToPoint morton_code =
+  morton_code
+  |> deinterleaveBits
+  |> word32ToFloatPair
+  where
+    word32ToFloatPair :: Exp (Word32, Word32) -> Exp (Float, Float)
+    word32ToFloatPair (unlift -> (x, y)) = lift (bitcast x, bitcast y)
 
 -- | Returns a single 64-bit number where all even-indexed bits are set to the bits of `a`.
 --

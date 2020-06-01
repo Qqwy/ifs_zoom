@@ -1,17 +1,59 @@
 {-# LANGUAGE RebindableSyntax #-}
 {-# LANGUAGE ViewPatterns #-}
+
+{-|
+ Module      : Lib.Sort
+ Copyright   : [2020] Wiebe-Marten Wijnja
+ License     : BSD3
+
+ Maintainer  : Wiebe-Marten Wijnja <w-m@wmcode.nl>
+ Stability   : experimental
+ Portability : non-portable (GHC extensions)
+
+This module deals with the sorting of data in parallel on the GPU.
+
+The main entrypoint is `sortPoints`.
+The other exposed functions are building blocks of that one.
+They are exposed to be easily testable themselves.
+ -}
+
 module Lib.Sort
   (
-    radixSort,
-    radixSortBit
+    sortPoints
+  , radixSort
+  , radixSortBit
   ) where
 
-import qualified Prelude as P
-import qualified Data.List as DL
-import qualified Helper as Helper
 import Pipe
+
+import qualified Prelude
+import qualified Data.List
+import qualified Helper as Helper
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Data.Bits
+
+import qualified Lib.MortonCode
+
+-- | Sorts an array of points by the Z-order curve (AKA morton code)
+--
+-- This is done by transforming the pair of 32-bit floats to 32-bit unsigned int,
+-- and combining them to get one unsigned 64-bit int.
+-- After sorting, this transformation is reversed.
+sortPoints :: Acc (Vector (Float, Float)) -> Acc (Vector (Float, Float))
+sortPoints points =
+  points
+  |> map floatPairToWord32Pair
+  |> map (uncurry Lib.MortonCode.interleaveBits)
+  |> radixSort
+  |> map Lib.MortonCode.deinterleaveBits
+  |> map word32ToFloatPair
+  where
+    floatPairToWord32Pair :: Exp (Float, Float) -> Exp (Word32, Word32)
+    floatPairToWord32Pair (unlift -> (x, y)) = lift (bitcast x, bitcast y)
+    word32ToFloatPair :: Exp (Word32, Word32) -> Exp (Float, Float)
+    word32ToFloatPair (unlift -> (x, y)) = lift (bitcast x, bitcast y)
+
+
 
 -- | A full parallel Radix Sort
 --
@@ -33,8 +75,8 @@ import Data.Array.Accelerate.Data.Bits
 radixSort :: Acc (Vector Word64) -> Acc (Vector Word64)
 radixSort vector =
   Helper.bitsList
-  |> P.map radixSortBit
-  |> DL.foldl' (\input next -> input |> compute |>next) vector
+  |> Prelude.fmap radixSortBit
+  |> Data.List.foldl' (\input next -> input |> compute |>next) vector
 
 -- | One step of parallel radix sort, for a single bit.
 radixSortBit :: Int -> Acc (Vector Word64) -> Acc (Vector Word64)

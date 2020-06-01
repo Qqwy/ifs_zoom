@@ -23,14 +23,11 @@ spec = do
       Interpreter.run (Lib.Sort.radixSort unsorted_arr) `shouldBe` (sorted_arr)
     it "sorts arbitrary lists" $ do
       property $ \list ->
-        let
-          res :: [Word64]
-          res =
-            list
-            |> fromList (Z :. Data.List.length list)
-            |> use
-            |> Lib.Sort.radixSort
-            |> Interpreter.run
-            |> toList
-        in
-          res Prelude.== (Data.List.sort list)
+        ((list :: [Word64])
+        |> fromList (Z :. Data.List.length list)
+        |> use
+        |> Lib.Sort.radixSort
+        |> Interpreter.run
+        |> toList)
+          Prelude.==
+        (Data.List.sort list)
