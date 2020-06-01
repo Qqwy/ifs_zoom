@@ -58,7 +58,7 @@ runChaosGame = do
       |> fromList (Z :. 4)
       |> use
       |> A.map (Lib.ChaosGame.transformationFromSixtuple)
-    program = Lib.ChaosGame.chaosGame transformations 4096 42
+    program = Lib.ChaosGame.chaosGame transformations 1000 42
     result = PTX.run program
 
   printf "program: %s\n" (show program)
