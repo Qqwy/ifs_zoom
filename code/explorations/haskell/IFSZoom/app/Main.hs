@@ -15,6 +15,7 @@ import Pipe
 import Lib
 import qualified Lib.ChaosGame
 import qualified Lib.Sort
+import qualified Lib.Picture
 
 import Text.Printf
 import Prelude                                                      as P
@@ -31,6 +32,7 @@ import Data.Array.Accelerate.LLVM.PTX                               as PTX
 import Data.Array.Accelerate.Array.Sugar                        as S
 
 import Graphics.Gloss
+import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 
 
 main :: IO ()
@@ -61,12 +63,19 @@ runChaosGame = do
       |> A.map (Lib.ChaosGame.transformationFromSixtuple)
     seed = 43
     sqrt_npoints = 1000
-    program = seed |> Lib.ChaosGame.chaosGame transformations sqrt_npoints |> Lib.Sort.sortPoints
-    result = PTX.run program
+    program =
+      seed
+      |> Lib.ChaosGame.chaosGame transformations sqrt_npoints
+      -- |> Lib.Sort.sortPoints
+      |> Lib.Picture.naivePointCloudToPicture
+    result =
+      PTX.run program
+      |> IOBMP.writeImageToBMP "example_picture.bmp"
 
-  printf "program: %s\n" (show program)
-  printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
+  -- printf "program: %s\n" (show program)
+  -- printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
 
+  result
   
   -- runExample
   -- runBinarySearch

@@ -2,6 +2,7 @@
 
 module Lib.Picture
   (
+    naivePointCloudToPicture
   ) where
 
 import Pipe
