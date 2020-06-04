@@ -14,6 +14,7 @@ module Main where
 import Pipe
 import Lib
 import qualified Lib.ChaosGame
+import qualified Lib.Sort
 
 import Text.Printf
 import Prelude                                                      as P
@@ -58,11 +59,13 @@ runChaosGame = do
       |> fromList (Z :. 4)
       |> use
       |> A.map (Lib.ChaosGame.transformationFromSixtuple)
-    program = Lib.ChaosGame.chaosGame transformations 1000 42
+    seed = 43
+    sqrt_npoints = 1000
+    program = seed |> Lib.ChaosGame.chaosGame transformations sqrt_npoints |> Lib.Sort.sortPoints
     result = PTX.run program
 
   printf "program: %s\n" (show program)
-  printf "output (first 10 elements): %s\n" (result |> A.toList |> P.take 10 |> show)
+  printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
 
   
   -- runExample
