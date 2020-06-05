@@ -74,7 +74,7 @@ runChaosGame = do
       |> use
       |> A.map (Lib.ChaosGame.transformationFromSixtuple)
     seed = 42
-    sqrt_npoints = 1000
+    sqrt_npoints = 4000
     -- arr :: S.Vector (Float, Float)
     -- arr = fromList (Z :. 100) [(x, y) | x <- [0..10], y <- [0..10]]
     program1 =
@@ -93,7 +93,7 @@ runChaosGame = do
 
   printf "program1: %s\n" (show program1)
   printf "program2: %s\n" (show program2)
-  printf "result: %s\n" (result |> A.toList |> show)
+  -- printf "result: %s\n" (result |> A.toList |> show)
   -- printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
 
   result2

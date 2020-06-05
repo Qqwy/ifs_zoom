@@ -28,8 +28,8 @@ cloudToPixels input = permute (+) zeros (mapping input) (ones input)
     ones input = fill (shape input) 1
     mapping :: Acc (Vector (Float, Float)) -> Exp DIM1 -> Exp DIM2
     mapping input index = pointToPixel width height (input ! index)
-    width = 400 :: Int
-    height = 400 :: Int
+    width = 1024 :: Int
+    height = 1024 :: Int
 
 
 pixelsToColours :: Acc (Matrix Int) -> Acc (Matrix Word32)
