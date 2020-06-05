@@ -85,7 +85,8 @@ pointBasedTransform transformations prev_point current_point =
   let
     transformation =
       current_point
-      |> (floatPairToWord64)
+      -- |> (floatPairToWord64)
+      |> snd
       |> pickTransformation transformations
   in
     prev_point
@@ -93,7 +94,7 @@ pointBasedTransform transformations prev_point current_point =
     |> chaosTransform transformation
     |> homogeneous2point
 
-pickTransformation :: Acc (Vector (M33 Float, Float)) -> Exp Word64 -> Exp (M33 Float)
+pickTransformation :: Acc (Vector (M33 Float, Float)) -> Exp Float -> Exp (M33 Float)
 pickTransformation transformations rngval =
   transformations !! matching_transformation_index
   |> fst
@@ -101,7 +102,7 @@ pickTransformation transformations rngval =
     matching_transformation_index =
       while checkLarger goToNext (lift (0, fraction))
       |> fst
-    fraction = (fromIntegral rngval) / ((maxBound :: Exp Word64) |> fromIntegral) :: Exp Float
+    fraction = rngval `mod'` 1 -- (fromIntegral rngval) / ((maxBound :: Exp Word64) |> fromIntegral) :: Exp Float
     checkLarger :: Exp (Int, Float) -> Exp Bool
     checkLarger (unlift -> (index, probability)) =
       probability > snd (transformations !! index)
