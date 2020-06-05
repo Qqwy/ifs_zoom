@@ -28,6 +28,7 @@ chaosGame :: Acc (Vector (M33 Float)) -> Int -> Word64 -> Acc (Vector (Float, Fl
 chaosGame transformations n_points seed =
   Lib.Random.randomMatrix n_points n_points seed
   |> map word64ToFloatPair
+  -- |> map normalizeFloatPair
   |> fillChaosGameMatrix transformations
   |> flatten
 
@@ -39,7 +40,7 @@ chaosGame transformations n_points seed =
 fillChaosGameMatrix :: Acc (Vector (M33 Float)) -> Acc (Matrix (Float, Float)) -> Acc (Matrix (Float, Float))
 fillChaosGameMatrix transformations random_points =
   random_points
-  |> scanl (pointBasedTransform transformations) starting_point
+  |> prescanl (pointBasedTransform transformations) starting_point
   where
     starting_point = (0, 0) |> lift
 
@@ -75,7 +76,7 @@ chaosTransform matrix point = matrix !* point
 -- for both the element and the accumulator.
 --
 pointBasedTransform :: Acc (Vector (M33 Float)) -> Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
-pointBasedTransform transformations current_point prev_point =
+pointBasedTransform transformations prev_point current_point =
   let
     transformation =
       current_point
@@ -112,8 +113,15 @@ word64ToFloatPair :: Exp Word64 -> Exp (Float, Float)
 word64ToFloatPair number =
   let
     x' = number |> fromIntegral :: Exp Word32
-    x = x' |> bitcast :: Exp Float
+    x = x' |> fromIntegral :: Exp Float
     y' = (number `shiftR` 32) |> fromIntegral :: Exp Word32
-    y = y' |> bitcast :: Exp Float
+    y = y' |> fromIntegral :: Exp Float
   in
     lift (x, y)
+
+-- normalizeFloatPair :: Exp (Float, Float) -> Exp (Float, Float)
+-- normalizeFloatPair (unlift -> (x, y)) =
+--   lift (x', y')
+--   where
+--     x' = (x :: Exp Float) `mod'` 1
+--     y' = (y :: Exp Float) `mod'` 1

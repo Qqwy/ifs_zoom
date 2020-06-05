@@ -35,6 +35,8 @@ import Graphics.Gloss
 import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 
 
+import qualified Debug.Trace
+
 main :: IO ()
 main = do
   --display (InWindow "Nice Window" (800, 600) (10, 10)) black (Color white $ Circle 80)
@@ -53,29 +55,48 @@ runChaosGame :: IO ()
 runChaosGame = do
   let
     transformations =
-      [ (0,0,0,0.16,0.0, 0)
-      , (0.85,0.04, -0.04, 0.85,  0, 1.60)
-      , (0.20, -0.26, 0.23, 0.22, 0, 1.60)
-      , (-0.15, 0.28, 0.26, 0.24, 0, 0.45)
+      [ (0.5, 0, 0, 0.5, 0, 0)
+      , (0.5, 0, 0, 0.5, 0.5, 0)
+      , (0.5, 0, 0, 0.5, 0.25, (sqrt 3) / 4)
       ]
-      |> fromList (Z :. 4)
+      |> fromList (Z :. 3)
+      -- [ (0.5, 0, 0   , 0, 0.5, 0)
+      -- , (0.5, 0, 0.5 , 0, 0.5, 0)
+      -- , (0.5, 0, 0.25, 0, 0.5, (sqrt 3) / 4)
+      -- ]
+    -- transformations =
+    --   [ (0,0,0,0.16,0.0, 0)
+    --   , (0.85,0.04, -0.04, 0.85,  0, 1.60)
+    --   , (0.20, -0.26, 0.23, 0.22, 0, 1.60)
+    --   , (-0.15, 0.28, 0.26, 0.24, 0, 0.45)
+    --   ]
+    --   |> fromList (Z :. 4)
       |> use
       |> A.map (Lib.ChaosGame.transformationFromSixtuple)
-    seed = 43
+    seed = 42
     sqrt_npoints = 1000
-    program =
+    -- arr :: S.Vector (Float, Float)
+    -- arr = fromList (Z :. 100) [(x, y) | x <- [0..10], y <- [0..10]]
+    program1 =
       seed
       |> Lib.ChaosGame.chaosGame transformations sqrt_npoints
+      -- |> Debug.Trace.traceShowId
       -- |> Lib.Sort.sortPoints
+      -- use arr
+    result = PTX.run program1
+    program2 =
+      (use result)
       |> Lib.Picture.naivePointCloudToPicture
-    result =
-      PTX.run program
+    result2 =
+      PTX.run program2
       |> IOBMP.writeImageToBMP "example_picture.bmp"
 
-  -- printf "program: %s\n" (show program)
+  printf "program1: %s\n" (show program1)
+  printf "program2: %s\n" (show program2)
+  printf "result: %s\n" (result |> A.toList |> show)
   -- printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
 
-  result
+  result2
   
   -- runExample
   -- runBinarySearch

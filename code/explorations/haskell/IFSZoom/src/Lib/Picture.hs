@@ -12,6 +12,7 @@ import Data.Array.Accelerate.Data.Colour.RGB as RGB
 import Data.Array.Accelerate.Data.Colour.Names
 
 
+
 naivePointCloudToPicture :: Acc (Vector (Float, Float)) -> Acc (Matrix Word32)
 naivePointCloudToPicture point_cloud =
   point_cloud
@@ -26,11 +27,9 @@ cloudToPixels input = permute (+) zeros (mapping input) (ones input)
     ones :: Acc (Vector (Float, Float)) -> Acc (Vector Int)
     ones input = fill (shape input) 1
     mapping :: Acc (Vector (Float, Float)) -> Exp DIM1 -> Exp DIM2
-    mapping input index = pointToPixel (input ! index)
-    pointToPixel :: Exp (Float, Float) -> Exp DIM2
-    pointToPixel (unlift -> (x, y)) = index2 (Accelerate.round x) (Accelerate.round y)
-    width = 1024 :: Int
-    height = 1024 :: Int
+    mapping input index = pointToPixel width height (input ! index)
+    width = 400 :: Int
+    height = 400 :: Int
 
 
 pixelsToColours :: Acc (Matrix Int) -> Acc (Matrix Word32)
@@ -42,3 +41,22 @@ pixelsToColours pixels =
   where
     pixelToColour :: Exp Int -> Exp (HSL Float)
     pixelToColour pixel = Accelerate.cond (pixel Accelerate.== 0) black white
+
+
+pointToPixel :: Int -> Int -> Exp (Float, Float) -> Exp DIM2
+pointToPixel width height (unlift -> (x, y)) =
+  index2 xpos ypos
+  where
+    xpos =
+      (x :: Exp Float) * (constant (Prelude.fromIntegral width))
+      |> Accelerate.floor
+      -- x
+      -- |> Accelerate.round
+      -- |> (flip mod) (constant width)
+    ypos =
+      (y :: Exp Float) * (constant (Prelude.fromIntegral height))
+      |> Accelerate.floor
+      -- y
+      -- |> Accelerate.round
+      -- |> (flip mod) (constant height)
+
