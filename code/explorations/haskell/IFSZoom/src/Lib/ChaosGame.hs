@@ -6,6 +6,7 @@ module Lib.ChaosGame
   , fillChaosGameMatrix
   , point2Homogeneous
   , homogeneous2point
+  , transformationProbabilityFromSixtuplePair
   , transformationFromSixtuple
   , chaosTransform
   ) where
@@ -24,7 +25,7 @@ import qualified Lib.Random
 -- a total number of points
 -- and a seed
 -- we'll return a long array of 2D-points.
-chaosGame :: Acc (Vector (M33 Float)) -> Int -> Word64 -> Acc (Vector (Float, Float))
+chaosGame :: Acc (Vector (M33 Float, Float)) -> Int -> Word64 -> Acc (Vector (Float, Float))
 chaosGame transformations n_points seed =
   Lib.Random.randomMatrix n_points n_points seed
   |> map word64ToFloatPair
@@ -37,7 +38,7 @@ chaosGame transformations n_points seed =
 -- So all points in column `0` will be initial points,
 -- in column `1` will have one transformation applied,
 -- in column `2` two transformations, etc.
-fillChaosGameMatrix :: Acc (Vector (M33 Float)) -> Acc (Matrix (Float, Float)) -> Acc (Matrix (Float, Float))
+fillChaosGameMatrix :: Acc (Vector (M33 Float, Float)) -> Acc (Matrix (Float, Float)) -> Acc (Matrix (Float, Float))
 fillChaosGameMatrix transformations random_points =
   random_points
   |> prescanl (pointBasedTransform transformations) starting_point
@@ -49,6 +50,10 @@ point2Homogeneous (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
 
 homogeneous2point :: Exp (V3 Float) -> Exp (Float, Float)
 homogeneous2point (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
+
+transformationProbabilityFromSixtuplePair :: Exp ((Float, Float, Float, Float, Float, Float), Float) -> Exp (M33 Float, Float)
+transformationProbabilityFromSixtuplePair (unlift -> (sixtuple, p)) =
+  lift (transformationFromSixtuple sixtuple, (p :: Exp Float))
 
 transformationFromSixtuple :: Exp (Float, Float, Float, Float, Float, Float) -> Exp (M33 Float)
 transformationFromSixtuple sixtuple =
@@ -75,7 +80,7 @@ chaosTransform matrix point = matrix !* point
 -- A bit of a hack because Accelerate's `scanl` requires the same type
 -- for both the element and the accumulator.
 --
-pointBasedTransform :: Acc (Vector (M33 Float)) -> Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
+pointBasedTransform :: Acc (Vector (M33 Float, Float)) -> Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
 pointBasedTransform transformations prev_point current_point =
   let
     transformation =
@@ -88,11 +93,21 @@ pointBasedTransform transformations prev_point current_point =
     |> chaosTransform transformation
     |> homogeneous2point
 
-pickTransformation :: Acc (Vector (M33 Float)) -> Exp Word64 -> Exp (M33 Float)
+pickTransformation :: Acc (Vector (M33 Float, Float)) -> Exp Word64 -> Exp (M33 Float)
 pickTransformation transformations rngval =
-  transformations !! index
+  transformations !! matching_transformation_index
+  |> fst
   where
-    index = (fromIntegral rngval) `mod` (size transformations)
+    matching_transformation_index =
+      while checkLarger goToNext (lift (0, fraction))
+      |> fst
+    fraction = (fromIntegral rngval) / ((maxBound :: Exp Word64) |> fromIntegral) :: Exp Float
+    checkLarger :: Exp (Int, Float) -> Exp Bool
+    checkLarger (unlift -> (index, probability)) =
+      probability > snd (transformations !! index)
+    goToNext :: Exp (Int, Float) -> Exp (Int, Float)
+    goToNext (unlift -> (index, probability)) =
+     lift (index + 1, probability - snd (transformations !! index))
 
 
 -- | A fast way to turn a (Float, Float) into a Word64.
