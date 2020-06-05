@@ -20,7 +20,8 @@ module Lib.Random
   (
     randomVector,
     randomMatrix,
-    xorShift
+    xorShift64,
+    extractRandomUnitIntervalDouble
   ) where
 
 import qualified Prelude as P
@@ -35,9 +36,9 @@ import Lib.MortonCode
 randomVector :: Int -> Word64 -> Acc (Vector Word64)
 randomVector length seed =
   emptyVector
-  |> scanl (\ prev _-> xorShift prev) seed'
+  |> scanl (\ prev _-> xorShift64Star prev) seed'
   where
-    seed' = xorShift (constant seed)
+    seed' = xorShift64Star (constant seed)
     emptyVector = fill (constant (Z :. length)) 0
 
 -- | A cute implementation of a 'random' matrix.
@@ -61,18 +62,44 @@ randomMatrix n_cols n_rows seed =
       mapIndexToCol0 :: Exp DIM1 -> Exp DIM2
       mapIndexToCol0 (unindex1 -> index) = index2 index 0
       fillFirstColumn nums = permute const zeroes mapIndexToCol0 nums
-      fillRows mat = scanl1 (\acc _-> xorShift acc) mat
+      fillRows mat = scanl1 (\acc _-> xorShift64Star acc) mat
 
 -- | Simple XorShift Random Number Generator
 -- Returns a new number based on the given one.
 -- Note that XorShift is an _ok_ RNG but not a very high-quality one:
 -- Specifically, it will fail certain statistical tests.
 -- Also, it will never return `0` (if given any number except `0`).
-xorShift :: Bits a => Exp a -> Exp a
-xorShift a =
+xorShift64 :: Exp Word64 -> Exp Word64
+xorShift64 a =
   let
     b = a `xor` (shiftL a 13)
     c = b `xor` (shiftR b  7)
     d = c `xor` (shiftL c 17)
   in
     d
+
+-- | Simple XorShift Random Number Generator
+--
+-- This one is slightly better than the normal `xorShift64`
+xorShift64Star :: Exp Word64 -> Exp Word64
+xorShift64Star a =
+  let
+    b = a `xor` (shiftR a 12)
+    c = b `xor` (shiftL b 25)
+    d = c `xor` (shiftR c 27)
+  in
+    d * 2685821657736338717
+
+-- | Returns a double in the half-open range [0, 1)
+-- based on the random unsigned integer that was generated.
+--
+-- This uses the notes at http://prng.di.unimi.it/. Specifically:
+-- A double has a significant binary digits 53.
+-- We extract thus the top 53 bits of the number (which are better quality than the lower 11)
+-- We multiply this by `0x1.0p-53` (that is: 1.0 * 2^-53) to obtain a number in the range [0, 1)
+extractRandomUnitIntervalDouble :: Exp Word64 -> Exp Double
+extractRandomUnitIntervalDouble word =
+  word
+  |> (`shiftR` 11)
+  |> fromIntegral
+  |> (* (recip 2**53))

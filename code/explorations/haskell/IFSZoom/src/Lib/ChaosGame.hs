@@ -9,6 +9,8 @@ module Lib.ChaosGame
   , transformationProbabilityFromSixtuplePair
   , transformationFromSixtuple
   , chaosTransform
+  , floatPairToWord64
+  , word64ToFloatPair
   ) where
 
 import Pipe
@@ -85,8 +87,11 @@ pointBasedTransform transformations prev_point current_point =
   let
     transformation =
       current_point
-      -- |> (floatPairToWord64)
-      |> snd
+      |> floatPairToWord64
+      |> Lib.Random.extractRandomUnitIntervalDouble
+      |> toFloating
+      -- |> (\num -> (num `shiftR` 11) |> fromIntegral |> (* 9007199254740992))
+      -- |> fst
       |> pickTransformation transformations
   in
     prev_point
@@ -94,6 +99,14 @@ pointBasedTransform transformations prev_point current_point =
     |> chaosTransform transformation
     |> homogeneous2point
 
+-- | Picks the correct transformation
+-- based on the `rngval` passed in.
+--
+-- Assumes the probabilities that are the second elements of each of the `transformations`'s pairs
+-- together sum to one.
+--
+-- `rngval` might be any float; only its fractional part is considered
+-- (since we are looking for a probability i.e. in the half-open range [0..1)).
 pickTransformation :: Acc (Vector (M33 Float, Float)) -> Exp Float -> Exp (M33 Float)
 pickTransformation transformations rngval =
   transformations !! matching_transformation_index
@@ -102,7 +115,9 @@ pickTransformation transformations rngval =
     matching_transformation_index =
       while checkLarger goToNext (lift (0, fraction))
       |> fst
-    fraction = rngval `mod'` 1 -- (fromIntegral rngval) / ((maxBound :: Exp Word64) |> fromIntegral) :: Exp Float
+    -- fraction = rngval `mod'` 1 -- Turn this into a number in the half-open range [0..1)
+    -- fraction = rngval `shiftR` 11 |> (* 9007199254740992)
+    fraction = rngval
     checkLarger :: Exp (Int, Float) -> Exp Bool
     checkLarger (unlift -> (index, probability)) =
       probability > snd (transformations !! index)
@@ -122,16 +137,16 @@ floatPairToWord64 (unlift -> (x, y)) =
     x' = x |> bitcast |> lift :: Exp Word32
     y' = y |> bitcast |> lift :: Exp Word32
   in
-    (fromIntegral x') .|. (fromIntegral y' `shiftL` 32)
+    (fromIntegral x' `shiftL` 32) .|. (fromIntegral y')
 
 -- | Inverse of `floatPairToWord64`
 word64ToFloatPair :: Exp Word64 -> Exp (Float, Float)
 word64ToFloatPair number =
   let
-    x' = number |> fromIntegral :: Exp Word32
-    x = x' |> fromIntegral :: Exp Float
-    y' = (number `shiftR` 32) |> fromIntegral :: Exp Word32
-    y = y' |> fromIntegral :: Exp Float
+    x' = (number `shiftR` 32) |> fromIntegral :: Exp Word32
+    x = x' |> bitcast :: Exp Float
+    y' = number |> fromIntegral :: Exp Word32
+    y = y' |> bitcast :: Exp Float
   in
     lift (x, y)
 

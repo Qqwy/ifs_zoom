@@ -114,7 +114,8 @@ test-suite hspec
       , accelerate-llvm-ptx
       , IFSZoom
   other-modules:
-      Lib.SortSpec
+        Lib.SortSpec
+      , Lib.ChaosGameSpec
   default-language: Haskell2010
   type:             exitcode-stdio-1.0
   hs-source-dirs:   test
