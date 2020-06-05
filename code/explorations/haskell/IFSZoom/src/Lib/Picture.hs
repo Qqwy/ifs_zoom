@@ -23,7 +23,7 @@ cloudToPixels :: Acc (Vector (Float, Float)) -> Acc (Matrix Int)
 cloudToPixels input = permute (+) zeros (mapping input) (ones input)
   where
     zeros :: Acc (Matrix Int)
-    zeros = fill (constant (Z :. height :. width)) 0
+    zeros = fill (constant (Z :. width :. height)) 0
     ones :: Acc (Vector (Float, Float)) -> Acc (Vector Int)
     ones input = fill (shape input) 1
     mapping :: Acc (Vector (Float, Float)) -> Exp DIM1 -> Exp DIM2
@@ -45,18 +45,24 @@ pixelsToColours pixels =
 
 pointToPixel :: Int -> Int -> Exp (Float, Float) -> Exp DIM2
 pointToPixel width height (unlift -> (x, y)) =
-  index2 xpos ypos
+  index2 ypos xpos
   where
+    x' = x :: Exp Float
+    y' = y :: Exp Float
     xpos =
-      (x :: Exp Float) * (constant (Prelude.fromIntegral width))
+      (constant (Prelude.fromIntegral width / 2)) + x' * (Prelude.fromIntegral width) / 11
       |> Accelerate.floor
+      -- (x :: Exp Float) * (constant (Prelude.fromIntegral width))
+      -- |> Accelerate.floor
       -- x
       -- |> Accelerate.round
       -- |> (flip mod) (constant width)
     ypos =
-      (y :: Exp Float) * (constant (Prelude.fromIntegral height))
+      (constant (Prelude.fromIntegral height)) - y' * (Prelude.fromIntegral height) / 11
       |> Accelerate.floor
-      -- y
+      -- (y :: Exp Float) * (constant (Prelude.fromIntegral height))
+      -- |> Accelerate.floor
+      -- -- y
       -- |> Accelerate.round
       -- |> (flip mod) (constant height)
 

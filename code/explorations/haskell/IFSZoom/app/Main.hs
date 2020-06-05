@@ -54,27 +54,23 @@ main = do
 runChaosGame :: IO ()
 runChaosGame = do
   let
-    transformations =
-      [ (0.5, 0, 0, 0.5, 0, 0)
-      , (0.5, 0, 0, 0.5, 0.5, 0)
-      , (0.5, 0, 0, 0.5, 0.25, (sqrt 3) / 4)
-      ]
-      |> fromList (Z :. 3)
-      -- [ (0.5, 0, 0   , 0, 0.5, 0)
-      -- , (0.5, 0, 0.5 , 0, 0.5, 0)
-      -- , (0.5, 0, 0.25, 0, 0.5, (sqrt 3) / 4)
-      -- ]
     -- transformations =
-    --   [ (0,0,0,0.16,0.0, 0)
-    --   , (0.85,0.04, -0.04, 0.85,  0, 1.60)
-    --   , (0.20, -0.26, 0.23, 0.22, 0, 1.60)
-    --   , (-0.15, 0.28, 0.26, 0.24, 0, 0.45)
+    --   [ (0.5, 0, 0, 0.5, 0, 0)
+    --   , (0.5, 0, 0, 0.5, 0.5, 0)
+    --   , (0.5, 0, 0, 0.5, 0.25, (sqrt 3) / 4)
     --   ]
-    --   |> fromList (Z :. 4)
+    --   |> fromList (Z :. 3)
+    transformations =
+      [ (0,0,0,0.16,0.0, 0)
+      , (0.85,0.04, -0.04, 0.85,  0, 1.60)
+      , (0.20, -0.26, 0.23, 0.22, 0, 1.60)
+      , (-0.15, 0.28, 0.26, 0.24, 0, 0.45)
+      ]
+      |> fromList (Z :. 4)
       |> use
       |> A.map (Lib.ChaosGame.transformationFromSixtuple)
     seed = 42
-    sqrt_npoints = 4000
+    sqrt_npoints = 12000
     -- arr :: S.Vector (Float, Float)
     -- arr = fromList (Z :. 100) [(x, y) | x <- [0..10], y <- [0..10]]
     program1 =
@@ -85,14 +81,15 @@ runChaosGame = do
       -- use arr
     result = PTX.run program1
     program2 =
-      (use result)
+      -- (use result)
+      program1
       |> Lib.Picture.naivePointCloudToPicture
     result2 =
       PTX.run program2
       |> IOBMP.writeImageToBMP "example_picture.bmp"
 
-  printf "program1: %s\n" (show program1)
-  printf "program2: %s\n" (show program2)
+  -- printf "program1: %s\n" (show program1)
+  -- printf "program2: %s\n" (show program2)
   -- printf "result: %s\n" (result |> A.toList |> show)
   -- printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
 
