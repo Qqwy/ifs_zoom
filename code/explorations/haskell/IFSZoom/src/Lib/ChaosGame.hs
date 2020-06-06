@@ -27,9 +27,9 @@ import qualified Lib.Random
 -- a total number of points
 -- and a seed
 -- we'll return a long array of 2D-points.
-chaosGame :: Acc (Vector (M33 Float, Float)) -> Int -> Word64 -> Acc (Vector (Float, Float))
-chaosGame transformations n_points seed =
-  Lib.Random.randomMatrix n_points n_points seed
+chaosGame :: Acc (Vector (M33 Float, Float)) -> Int -> Int -> Word64 -> Acc (Vector (Float, Float))
+chaosGame transformations n_points_per_thread paralellism seed =
+  Lib.Random.randomMatrix paralellism n_points_per_thread seed
   |> map word64ToFloatPair
   -- |> map normalizeFloatPair
   |> fillChaosGameMatrix transformations

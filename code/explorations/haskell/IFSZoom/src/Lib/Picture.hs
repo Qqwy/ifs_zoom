@@ -13,23 +13,21 @@ import Data.Array.Accelerate.Data.Colour.Names
 
 
 
-naivePointCloudToPicture :: Acc (Vector (Float, Float)) -> Acc (Matrix Word32)
-naivePointCloudToPicture point_cloud =
+naivePointCloudToPicture :: Int -> Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Word32)
+naivePointCloudToPicture width height point_cloud =
   point_cloud
-  |> cloudToPixels
+  |> cloudToPixels width height
   |> pixelsToColours
 
-cloudToPixels :: Acc (Vector (Float, Float)) -> Acc (Matrix Int)
-cloudToPixels input = permute (+) zeros (mapping input) (ones input)
+cloudToPixels :: Int -> Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Int)
+cloudToPixels width height input = permute (+) zeros (mapping input) (ones input)
   where
     zeros :: Acc (Matrix Int)
     zeros = fill (constant (Z :. width :. height)) 0
     ones :: Acc (Vector (Float, Float)) -> Acc (Vector Int)
-    ones input = fill (shape input) 1
+    ones array = fill (shape array) 1
     mapping :: Acc (Vector (Float, Float)) -> Exp DIM1 -> Exp DIM2
-    mapping input index = pointToPixel width height (input ! index)
-    width = 1024 :: Int
-    height = 1024 :: Int
+    mapping array index = pointToPixel width height (array ! index)
 
 
 pixelsToColours :: Acc (Matrix Int) -> Acc (Matrix Word32)

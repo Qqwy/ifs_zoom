@@ -16,9 +16,12 @@ import Lib
 import qualified Lib.ChaosGame
 import qualified Lib.Sort
 import qualified Lib.Picture
+import qualified Options
 
 import Text.Printf
 import Prelude                                                      as P
+import qualified Data.Maybe
+import qualified System.Random
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Interpreter                            as Interpreter
@@ -35,10 +38,12 @@ import Graphics.Gloss
 import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 
 
-import qualified Debug.Trace
 
 main :: IO ()
 main = do
+  options <- Options.parseCommandLineOptions
+  putStrLn (show options)
+
   --display (InWindow "Nice Window" (800, 600) (10, 10)) black (Color white $ Circle 80)
   -- let
   --   mycircle = Circle 80 |> Color white
@@ -47,12 +52,22 @@ main = do
   --   window = (InWindow "Iterated Function Systems Exploration" dimensions position)
 
   -- (mycircle |> display window black)
+  if ((Options.samples options) P.< (Options.paralellism options)) then do
+    putStrLn "Error. `samples` should be larger than `paralellism`."
+  else do
+    options <- maybeSeedRNG options
+    runChaosGame options
 
-  runChaosGame
+maybeSeedRNG :: Options.CLIOptions -> IO Options.CLIOptions
+maybeSeedRNG options@(Options.CLIOptions {Options.seed = 0}) = do
+  auto_seed <- System.Random.getStdRandom System.Random.random
+  putStrLn ("Using seed " P.++ (show auto_seed))
+  return (options {Options.seed = auto_seed})
 
+maybeSeedRNG options = return options
 
-runChaosGame :: IO ()
-runChaosGame = do
+runChaosGame :: Options.CLIOptions -> IO ()
+runChaosGame options = do
   let
     -- transformations =
     --   [ ((0.5, 0, 0, 0.5, 0, 0), 1/3)
@@ -69,13 +84,15 @@ runChaosGame = do
       |> fromList (Z :. 4)
       |> use
       |> A.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)
-    seed = 42
-    sqrt_npoints = 12000
-    -- arr :: S.Vector (Float, Float)
-    -- arr = fromList (Z :. 100) [(x, y) | x <- [0..10], y <- [0..10]]
+    seed = options |> Options.seed
+    samples = options |> Options.samples |> P.fromIntegral
+    paralellism = options |> Options.paralellism |> P.fromIntegral
+    n_points_per_thread = samples `div` paralellism
+    picture_width = options |> Options.render_width |> P.fromIntegral
+    picture_height = options |> Options.render_height |> P.fromIntegral
     program1 =
       seed
-      |> Lib.ChaosGame.chaosGame transformations sqrt_npoints
+      |> Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism
       -- |> Debug.Trace.traceShowId
       -- |> Lib.Sort.sortPoints
       -- use arr
@@ -83,7 +100,7 @@ runChaosGame = do
     program2 =
       -- (use result)
       program1
-      |> Lib.Picture.naivePointCloudToPicture
+      |> Lib.Picture.naivePointCloudToPicture picture_width picture_height
     result2 =
       PTX.run program2
       |> IOBMP.writeImageToBMP "example_picture.bmp"

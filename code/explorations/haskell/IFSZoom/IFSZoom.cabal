@@ -46,13 +46,18 @@ executable IFSZoom-exe
   hs-source-dirs:       app
   main-is:              Main.hs
 
+  other-modules:
+    Options
+
   build-depends:
         base
       , IFSZoom
+      , random
       , accelerate
       , accelerate-io
       , gloss-accelerate
       , gloss
+      , optparse-applicative >= 0.14
   ghc-options:
       -O2
       -threaded
