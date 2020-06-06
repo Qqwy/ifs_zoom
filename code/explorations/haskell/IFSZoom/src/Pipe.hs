@@ -22,6 +22,6 @@ module Pipe ((|>)) where
 -- It is based on the same syntax that exists in e.g. F#, Elm, Elixir.
 (|>) :: a -> (a -> b) -> b
 x |> f = f x
-infixl 0 |>
+infixl 1 |>
 {-# INLINE (|>) #-}
 
