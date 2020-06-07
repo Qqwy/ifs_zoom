@@ -30,6 +30,7 @@ import Data.Array.Accelerate.LLVM.PTX                               as PTX
 #endif
 
 import qualified Graphics.Gloss
+import qualified Graphics.Gloss.Data.Picture
 import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 
@@ -105,4 +106,6 @@ runChaosGame options = do
     position = (10, 10)
     window = (Graphics.Gloss.InWindow "Iterated Function Systems Exploration" dimensions position)
 
-  (Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True |> Graphics.Gloss.display window Graphics.Gloss.black)
+  (Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True
+   |> Graphics.Gloss.Data.Picture.scale 1 (-1)
+   |> Graphics.Gloss.display window Graphics.Gloss.black)

@@ -8,7 +8,7 @@ import Test.Hspec
 import Test.QuickCheck
 import qualified Data.Array.Accelerate.Interpreter as Interpreter
 
-import Data.Array.Accelerate as Accelerate
+import Data.Array.Accelerate
 
 spec :: Spec
 spec = do

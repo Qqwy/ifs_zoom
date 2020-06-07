@@ -1,4 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE RebindableSyntax #-}
 
 module Lib.Picture
   (
@@ -13,17 +14,17 @@ import Data.Array.Accelerate.Data.Colour.Names
 
 
 
-naivePointCloudToPicture :: Int -> Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Word32)
+naivePointCloudToPicture :: Exp Int -> Exp Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Word32)
 naivePointCloudToPicture width height point_cloud =
   point_cloud
   |> cloudToPixels width height
   |> pixelsToColours
 
-cloudToPixels :: Int -> Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Int)
+cloudToPixels :: Exp Int -> Exp Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Int)
 cloudToPixels width height input = permute (+) zeros (mapping input) (ones input)
   where
     zeros :: Acc (Matrix Int)
-    zeros = fill (constant (Z :. width :. height)) 0
+    zeros = fill (index2 height width) 0
     ones :: Acc (Vector (Float, Float)) -> Acc (Vector Int)
     ones array = fill (shape array) 1
     mapping :: Acc (Vector (Float, Float)) -> Exp DIM1 -> Exp DIM2
@@ -46,7 +47,7 @@ pixelsToColours pixels =
 --
 -- TODO this implementation is currently hard-coded for the Barnsley Fern,
 -- we want to use a customizable camera transformation instead.
-pointToPixel :: Int -> Int -> Exp (Float, Float) -> Exp DIM2
+pointToPixel :: Exp Int -> Exp Int -> Exp (Float, Float) -> Exp DIM2
 pointToPixel width height (unlift -> (x, y)) =
   cond
   (pointVisible width height (lift (xpos, ypos)))
@@ -56,13 +57,13 @@ pointToPixel width height (unlift -> (x, y)) =
     x' = x :: Exp Float
     y' = y :: Exp Float
     xpos =
-      (constant (Prelude.fromIntegral width / 2)) + x' * (Prelude.fromIntegral width) / 11
+      (fromIntegral width / 2) + x' * (fromIntegral width) / 11
       |> Accelerate.floor
     ypos =
-      (constant (Prelude.fromIntegral height)) - y' * (Prelude.fromIntegral height) / 11
+      ((fromIntegral height)) - y' * (fromIntegral height) / 11
       |> Accelerate.floor
 
-pointVisible :: Int -> Int -> Exp (Int, Int) -> Exp Bool
+pointVisible :: Exp Int -> Exp Int -> Exp (Int, Int) -> Exp Bool
 pointVisible width height (unlift -> (x, y)) =
-  x Accelerate.>= 0 Accelerate.&& x Accelerate.< (constant width) Accelerate.&&
-  y Accelerate.>= 0 Accelerate.&& y Accelerate.< (constant height)
+  x >= 0 && x < width &&
+  y >= 0 && y < height

@@ -4,8 +4,8 @@
 module Lib.ChaosGame
   ( chaosGame
   , fillChaosGameMatrix
-  , point2Homogeneous
-  , homogeneous2point
+  , pointToHomogeneous
+  , homogeneousToPoint
   , transformationProbabilityFromSixtuplePair
   , transformationFromSixtuple
   , chaosTransform
@@ -31,7 +31,6 @@ chaosGame :: Acc (Vector (M33 Float, Float)) -> Int -> Int -> Word64 -> Acc (Vec
 chaosGame transformations n_points_per_thread paralellism seed =
   Lib.Random.randomMatrix paralellism n_points_per_thread seed
   |> map word64ToFloatPair
-  -- |> map normalizeFloatPair
   |> fillChaosGameMatrix transformations
   |> flatten
 
@@ -47,11 +46,11 @@ fillChaosGameMatrix transformations random_points =
   where
     starting_point = (0, 0) |> lift
 
-point2Homogeneous :: Exp (Float, Float) -> Exp (V3 Float)
-point2Homogeneous (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
+pointToHomogeneous :: Exp (Float, Float) -> Exp (V3 Float)
+pointToHomogeneous (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
 
-homogeneous2point :: Exp (V3 Float) -> Exp (Float, Float)
-homogeneous2point (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
+homogeneousToPoint :: Exp (V3 Float) -> Exp (Float, Float)
+homogeneousToPoint (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
 
 transformationProbabilityFromSixtuplePair :: Exp ((Float, Float, Float, Float, Float, Float), Float) -> Exp (M33 Float, Float)
 transformationProbabilityFromSixtuplePair (unlift -> (sixtuple, p)) =
@@ -90,14 +89,12 @@ pointBasedTransform transformations prev_point current_point =
       |> floatPairToWord64
       |> Lib.Random.extractRandomUnitIntervalDouble
       |> toFloating
-      -- |> (\num -> (num `shiftR` 11) |> fromIntegral |> (* 9007199254740992))
-      -- |> fst
       |> pickTransformation transformations
   in
     prev_point
-    |> point2Homogeneous
+    |> pointToHomogeneous
     |> chaosTransform transformation
-    |> homogeneous2point
+    |> homogeneousToPoint
 
 -- | Picks the correct transformation
 -- based on the `rngval` passed in.
@@ -115,8 +112,6 @@ pickTransformation transformations rngval =
     matching_transformation_index =
       while checkLarger goToNext (lift (0, fraction))
       |> fst
-    -- fraction = rngval `mod'` 1 -- Turn this into a number in the half-open range [0..1)
-    -- fraction = rngval `shiftR` 11 |> (* 9007199254740992)
     fraction = rngval
     checkLarger :: Exp (Int, Float) -> Exp Bool
     checkLarger (unlift -> (index, probability)) =
