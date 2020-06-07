@@ -58,27 +58,21 @@ pixelsToColours pixels =
 --
 -- This uses the special `ignore` index for points/pixels that fall outside of the region of the picture.
 --
--- TODO this implementation is currently hard-coded for the Barnsley Fern,
--- we want to use a customizable camera transformation instead.
 pointToPixel :: Exp Int -> Exp Int -> Exp (Float, Float) -> Exp DIM2
 pointToPixel width height (unlift -> (x, y)) =
   cond
-  (pointVisible width height (lift (xpos, ypos)))
+  (isPointVisible (lift (x, y)))
   (index2 ypos xpos)
   (ignore)
   where
-    x' = x :: Exp Float
-    y' = y :: Exp Float
-    xpos = x' * (fromIntegral width)  |> Accelerate.floor
-    ypos = y' * (fromIntegral height) |> Accelerate.floor
-    -- xpos =
-    --   (fromIntegral width / 2) + x' * (fromIntegral width) / 11
-    --   |> Accelerate.floor
-    -- ypos =
-    --   ((fromIntegral height)) - y' * (fromIntegral height) / 11
-    --   |> Accelerate.floor
+    xpos = x * (fromIntegral width)  |> Accelerate.floor
+    ypos = y * (fromIntegral height) |> Accelerate.floor
 
-pointVisible :: Exp Int -> Exp Int -> Exp (Int, Int) -> Exp Bool
-pointVisible width height (unlift -> (x, y)) =
-  x >= 0 && x < width &&
-  y >= 0 && y < height
+-- | True if the given point will be visible on the screen
+-- Works on screen-coordinates;
+-- that is: tests if point is inside the unit box
+-- (the half-open two-dimensional range (0, 0)..(1, 1)).
+isPointVisible :: Exp (Float, Float) -> Exp Bool
+isPointVisible (unlift -> (x, y)) =
+  x >= 0 && x < 1 &&
+  y >= 0 && y < 1
