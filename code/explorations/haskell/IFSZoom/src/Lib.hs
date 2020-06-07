@@ -11,8 +11,8 @@
 --
 
 module Lib (
-  binarySearch,
-  randomMatrix,
+  naivePointCloudToPicture
+  -- binarySearch,
   -- randomVector,
   -- xorShift,
   -- radixSort,
@@ -22,19 +22,26 @@ module Lib (
   -- interleaveBits,
   -- shrinkBits,
   -- deinterleaveBits,
-  sortPoints
 ) where
+
+import Pipe
+import Lib.Common
+import qualified Lib.MortonCode
+import qualified Lib.Random
+import qualified Lib.Sort
+import qualified Lib.Camera
+import qualified Lib.Picture
 
 import qualified Prelude as P
 import qualified Data.List as DL
 import qualified Helper as Helper
-import Pipe
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Data.Bits
-import Lib.MortonCode
-import Lib.Random
-import Lib.Sort
 
+
+naivePointCloudToPicture :: Acc (Scalar Lib.Camera.Camera) -> Acc (Scalar Int) -> Acc (Scalar Int) -> Acc (Vector Point) -> Acc Lib.Picture.RasterPicture
+naivePointCloudToPicture (the ->camera) (the -> width) (the -> height) point_cloud =
+  Lib.Picture.naivePointCloudToPicture camera width height point_cloud
 
 -- |
 -- Main function to run once on the GPU
@@ -59,7 +66,7 @@ createIFSPointCloud nThreads nPoints transformations =
 -- but it gives a general overview of how far the work has proceeded.
 buildBinarySearchTree points =
   points
-  |> sortPoints
+  |> Lib.Sort.sortPoints
   |> buildInplaceBinarySearchTree
   where
     buildInplaceBinarySearchTree = undefined

@@ -1,5 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE RebindableSyntax #-}
+
 module Lib.Camera
   ( Camera
   , scaleCamera

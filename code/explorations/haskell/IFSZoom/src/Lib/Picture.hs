@@ -2,8 +2,8 @@
 {-# LANGUAGE RebindableSyntax #-}
 
 module Lib.Picture
-  (
-    naivePointCloudToPicture
+  ( RasterPicture
+  , naivePointCloudToPicture
   ) where
 
 import Pipe

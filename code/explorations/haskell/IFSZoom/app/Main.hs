@@ -36,7 +36,6 @@ import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 
 
-
 main :: IO ()
 main = do
   options <- Options.parseCommandLineOptions
@@ -113,5 +112,5 @@ runChaosGame options = do
     window = (Graphics.Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
 
   (Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True
-   |> Graphics.Gloss.Data.Picture.scale 1 (-1)
+   |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
    |> Graphics.Gloss.display window Graphics.Gloss.black)
