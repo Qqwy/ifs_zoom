@@ -6,6 +6,7 @@ module Lib.Camera
   , translateCamera
   , cameraFromSixtuple
   , cameraTransform
+  , defaultCamera
   ) where
 
 import Pipe
@@ -19,8 +20,6 @@ import Data.Array.Accelerate.Linear.Matrix ((!*), (!*!), (!+!), inv33)
 -- | A camera is 'just' a 2D affine transformation matrix.
 type Camera = M33 Float
 
-cameraFromSixtuple :: Exp (Float, Float, Float, Float, Float, Float) -> Exp Camera
-cameraFromSixtuple sixtuple = Lib.Common.transformationFromSixtuple sixtuple
 
 -- | Transforms a point from world space to screen space.
 cameraTransform :: Exp Camera -> Exp (V3 Float) -> Exp (V3 Float)
@@ -51,3 +50,19 @@ translateCamera horizontal vertical camera =
                              (V3 0 0 vertical)
                              (V3 0 0 0)
                              )
+
+cameraFromSixtuple :: (Float, Float, Float, Float, Float, Float) -> Camera
+cameraFromSixtuple (a, b, c, d, e, f) =
+  let
+    matrix :: M33 Float
+    matrix = (V3 (V3 a b e)
+                 (V3 c d f)
+                 (V3 0 0 1))
+  in
+    matrix
+
+defaultCamera :: Camera
+defaultCamera =
+  -- (1, 0, 0, 1, 0, 0)
+  (((recip 11), 0, 0, -(recip 11), 0.5, 1))
+  |> cameraFromSixtuple

@@ -10,8 +10,10 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Lib (
-  naivePointCloudToPicture
+module Lib
+  ( naivePointCloudToPicture
+  , Lib.Camera.Camera
+  , Lib.Picture.RasterPicture
   -- binarySearch,
   -- randomVector,
   -- xorShift,

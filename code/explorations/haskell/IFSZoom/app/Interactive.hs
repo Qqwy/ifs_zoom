@@ -15,7 +15,8 @@ import qualified Lib
 import qualified Lib.ChaosGame
 import qualified Lib.Camera
 
-import qualified Graphics.Gloss.Interface.IO.Game as Gloss
+import qualified Graphics.Gloss.Data.Picture
+import qualified Graphics.Gloss.Interface.IO.Simulate as Gloss
 import qualified Data.Array.Accelerate as Accelerate
 import Graphics.Gloss.Interface.IO.Game(Event(..), Key(..))
 import qualified Graphics.Gloss.Accelerate.Data.Picture
@@ -26,7 +27,7 @@ data SimState = SimState
   , point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
   , should_update :: Bool
   , dimensions :: (Word, Word)
-  , camera :: Lib.Camera.Camera
+  , camera :: Lib.Camera
   }
 
 type IFSTransformation =
@@ -40,19 +41,18 @@ run transformations options = do
     position = (10, 10)
     window = (Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
 
-  Gloss.playIO
+  Gloss.simulateIO
     window
-    Gloss.red
+    Gloss.black
     20
     (initialSimState transformations options)
     drawSimState
-    reactToUserInput
     updateSimState
 
 -- | Updates the state of the sim_state based on earlier user input.
 -- Runs once every frame
-updateSimState :: Float -> SimState -> IO SimState
-updateSimState _ sim_state@SimState{should_update} =
+updateSimState :: Gloss.ViewPort -> Float -> SimState -> IO SimState
+updateSimState _ _ sim_state@SimState{should_update} =
   case should_update of
     False ->
       return sim_state
@@ -70,35 +70,43 @@ updateSimState _ sim_state@SimState{should_update} =
 -- so we only re-render when the sim_state (camera position etc) changes
 -- rather than every frame.
 drawSimState :: SimState -> IO Gloss.Picture
-drawSimState sim_state = return (picture sim_state)
+drawSimState sim_state =
+  sim_state
+  |> picture
+  |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
+  |> return
 
-
+renderSimState :: SimState -> Lib.RasterPicture
 renderSimState SimState{point_cloud, dimensions, camera} =
   point_cloud
-  |> Lib.naivePointCloudToPicture (Accelerate.use camera) (Accelerate.use (fromIntegral width)) (Accelerate.use (fromIntegral height))
+  |> Lib.naivePointCloudToPicture camera' width' height'
   |> Data.Array.Accelerate.LLVM.PTX.run
   where
     (width, height) = dimensions
+    camera' = camera |> Accelerate.lift |> Accelerate.unit
+    width'  = width  |> fromIntegral    |> Accelerate.unit
+    height' = height |> fromIntegral    |> Accelerate.unit
 
 
-reactToUserInput :: Gloss.Event -> SimState -> IO SimState
-reactToUserInput event sim_state =
-  case event of
-    -- EventKey (Char 'w') s _ _ -> toggle zoom 0.975 s sim_state
-    -- EventKey (Char 'a') s _ _ -> toggle zoom 1.025 s sim_state
-    _ -> return sim_state
-    where
-      -- toggle fun val Gloss.Down sim_state = sim_state |> set fun (Just val) |> dirty |> return
-      -- toggle fun _   Gloss.Up   sim_state = sim_state |> set fun Nothing |> return
-      -- dirty sim_state = sim_state { shouldUpdate = True }
+-- reactToUserInput :: Gloss.Event -> SimState -> IO SimState
+-- reactToUserInput event sim_state =
+--   case event of
+--     -- EventKey (Char 'w') s _ _ -> toggle zoom 0.975 s sim_state
+--     -- EventKey (Char 'a') s _ _ -> toggle zoom 1.025 s sim_state
+--     _ -> return sim_state
+--     where
+--       -- toggle fun val Gloss.Down sim_state = sim_state |> set fun (Just val) |> dirty |> return
+--       -- toggle fun _   Gloss.Up   sim_state = sim_state |> set fun Nothing |> return
+--       -- dirty sim_state = sim_state { shouldUpdate = True }
 
 initialSimState :: [IFSTransformation] -> CLIOptions -> SimState
 initialSimState transformations_list options =
   SimState
   { picture = Gloss.blank
-  , should_update = False
+  , should_update = True
   , point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism seed
   , dimensions = (picture_width, picture_height)
+  , camera = Lib.Camera.defaultCamera
   }
   where
     seed = options |> Options.seed
@@ -111,6 +119,7 @@ initialSimState transformations_list options =
     transformations = buildTransformations transformations_list
 
 
+buildTransformations :: [IFSTransformation] -> Accelerate.Acc IFS
 buildTransformations transformations_list =
   transformations_list
   |> Accelerate.fromList (Accelerate.Z Accelerate.:. (length transformations_list))

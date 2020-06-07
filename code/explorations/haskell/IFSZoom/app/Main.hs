@@ -15,7 +15,9 @@ import Pipe
 import qualified Lib.ChaosGame
 import qualified Lib.Picture
 import qualified Lib.Camera
+
 import qualified Options
+import qualified Interactive
 
 -- import Text.Printf
 import Prelude                                                      as P
@@ -45,7 +47,7 @@ main = do
   else
     options
     |> maybeSeedRNG
-    >>= runChaosGame
+    >>= runProgram
 
 maybeSeedRNG :: Options.CLIOptions -> IO Options.CLIOptions
 maybeSeedRNG options@(Options.CLIOptions {Options.seed = 0}) = do
@@ -54,6 +56,18 @@ maybeSeedRNG options@(Options.CLIOptions {Options.seed = 0}) = do
   return (options {Options.seed = auto_seed})
 
 maybeSeedRNG options = return options
+
+runProgram :: Options.CLIOptions -> IO ()
+runProgram options = do
+  let
+    transformations =
+      [ ((0,0,0,0.16,0.0, 0), 0.01)
+      , ((0.85,0.04, -0.04, 0.85,  0, 1.60), 0.85)
+      , ((0.20, -0.26, 0.23, 0.22, 0, 1.60), 0.07)
+      , ((-0.15, 0.28, 0.26, 0.24, 0, 0.44), 0.07)
+      ]
+
+  Interactive.run transformations options
 
 runChaosGame :: Options.CLIOptions -> IO ()
 runChaosGame options = do
@@ -81,7 +95,7 @@ runChaosGame options = do
     picture_height = options |> Options.render_height |> P.fromIntegral
     camera =
       (((recip 11), 0, 0, -(recip 11), 0.5, 1) :: (Float, Float, Float, Float, Float, Float))
-      |> lift
+      -- |> lift
       |> Lib.Camera.cameraFromSixtuple
     program1 =
       seed
@@ -93,7 +107,7 @@ runChaosGame options = do
     program2 =
       -- (use result)
       program1
-      |> Lib.Picture.naivePointCloudToPicture camera picture_width picture_height
+      |> Lib.Picture.naivePointCloudToPicture (lift camera) picture_width picture_height
     picture =
       PTX.run program2
 
