@@ -17,17 +17,18 @@ import Pipe
 
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Data.Bits ((.|.), shiftL, shiftR)
-import Data.Array.Accelerate.Linear (V3(..), M33)
 import Data.Array.Accelerate.Linear.Matrix ((!*))
 
+import Lib.Common
 import qualified Lib.Random
+
 
 -- | Runs the chaos game
 -- Given an array of transformations
 -- a total number of points
 -- and a seed
 -- we'll return a long array of 2D-points.
-chaosGame :: Acc (Vector (M33 Float, Float)) -> Int -> Int -> Word64 -> Acc (Vector (Float, Float))
+chaosGame :: Acc IFS -> Int -> Int -> RNGVal -> Acc (Vector Point)
 chaosGame transformations n_points_per_thread paralellism seed =
   Lib.Random.randomMatrix paralellism n_points_per_thread seed
   |> map word64ToFloatPair
@@ -39,38 +40,16 @@ chaosGame transformations n_points_per_thread paralellism seed =
 -- So all points in column `0` will be initial points,
 -- in column `1` will have one transformation applied,
 -- in column `2` two transformations, etc.
-fillChaosGameMatrix :: Acc (Vector (M33 Float, Float)) -> Acc (Matrix (Float, Float)) -> Acc (Matrix (Float, Float))
+fillChaosGameMatrix :: Acc IFS -> Acc (Matrix Point) -> Acc (Matrix Point)
 fillChaosGameMatrix transformations random_points =
   random_points
   |> prescanl (pointBasedTransform transformations) starting_point
   where
     starting_point = (0, 0) |> lift
 
-pointToHomogeneous :: Exp (Float, Float) -> Exp (V3 Float)
-pointToHomogeneous (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
 
-homogeneousToPoint :: Exp (V3 Float) -> Exp (Float, Float)
-homogeneousToPoint (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
-
-transformationProbabilityFromSixtuplePair :: Exp ((Float, Float, Float, Float, Float, Float), Float) -> Exp (M33 Float, Float)
-transformationProbabilityFromSixtuplePair (unlift -> (sixtuple, p)) =
-  lift (transformationFromSixtuple sixtuple, (p :: Exp Float))
-
-transformationFromSixtuple :: Exp (Float, Float, Float, Float, Float, Float) -> Exp (M33 Float)
-transformationFromSixtuple sixtuple =
-  let
-    (a, b, c, d, e, f) = unlift sixtuple :: (Exp Float, Exp Float, Exp Float, Exp Float, Exp Float, Exp Float)
-    matrix :: M33 (Exp Float)
-    matrix = (V3 (V3 a b e)
-                 (V3 c d f)
-                 (V3 0 0 1))
-  in
-    lift matrix
-
--- | TODO proper choice based on probability
---
--- Currently picks with equal probability
-chaosTransform :: Exp (M33 Float) -> Exp (V3 Float) -> Exp (V3 Float)
+-- | Transforms a single point using one of the IFS's transformations.
+chaosTransform :: Exp Transformation -> Exp HomogeneousPoint -> Exp HomogeneousPoint
 chaosTransform matrix point = matrix !* point
 
 
@@ -81,7 +60,7 @@ chaosTransform matrix point = matrix !* point
 -- A bit of a hack because Accelerate's `scanl` requires the same type
 -- for both the element and the accumulator.
 --
-pointBasedTransform :: Acc (Vector (M33 Float, Float)) -> Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
+pointBasedTransform :: Acc IFS -> Exp Point -> Exp Point -> Exp Point
 pointBasedTransform transformations prev_point current_point =
   let
     transformation =
@@ -102,9 +81,9 @@ pointBasedTransform transformations prev_point current_point =
 -- Assumes the probabilities that are the second elements of each of the `transformations`'s pairs
 -- together sum to one.
 --
--- `rngval` might be any float; only its fractional part is considered
--- (since we are looking for a probability i.e. in the half-open range [0..1)).
-pickTransformation :: Acc (Vector (M33 Float, Float)) -> Exp Float -> Exp (M33 Float)
+-- `rngval` should be in the unit range [0..1)
+-- (since we are comparing it with probabilities probability)
+pickTransformation :: Acc IFS -> Exp Probability -> Exp Transformation
 pickTransformation transformations rngval =
   transformations !! matching_transformation_index
   |> fst
@@ -126,7 +105,7 @@ pickTransformation transformations rngval =
 -- The hope is that LLVM or the PTX compilers might optimize it to a no-op,
 -- if the pair is adjacent in memory.
 -- Do not confuse this with `pointToMorton`.
-floatPairToWord64 :: Exp (Float, Float) -> Exp Word64
+floatPairToWord64 :: Exp Point -> Exp Word64
 floatPairToWord64 (unlift -> (x, y)) =
   let
     x' = x |> bitcast |> lift :: Exp Word32
@@ -135,7 +114,7 @@ floatPairToWord64 (unlift -> (x, y)) =
     (fromIntegral x' `shiftL` 32) .|. (fromIntegral y')
 
 -- | Inverse of `floatPairToWord64`
-word64ToFloatPair :: Exp Word64 -> Exp (Float, Float)
+word64ToFloatPair :: Exp Word64 -> Exp Point
 word64ToFloatPair number =
   let
     x' = (number `shiftR` 32) |> fromIntegral :: Exp Word32
@@ -144,10 +123,3 @@ word64ToFloatPair number =
     y = y' |> bitcast :: Exp Float
   in
     lift (x, y)
-
--- normalizeFloatPair :: Exp (Float, Float) -> Exp (Float, Float)
--- normalizeFloatPair (unlift -> (x, y)) =
---   lift (x', y')
---   where
---     x' = (x :: Exp Float) `mod'` 1
---     y' = (y :: Exp Float) `mod'` 1

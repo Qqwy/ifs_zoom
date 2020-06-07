@@ -14,6 +14,7 @@ module Main where
 import Pipe
 import qualified Lib.ChaosGame
 import qualified Lib.Picture
+import qualified Lib.Camera
 import qualified Options
 
 -- import Text.Printf
@@ -79,6 +80,10 @@ runChaosGame options = do
     n_points_per_thread = samples `div` paralellism
     picture_width = options |> Options.render_width |> P.fromIntegral
     picture_height = options |> Options.render_height |> P.fromIntegral
+    camera =
+      (((recip 11), 0, 0, -(recip 11), 0.5, 1) :: (Float, Float, Float, Float, Float, Float))
+      |> lift
+      |> Lib.Camera.cameraFromSixtuple
     program1 =
       seed
       |> Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism
@@ -89,7 +94,7 @@ runChaosGame options = do
     program2 =
       -- (use result)
       program1
-      |> Lib.Picture.naivePointCloudToPicture picture_width picture_height
+      |> Lib.Picture.naivePointCloudToPicture camera picture_width picture_height
     picture =
       PTX.run program2
 
@@ -102,9 +107,10 @@ runChaosGame options = do
 
   let
     -- mycircle = Circle 80 |> Graphics.Gloss.Color white
-    dimensions = (800, 600)
+    width = options |> Options.render_width |> P.fromIntegral
+    height = options |> Options.render_height |> P.fromIntegral
     position = (10, 10)
-    window = (Graphics.Gloss.InWindow "Iterated Function Systems Exploration" dimensions position)
+    window = (Graphics.Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
 
   (Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True
    |> Graphics.Gloss.Data.Picture.scale 1 (-1)

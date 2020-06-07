@@ -1,7 +1,7 @@
 module Lib.CameraSpec (spec) where
 
 import qualified Lib.Camera
-import qualified Lib.ChaosGame
+import qualified Lib.Common
 
 import Pipe
 import Test.Hspec
@@ -55,9 +55,9 @@ spec = do
           res =
             ((0, 0) :: (Float, Float))
             |> lift
-            |> Lib.ChaosGame.pointToHomogeneous
+            |> Lib.Common.pointToHomogeneous
             |> Lib.Camera.cameraTransform camera
-            |> Lib.ChaosGame.homogeneousToPoint
+            |> Lib.Common.homogeneousToPoint
           in
           (runE res) Prelude.== (horizontal, vertical)
 

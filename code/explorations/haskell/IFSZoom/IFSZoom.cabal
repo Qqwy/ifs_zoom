@@ -28,8 +28,9 @@ library
   exposed-modules:
       Lib
     , Pipe
-    , Lib.ChaosGame
     , Lib.Camera
+    , Lib.ChaosGame
+    , Lib.Common
     , Lib.MortonCode
     , Lib.Picture
     , Lib.Random

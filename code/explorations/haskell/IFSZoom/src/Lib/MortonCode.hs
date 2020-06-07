@@ -29,7 +29,11 @@ import Pipe
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Data.Bits
 
-pointToMorton :: Exp (Float, Float) -> Exp Word64
+-- | Type alias to indicate the semantic meaning of the 64-bit integer:
+-- it is a code representing a point.
+type MortonCode = Word64
+
+pointToMorton :: Exp (Float, Float) -> Exp MortonCode
 pointToMorton point =
   point
   |> floatPairToWord32Pair
@@ -39,7 +43,7 @@ pointToMorton point =
     floatPairToWord32Pair (unlift -> (x, y)) = lift (bitcast x, bitcast y)
 
 
-mortonToPoint ::  Exp Word64 -> Exp (Float, Float)
+mortonToPoint ::  Exp MortonCode -> Exp (Float, Float)
 mortonToPoint morton_code =
   morton_code
   |> deinterleaveBits

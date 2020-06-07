@@ -12,7 +12,6 @@
 
 module Lib (
   binarySearch,
-  chaosGame,
   randomMatrix,
   -- randomVector,
   -- xorShift,
@@ -51,6 +50,8 @@ createIFSPointCloud nThreads nPoints transformations =
   |> buildBinarySearchTree
   where
     chaosGame = undefined
+
+--- Below are ideas that are only useful later:
 
 -- | Transforms an array of points into a binary search tree to quickly search through
 --
@@ -95,37 +96,3 @@ binarySearch target arr =
             if      elem < target then lift $ (middle + 1, right)
             else if elem > target then lift $ (left, middle - 1)
             else                       lift $ (middle, middle)
-
--- | Runs the chaos game in parallel
---
--- Taking a number of points `nThreads * nPointsPerThread` and the set of `transformations` (with probabilities) as input
--- and returns a sequence with `n` points as output
---
--- - Build a matrix of nThreads * nPointsPerThread
--- - In parallel for each row
---   - Compute the next point by applying a randomly chosen transformation to the current point (scanl).
--- - Reinterpret the resulting matrix as a single long sequence
-chaosGame :: Int -> Int -> Acc (Vector Float) -> Acc (Vector (Float, Float))
-chaosGame nThreads nPointsPerThread transformations =
-  mat
-  |> scanl transformPoint (lift (0.0, 0.0))
-  |> reshape (constant (Z :. nPointsPerThread * nThreads))
-  where
-    mat :: Acc (Matrix (Float, Float))
-    mat = fill (constant (Z :. nPointsPerThread :. nThreads)) (lift (0, 0))
-    -- startingPoints = fromList (Z :. nThreads) [(0, 0)..] -- random points between (-1, -1) and (1, 1)
-    transformPoint :: Exp (Float, Float) -> Exp (Float, Float) -> Exp (Float, Float)
-    transformPoint point acc = point
-      -- TODO Pick one of the transformations and apply it to the point
-      -- TODO randomness. Maybe xorshift?
-
-
-
--- | Transforms an unsigned number to a 32-bit float in the 0..1 range.
-wordToNormalizedDouble :: Exp Word -> Exp Double
-wordToNormalizedDouble input =
-  (fromIntegral input) / (fromIntegral highest)
-  where
-    highest = maxBound :: Exp Word
-
-
