@@ -27,6 +27,7 @@ data SimState = SimState
   , point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
   , should_update :: Bool
   , dimensions :: (Word, Word)
+  , current_viewport :: Gloss.ViewPort
   , camera :: Lib.Camera
   }
 
@@ -52,18 +53,27 @@ run transformations options = do
 -- | Updates the state of the sim_state based on earlier user input.
 -- Runs once every frame
 updateSimState :: Gloss.ViewPort -> Float -> SimState -> IO SimState
-updateSimState _ _ sim_state@SimState{should_update} =
-  case should_update of
-    False ->
-      return sim_state
-    True  ->
-      let
-        new_picture = Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray (renderSimState sim_state) True
-      in
-        sim_state { should_update = False
-                  , picture = new_picture
-                  }
-        |> return
+updateSimState viewport _ sim_state@SimState{current_viewport} =
+  if areViewportsEqual viewport current_viewport then
+    return sim_state
+  else do
+    let
+      new_picture = Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray (renderSimState sim_state) True
+        -- |> applyInverseViewport viewport
+      new_sim_state = sim_state { should_update = False
+                , picture = new_picture
+                , camera = viewportToCamera sim_state viewport
+                , current_viewport = viewport
+                }
+      Gloss.ViewPort a b c = viewport
+
+    putStrLn (show (a, b, c))
+    return new_sim_state
+
+-- Circumventing the missing `Eq` instance for Gloss.Viewport
+areViewportsEqual :: Gloss.ViewPort -> Gloss.ViewPort -> Bool
+areViewportsEqual (Gloss.ViewPort a b c) (Gloss.ViewPort d e f) =
+  (a, b, c) == (d, e, f)
 
 -- | Called every frame.
 -- When drawing, we simply return the picture we made earlier,
@@ -75,6 +85,13 @@ drawSimState sim_state =
   |> picture
   |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
   |> return
+
+applyInverseViewport (Gloss.ViewPort (tx, ty) rotation scale) picture =
+  picture
+  |> Graphics.Gloss.Data.Picture.scale (recip scale) (recip scale)
+  |> Graphics.Gloss.Data.Picture.rotate (-rotation)
+  |> Graphics.Gloss.Data.Picture.translate (-tx) (-ty)
+
 
 renderSimState :: SimState -> Lib.RasterPicture
 renderSimState SimState{point_cloud, dimensions, camera} =
@@ -107,6 +124,7 @@ initialSimState transformations_list options =
   , point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism seed
   , dimensions = (picture_width, picture_height)
   , camera = Lib.Camera.defaultCamera
+  , current_viewport = Gloss.ViewPort (0, 0) 0 0
   }
   where
     seed = options |> Options.seed
@@ -125,3 +143,12 @@ buildTransformations transformations_list =
   |> Accelerate.fromList (Accelerate.Z Accelerate.:. (length transformations_list))
   |> Accelerate.use
   |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)
+
+viewportToCamera :: SimState -> Gloss.ViewPort -> Lib.Camera
+viewportToCamera SimState{dimensions = (width, height)} (Gloss.ViewPort (tx, ty) rotate scale) =
+  Lib.Camera.defaultCamera
+  |> Lib.Camera.scaleCamera scale
+  |> Lib.Camera.translateCamera horizontal vertical
+  where
+    horizontal = tx / (fromIntegral width)
+    vertical = ty / (fromIntegral height)

@@ -41,6 +41,7 @@ library
         base                        >= 4.7 && < 5
       , accelerate                  >= 1.0
       , colour-accelerate
+      , linear
       , linear-accelerate
 
 executable IFSZoom-exe
