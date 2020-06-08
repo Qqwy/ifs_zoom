@@ -22,6 +22,8 @@ import Graphics.Gloss.Interface.IO.Game(Event(..), Key(..))
 import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.LLVM.PTX
 
+import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
+
 data SimState = SimState
   { picture :: !Gloss.Picture
   , point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
@@ -58,16 +60,19 @@ updateSimState viewport _ sim_state@SimState{current_viewport} =
     return sim_state
   else do
     let
-      new_picture = Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray (renderSimState sim_state) True
+      new_picture = (renderSimState sim_state)
+      new_picture' = Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray new_picture True
         -- |> applyInverseViewport viewport
       new_sim_state = sim_state { should_update = False
-                , picture = new_picture
+                , picture = new_picture'
                 , camera = viewportToCamera sim_state viewport
                 , current_viewport = viewport
                 }
       Gloss.ViewPort a b c = viewport
 
     putStrLn (show (a, b, c))
+    IOBMP.writeImageToBMP "example_picture.bmp" new_picture
+
     return new_sim_state
 
 -- Circumventing the missing `Eq` instance for Gloss.Viewport
