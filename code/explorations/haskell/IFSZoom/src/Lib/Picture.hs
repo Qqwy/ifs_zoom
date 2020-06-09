@@ -1,6 +1,17 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE RebindableSyntax #-}
 
+{-|
+ Module      : Lib.Picture
+ Copyright   : [2020] Wiebe-Marten Wijnja
+ License     : BSD3
+
+ Maintainer  : Wiebe-Marten Wijnja <w-m@wmcode.nl>
+ Stability   : experimental
+ Portability : non-portable (GHC extensions)
+
+Transforming a point cloud to a rasterized picture, using a camera transformation.
+-}
 module Lib.Picture
   ( RasterPicture
   , naivePointCloudToPicture
@@ -18,7 +29,9 @@ import Data.Array.Accelerate.Data.Colour.Names
 
 type RasterPicture = Matrix Word32
 
-
+-- | A very simple way to create a picture from a point cloud.
+-- No optimizations: we iterate over all points
+-- and only find out very late whether they'll end up on the screen.
 naivePointCloudToPicture :: Exp Camera -> Exp Int -> Exp Int -> Acc (Vector Point) -> Acc RasterPicture
 naivePointCloudToPicture camera width height point_cloud =
   point_cloud
@@ -26,6 +39,7 @@ naivePointCloudToPicture camera width height point_cloud =
   |> screenToPixels width height
   |> pixelsToColours
 
+-- | Maps the camera transformation over all points.
 worldToScreen :: Exp Camera -> Acc (Vector Point) -> Acc (Vector Point)
 worldToScreen camera point_cloud =
   point_cloud
@@ -33,6 +47,8 @@ worldToScreen camera point_cloud =
   |> Accelerate.map (Lib.Camera.cameraTransform camera)
   |> Accelerate.map (Lib.Common.homogeneousToPoint)
 
+-- | Turns points in screen-space to pixels in a 2D 'histogram' representation
+-- where every pixel counts how many points it contains.
 screenToPixels :: Exp Int -> Exp Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Int)
 screenToPixels width height input = permute (+) zeros (mapping input) (ones input)
   where
@@ -43,7 +59,9 @@ screenToPixels width height input = permute (+) zeros (mapping input) (ones inpu
     mapping :: Acc (Vector (Float, Float)) -> Exp DIM1 -> Exp DIM2
     mapping array index = pointToPixel width height (array ! index)
 
-
+-- | Currently a very simple (and not very beautiful) implementation,
+-- where we use 'black' to indicate no points
+-- and 'white' to indicate one or more points.
 pixelsToColours :: Acc (Matrix Int) -> Acc (Matrix Word32)
 pixelsToColours pixels =
   pixels
@@ -69,9 +87,10 @@ pointToPixel width height (unlift -> (x, y)) =
     ypos = y * (fromIntegral height) |> Accelerate.floor
 
 -- | True if the given point will be visible on the screen
+--
 -- Works on screen-coordinates;
 -- that is: tests if point is inside the unit box
--- (the half-open two-dimensional range (0, 0)..(1, 1)).
+-- (the half-open two-dimensional range `[(0, 0)..(1, 1))`).
 isPointVisible :: Exp (Float, Float) -> Exp Bool
 isPointVisible (unlift -> (x, y)) =
   x >= 0 && x < 1 &&

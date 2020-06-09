@@ -1,7 +1,16 @@
 {-# LANGUAGE ViewPatterns #-}
+{-|
+ Module      : Lib.ChaosGame
+ Copyright   : [2020] Wiebe-Marten Wijnja
+ License     : BSD3
 
--- | Contains common types and functions
--- that are used throughout the application
+ Maintainer  : Wiebe-Marten Wijnja <w-m@wmcode.nl>
+ Stability   : experimental
+ Portability : non-portable (GHC extensions)
+
+Contains common types, type aliases and functions
+that are used throughout the application
+-}
 module Lib.Common
   ( Transformation
   , Probability

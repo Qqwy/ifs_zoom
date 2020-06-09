@@ -1,5 +1,20 @@
 {-# LANGUAGE ViewPatterns #-}
 
+{-|
+ Module      : Lib.Camera
+ Copyright   : [2020] Wiebe-Marten Wijnja
+ License     : BSD3
+
+ Maintainer  : Wiebe-Marten Wijnja <w-m@wmcode.nl>
+ Stability   : experimental
+ Portability : non-portable (GHC extensions)
+
+transformations to (groups of) points to turn them from world-space to screen-space.
+
+The camera (a transformation matrix) itself is meant to be manipulated on the CPU.
+The resulting transformation is then given to the GPU to map over all (visible) points.
+ -}
+
 module Lib.Camera
   ( Camera
   , scaleCamera
@@ -23,6 +38,7 @@ type Camera = M33 Float
 
 
 -- | Transforms a point from world space to screen space.
+-- (Runs on the GPU!)
 cameraTransform :: Exp Camera -> Exp (V3 Float) -> Exp (V3 Float)
 cameraTransform camera point = camera !* point
 

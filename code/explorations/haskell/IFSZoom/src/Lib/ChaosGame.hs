@@ -1,6 +1,30 @@
 {-# LANGUAGE RebindableSyntax #-}
 {-# LANGUAGE ViewPatterns #-}
 
+{-|
+ Module      : Lib.ChaosGame
+ Copyright   : [2020] Wiebe-Marten Wijnja
+ License     : BSD3
+
+ Maintainer  : Wiebe-Marten Wijnja <w-m@wmcode.nl>
+ Stability   : experimental
+ Portability : non-portable (GHC extensions)
+
+Parallel 'Chaos Game' implementation.
+The Chaos Game is a probabilistic algorithm to draw an Iterated Function System.
+Curiously, given enough points, the contraction of the IFS will ensure that the result will converge
+to the same deterministic picture.
+
+This implementation of the Chaos Game takes a description of an IFS as input,
+performs all random number generation and point-transforming on the GPU itself,
+and finally returns a single vector of points as output.
+
+This vector might be kept on the GPU for further manipulation (e.g. drawing pictures from them) afterwards.
+
+Note that many 'internal' functions of this module have also been exported,
+to make testing the various components easier.
+ -}
+
 module Lib.ChaosGame
   ( chaosGame
   , fillChaosGameMatrix
@@ -24,11 +48,21 @@ import qualified Lib.Random
 
 
 -- | Runs the chaos game
--- Given an array of transformations
--- a total number of points
--- and a seed
--- we'll return a long array of 2D-points.
-chaosGame :: Acc IFS -> Int -> Int -> RNGVal -> Acc (Vector Point)
+--
+-- Note that this implementation runs on a two-dimensional matrix:
+-- each row is handled by a different thread
+-- each field in each row is the next iteration of the chaos game.
+--
+-- Essentially this means that for a high number of `n_points_per_thread`
+-- we'll have very high-quality points.
+-- whereas for a high `paralellism` we'll be able to run the chaosGame faster.
+--
+-- So depending on the particular IFS and GPU, you'll want to tune those values differently.
+chaosGame :: Acc IFS -- ^ A description of the IFS' transformations + probabilities
+          -> Int -- ^ the amount of points to compute on each GPU thread.
+          -> Int -- ^ the number of threads to spin up.
+          -> RNGVal -- ^ A random number seed to start the random number generation with.
+  -> Acc (Vector Point) -- ^ A representation of the resulting point cloud.
 chaosGame transformations n_points_per_thread paralellism seed =
   Lib.Random.randomMatrix paralellism n_points_per_thread seed
   |> map word64ToFloatPair
@@ -52,13 +86,13 @@ fillChaosGameMatrix transformations random_points =
 chaosTransform :: Exp Transformation -> Exp HomogeneousPoint -> Exp HomogeneousPoint
 chaosTransform matrix point = matrix !* point
 
-
 -- | Picks a transformation from an array of transformations
 -- based on the value of `current_point`
 -- to finally transform `prev_point`.
 --
 -- A bit of a hack because Accelerate's `scanl` requires the same type
 -- for both the element and the accumulator.
+-- this is why we transform from a pair of 32-bit floats to a single 64-bit integer (and back).
 --
 pointBasedTransform :: Acc IFS -> Exp Point -> Exp Point -> Exp Point
 pointBasedTransform transformations prev_point current_point =
