@@ -74,62 +74,62 @@ runProgram options = do
 
   Interactive.run transformations options
 
-runChaosGame :: Options.CLIOptions -> IO ()
-runChaosGame options = do
-  let
-    -- transformations =
-    --   [ ((0.5, 0, 0, 0.5, 0, 0), 1/3)
-    --   , ((0.5, 0, 0, 0.5, 0.5, 0), 1/3)
-    --   , ((0.5, 0, 0, 0.5, 0.25, (sqrt 3) / 4), 1/3)
-    --   ]
-    --   |> fromList (Z :. 3)
-    transformations =
-      [ ((0,0,0,0.16,0.0, 0), 0.01)
-      , ((0.85,0.04, -0.04, 0.85,  0, 1.60), 0.85)
-      , ((0.20, -0.26, 0.23, 0.22, 0, 1.60), 0.07)
-      , ((-0.15, 0.28, 0.26, 0.24, 0, 0.44), 0.07)
-      ]
-      |> fromList (Z :. 4)
-      |> use
-      |> A.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)
-    seed = options |> Options.seed
-    samples = options |> Options.samples |> P.fromIntegral
-    paralellism = options |> Options.paralellism |> P.fromIntegral
-    n_points_per_thread = samples `div` paralellism
-    picture_width = options |> Options.render_width |> P.fromIntegral
-    picture_height = options |> Options.render_height |> P.fromIntegral
-    camera =
-      (((recip 11), 0, 0, -(recip 11), 0.5, 1) :: (Float, Float, Float, Float, Float, Float))
-      -- |> lift
-      |> Lib.Camera.cameraFromSixtuple
-    program1 =
-      seed
-      |> Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism
-      -- |> Debug.Trace.traceShowId
-      -- |> Lib.Sort.sortPoints
-      -- use arr
-    -- result = PTX.run program1
-    program2 =
-      -- (use result)
-      program1
-      |> Lib.Picture.naivePointCloudToPicture (lift camera) picture_width picture_height
-    picture =
-      PTX.run program2
+-- runChaosGame :: Options.CLIOptions -> IO ()
+-- runChaosGame options = do
+--   let
+--     -- transformations =
+--     --   [ ((0.5, 0, 0, 0.5, 0, 0), 1/3)
+--     --   , ((0.5, 0, 0, 0.5, 0.5, 0), 1/3)
+--     --   , ((0.5, 0, 0, 0.5, 0.25, (sqrt 3) / 4), 1/3)
+--     --   ]
+--     --   |> fromList (Z :. 3)
+--     transformations =
+--       [ ((0,0,0,0.16,0.0, 0), 0.01)
+--       , ((0.85,0.04, -0.04, 0.85,  0, 1.60), 0.85)
+--       , ((0.20, -0.26, 0.23, 0.22, 0, 1.60), 0.07)
+--       , ((-0.15, 0.28, 0.26, 0.24, 0, 0.44), 0.07)
+--       ]
+--       |> fromList (Z :. 4)
+--       |> use
+--       |> A.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)
+--     seed = options |> Options.seed
+--     samples = options |> Options.samples |> P.fromIntegral
+--     paralellism = options |> Options.paralellism |> P.fromIntegral
+--     n_points_per_thread = samples `div` paralellism
+--     picture_width = options |> Options.render_width |> P.fromIntegral
+--     picture_height = options |> Options.render_height |> P.fromIntegral
+--     camera =
+--       (((recip 11), 0, 0, -(recip 11), 0.5, 1) :: (Float, Float, Float, Float, Float, Float))
+--       -- |> lift
+--       |> Lib.Camera.cameraFromSixtuple
+--     program1 =
+--       seed
+--       |> Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism
+--       -- |> Debug.Trace.traceShowId
+--       -- |> Lib.Sort.sortPoints
+--       -- use arr
+--     -- result = PTX.run program1
+--     program2 =
+--       -- (use result)
+--       program1
+--       |> Lib.Picture.naivePointCloudToPicture (lift camera) picture_width picture_height
+--     picture =
+--       PTX.run program2
 
-  -- printf "program1: %s\n" (show program1)
-  -- printf "program2: %s\n" (show program2)
-  -- printf "result: %s\n" (result |> A.toList |> show)
-  -- printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
+--   -- printf "program1: %s\n" (show program1)
+--   -- printf "program2: %s\n" (show program2)
+--   -- printf "result: %s\n" (result |> A.toList |> show)
+--   -- printf "output (first 100 elements): %s\n" (result |> A.toList |> show)
 
-  picture |> IOBMP.writeImageToBMP "example_picture.bmp"
+--   picture |> IOBMP.writeImageToBMP "example_picture.bmp"
 
-  let
-    -- mycircle = Circle 80 |> Graphics.Gloss.Color white
-    width = options |> Options.render_width |> P.fromIntegral
-    height = options |> Options.render_height |> P.fromIntegral
-    position = (10, 10)
-    window = (Graphics.Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
+--   let
+--     -- mycircle = Circle 80 |> Graphics.Gloss.Color white
+--     width = options |> Options.render_width |> P.fromIntegral
+--     height = options |> Options.render_height |> P.fromIntegral
+--     position = (10, 10)
+--     window = (Graphics.Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
 
-  (Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True
-   |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
-   |> Graphics.Gloss.display window Graphics.Gloss.black)
+--   (Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True
+--    |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
+--    |> Graphics.Gloss.display window Graphics.Gloss.black)
