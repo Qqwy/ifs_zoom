@@ -61,10 +61,11 @@ import qualified Lib.Random
 chaosGame :: Acc IFS -- ^ A description of the IFS' transformations + probabilities
           -> Int -- ^ the amount of points to compute on each GPU thread.
           -> Int -- ^ the number of threads to spin up.
-          -> RNGVal -- ^ A random number seed to start the random number generation with.
+          -> Acc (Matrix Word64) -- ^ A random matrix
   -> Acc (Vector Point) -- ^ A representation of the resulting point cloud.
-chaosGame transformations n_points_per_thread paralellism seed =
-  Lib.Random.randomMatrix paralellism n_points_per_thread seed
+chaosGame transformations n_points_per_thread paralellism random_matrix =
+  random_matrix
+  -- Lib.Random.randomMatrix paralellism n_points_per_thread seed
   |> map word64ToFloatPair
   |> fillChaosGameMatrix transformations
   |> flatten
