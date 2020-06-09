@@ -18,6 +18,7 @@ import qualified Lib.Camera
 import qualified Graphics.Gloss.Data.Picture
 import qualified Graphics.Gloss.Interface.IO.Game as Gloss
 import qualified Data.Array.Accelerate as Accelerate
+import Data.Array.Accelerate(Z(..), (:.)(..))
 import Graphics.Gloss.Interface.IO.Game(Event(..), Key(..), MouseButton(..), KeyState(..))
 import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.LLVM.PTX
@@ -32,11 +33,12 @@ data Input = Input
   , tx :: Float
   , ty :: Float
   , zooming :: Maybe Zooming
+  , saveScreenshot :: Bool
   }
   deriving (Eq, Ord, Show)
 
 data SimState = SimState
-  { picture :: !Gloss.Picture
+  { picture :: !Lib.RasterPicture
   , point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
   , should_update :: Bool
   , dimensions :: (Word, Word)
@@ -75,10 +77,8 @@ handleInput event state@SimState{input} = do
 
   if input' == input then
     return state
-  else
-    state
-    |> applyInput input'
-    |> return
+  else do
+    applyInput input' state
 
 handleInput' :: Event -> Input -> Input
 handleInput' event input =
@@ -97,20 +97,23 @@ handleInput' event input =
       where
         x' = x - x0
         y' = y - y0
-    (EventKey (MouseButton WheelUp) _ _ _, Input{}) ->
+    (EventKey (MouseButton WheelUp) _ _ _, _) ->
       input{zooming = Just ZoomIn}
-    (EventKey (MouseButton WheelDown) _ _ _, Input{}) ->
+    (EventKey (MouseButton WheelDown) _ _ _, _) ->
       input{zooming = Just ZoomOut}
+    (EventKey (Char 's') Down _ _, Input{}) ->
+      input{saveScreenshot = True}
     _ ->
       input
 
-applyInput :: Input -> SimState -> SimState
-applyInput input sim_state =
+applyInput :: Input -> SimState -> IO SimState
+applyInput input sim_state = do
   sim_state
-  |> fillInput input
-  |> applyDragging
-  |> applyZooming
-  |> shouldUpdate
+  |> return . fillInput input
+  >>= return . applyDragging
+  >>= return . applyZooming
+  >>= maybeScreenshot
+  >>= return . shouldUpdate
   where
     fillInput input sim_state = sim_state{input = input}
     shouldUpdate sim_state = sim_state{should_update = True}
@@ -126,11 +129,20 @@ applyDragging sim_state@SimState{input = input@Input{tx, ty}, camera, dimensions
     unit_y = -ty / (fromIntegral screen_height)
 
 applyZooming :: SimState -> SimState
-applyZooming sim_state@SimState{input = Input{zooming = Nothing}} = sim_state
+applyZooming sim_state@SimState{input = Input{zooming = Nothing}} =
+  sim_state
 applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomIn}, camera} =
   sim_state{camera = Lib.Camera.scaleCamera 1.025 camera, input = input{zooming = Nothing}}
 applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomOut}, camera} =
   sim_state{camera = Lib.Camera.scaleCamera 0.975 camera, input = input{zooming = Nothing}}
+
+
+maybeScreenshot :: SimState -> IO SimState
+maybeScreenshot sim_state@SimState{input = Input{saveScreenshot = False}} =
+  return sim_state
+maybeScreenshot sim_state@SimState{input = input@Input{saveScreenshot = True}, picture} = do
+  IOBMP.writeImageToBMP "example_picture.bmp" picture
+  return sim_state{input = input{saveScreenshot = False}}
 
 -- | Updates the state of the sim_state based on earlier user input.
 -- Runs once every frame
@@ -141,10 +153,9 @@ updateSimState _ sim_state@SimState{should_update} =
     True -> do
       let
         new_picture = (renderSimState sim_state)
-        new_picture' = Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray new_picture True
           -- |> applyInverseViewport viewport
         new_sim_state = sim_state { should_update = False
-                  , picture = new_picture'
+                                  , picture = new_picture
                   -- , camera = viewportToCamera sim_state viewport
                   }
 
@@ -161,9 +172,9 @@ drawSimState :: SimState -> IO Gloss.Picture
 drawSimState sim_state =
   sim_state
   |> picture
+  |> (\picture -> Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True)
   |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
   |> return
-
 
 renderSimState :: SimState -> Lib.RasterPicture
 renderSimState SimState{point_cloud, dimensions, camera} =
@@ -191,7 +202,7 @@ renderSimState SimState{point_cloud, dimensions, camera} =
 initialSimState :: [IFSTransformation] -> CLIOptions -> SimState
 initialSimState transformations_list options =
   SimState
-  { picture = Gloss.blank
+  { picture = Accelerate.fromList (Z :. 0 :. 0) []
   , should_update = True
   , point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism seed
   , dimensions = (picture_width, picture_height)
@@ -215,12 +226,13 @@ initialInput =
   , zooming = Nothing
   , tx = 0
   , ty = 0
+  , saveScreenshot = False
   }
 
 buildTransformations :: [IFSTransformation] -> Accelerate.Acc IFS
 buildTransformations transformations_list =
   transformations_list
-  |> Accelerate.fromList (Accelerate.Z Accelerate.:. (length transformations_list))
+  |> Accelerate.fromList (Z :. (length transformations_list))
   |> Accelerate.use
   |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)
 
