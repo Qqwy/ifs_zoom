@@ -60,6 +60,8 @@ extra-deps:
 - colour-accelerate-0.3.0.0@sha256:968922b620c5ffc4365df2b33e7ff273e6ae77611a7be3db43d8a4d11b4f7fd5,1866
 - gloss-accelerate-2.0.0.1@sha256:526a203bdda7a50f18a8d0004556215083fb576ce1e44d7e15281fdbbff7890c,1288
 - mwc-random-accelerate-0.1.0.0@sha256:2c1a16f145e57d743981f9ee61b55e6fff9717e6fd878769e92e45caeae8fda8,1359
+- gloss-export-0.1.0.2@sha256:30367a0b73772a3e5af896d1160cf1c6ed9cb387b8f92e9960b99009e430fd17,2262
+
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

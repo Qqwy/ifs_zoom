@@ -67,6 +67,13 @@ packages:
       sha256: 05020dd9b338e2038da0d8a51b061c56f25eb6a3421e01d282021b7405da3f9a
   original:
     hackage: mwc-random-accelerate-0.1.0.0@sha256:2c1a16f145e57d743981f9ee61b55e6fff9717e6fd878769e92e45caeae8fda8,1359
+- completed:
+    hackage: gloss-export-0.1.0.2@sha256:30367a0b73772a3e5af896d1160cf1c6ed9cb387b8f92e9960b99009e430fd17,2262
+    pantry-tree:
+      size: 871
+      sha256: 3fa07b97b13a8c64bb5f7f9b542b68eec129caa9343bc1f6c3756547c1a774d8
+  original:
+    hackage: gloss-export-0.1.0.2@sha256:30367a0b73772a3e5af896d1160cf1c6ed9cb387b8f92e9960b99009e430fd17,2262
 snapshots:
 - completed:
     size: 524996

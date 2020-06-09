@@ -23,8 +23,9 @@ import Graphics.Gloss.Interface.IO.Game(Event(..), Key(..), MouseButton(..), Key
 import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.LLVM.PTX
 
-import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
+-- import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 import qualified Data.Array.Accelerate.System.Random.MWC
+import qualified Graphics.Gloss.Export
 
 data Zooming = ZoomOut | ZoomIn
   deriving (Eq, Ord, Show)
@@ -39,7 +40,7 @@ data Input = Input
   deriving (Eq, Ord, Show)
 
 data SimState = SimState
-  { picture :: !Lib.RasterPicture
+  { picture :: !Gloss.Picture
   , point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
   , should_update :: Bool
   , dimensions :: (Word, Word)
@@ -132,7 +133,7 @@ applyDragging sim_state@SimState{input = input@Input{tx, ty}, camera, dimensions
     }
   where
     unit_x = tx / (fromIntegral screen_width)
-    unit_y = -ty / (fromIntegral screen_height)
+    unit_y = ty / (fromIntegral screen_height)
 
 applyZooming :: SimState -> SimState
 applyZooming sim_state@SimState{input = Input{zooming = Nothing}} =
@@ -146,8 +147,8 @@ applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomOut}, cam
 maybeScreenshot :: SimState -> IO SimState
 maybeScreenshot sim_state@SimState{input = Input{saveScreenshot = False}} =
   return sim_state
-maybeScreenshot sim_state@SimState{input = input@Input{saveScreenshot = True}, picture} = do
-  IOBMP.writeImageToBMP "example_picture.bmp" picture
+maybeScreenshot sim_state@SimState{input = input@Input{saveScreenshot = True}, picture, dimensions = (width, height)} = do
+  Graphics.Gloss.Export.exportPictureToPNG (fromIntegral width, fromIntegral height) Gloss.black "example_picture.png" picture
   return sim_state{input = input{saveScreenshot = False}}
 
 -- | Updates the state of the sim_state based on earlier user input.
@@ -159,14 +160,11 @@ updateSimState _ sim_state@SimState{should_update} =
     True -> do
       let
         new_picture = (renderSimState sim_state)
-          -- |> applyInverseViewport viewport
         new_sim_state = sim_state { should_update = False
                                   , picture = new_picture
-                  -- , camera = viewportToCamera sim_state viewport
                   }
 
       putStrLn (show (camera sim_state))
-      -- IOBMP.writeImageToBMP "example_picture.bmp" new_picture
 
       return new_sim_state
 
@@ -178,15 +176,15 @@ drawSimState :: SimState -> IO Gloss.Picture
 drawSimState sim_state =
   sim_state
   |> picture
-  |> (\picture -> Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True)
-  |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
+  -- |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
   |> return
 
-renderSimState :: SimState -> Lib.RasterPicture
+renderSimState :: SimState -> Gloss.Picture
 renderSimState SimState{point_cloud, dimensions, camera} =
   point_cloud
   |> Lib.naivePointCloudToPicture camera' width' height'
   |> Data.Array.Accelerate.LLVM.PTX.run
+  |> (\picture -> Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture False)
   where
     (width, height) = dimensions
     camera' = camera |> Accelerate.lift |> Accelerate.unit
@@ -208,7 +206,7 @@ renderSimState SimState{point_cloud, dimensions, camera} =
 initialSimState :: [IFSTransformation] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
 initialSimState transformations_list options random_matrix =
   SimState
-  { picture = Accelerate.fromList (Z :. 0 :. 0) []
+  { picture = Gloss.blank
   , should_update = True
   , point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism (Accelerate.use random_matrix)
   , dimensions = (picture_width, picture_height)

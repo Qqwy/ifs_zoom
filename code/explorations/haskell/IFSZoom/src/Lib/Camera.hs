@@ -82,5 +82,5 @@ cameraFromSixtuple (a, b, c, d, e, f) =
 defaultCamera :: Camera
 defaultCamera =
   -- (1, 0, 0, 1, 0, 0)
-  (((recip 11), 0, 0, -(recip 11), 0.5, 1))
+  (((recip 11), 0, 0, (recip 11), 0.5, 0))
   |> cameraFromSixtuple

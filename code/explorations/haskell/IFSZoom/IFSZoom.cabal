@@ -59,8 +59,9 @@ executable IFSZoom-exe
       , random
       , accelerate
       , accelerate-io
-      , gloss-accelerate
       , gloss
+      , gloss-accelerate
+      , gloss-export
       , optparse-applicative >= 0.14
       , mwc-random-accelerate
   ghc-options:
