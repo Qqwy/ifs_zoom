@@ -83,8 +83,10 @@ pointToPixel width height (unlift -> (x, y)) =
   (index2 ypos xpos)
   (ignore)
   where
-    xpos = x * (fromIntegral width)  |> Accelerate.floor
-    ypos = y * (fromIntegral height) |> Accelerate.floor
+    xpos = xcenter + x * xcenter  |> Accelerate.floor
+    ypos = ycenter + y * ycenter |> Accelerate.floor
+    xcenter = fromIntegral width / 2
+    ycenter = fromIntegral height / 2
 
 -- | True if the given point will be visible on the screen
 --
@@ -93,5 +95,5 @@ pointToPixel width height (unlift -> (x, y)) =
 -- (the half-open two-dimensional range `[(0, 0)..(1, 1))`).
 isPointVisible :: Exp (Float, Float) -> Exp Bool
 isPointVisible (unlift -> (x, y)) =
-  x >= 0 && x < 1 &&
-  y >= 0 && y < 1
+  x >= (-1) && x < 1 &&
+  y >= (-1) && y < 1

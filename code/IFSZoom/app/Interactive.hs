@@ -148,7 +148,7 @@ maybeScreenshot :: SimState -> IO SimState
 maybeScreenshot sim_state@SimState{input = Input{saveScreenshot = False}} =
   return sim_state
 maybeScreenshot sim_state@SimState{input = input@Input{saveScreenshot = True}, picture, dimensions = (width, height)} = do
-  Graphics.Gloss.Export.exportPictureToPNG (fromIntegral width, fromIntegral height) Gloss.black "example_picture.png" picture
+  -- Graphics.Gloss.Export.exportPictureToPNG (fromIntegral width, fromIntegral height) Gloss.black "example_picture.png" picture
   return sim_state{input = input{saveScreenshot = False}}
 
 -- | Updates the state of the sim_state based on earlier user input.
