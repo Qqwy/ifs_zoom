@@ -62,6 +62,7 @@ executable IFSZoom-exe
       , gloss-accelerate
       , gloss
       , optparse-applicative >= 0.14
+      , mwc-random-accelerate
   ghc-options:
       -O2
       -threaded

@@ -24,6 +24,7 @@ import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.LLVM.PTX
 
 import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
+import qualified Data.Array.Accelerate.System.Random.MWC
 
 data Zooming = ZoomOut | ZoomIn
   deriving (Eq, Ord, Show)
@@ -56,12 +57,17 @@ run transformations options = do
     height = options |> Options.render_height |> fromIntegral
     position = (10, 10)
     window = (Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
+    samples = options |> Options.samples |> fromIntegral
+    paralellism = options |> Options.paralellism |> fromIntegral
+    n_points_per_thread = samples `div` paralellism
+
+  random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism)
 
   Gloss.playIO
     window
     Gloss.black
     20
-    (initialSimState transformations options)
+    (initialSimState transformations options random_matrix)
     drawSimState
     handleInput
     updateSimState
@@ -199,12 +205,12 @@ renderSimState SimState{point_cloud, dimensions, camera} =
 --       -- toggle fun _   Gloss.Up   sim_state = sim_state |> set fun Nothing |> return
 --       -- dirty sim_state = sim_state { shouldUpdate = True }
 
-initialSimState :: [IFSTransformation] -> CLIOptions -> SimState
-initialSimState transformations_list options =
+initialSimState :: [IFSTransformation] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
+initialSimState transformations_list options random_matrix =
   SimState
   { picture = Accelerate.fromList (Z :. 0 :. 0) []
   , should_update = True
-  , point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism seed
+  , point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism (Accelerate.use random_matrix)
   , dimensions = (picture_width, picture_height)
   , camera = Lib.Camera.defaultCamera
   , input = initialInput
