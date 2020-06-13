@@ -17,11 +17,13 @@ import qualified Lib.Picture
 import qualified Lib.Camera
 
 import qualified Options
+import Options(CLIOptions, HasCLIOptions(..))
+
 import qualified Interactive
 
--- import Text.Printf
 import Prelude                                                      as P
 import qualified System.Random
+import Lens.Micro.Platform
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Interpreter                            as Interpreter
@@ -42,7 +44,7 @@ main :: IO ()
 main = do
   options <- Options.parseCommandLineOptions
 
-  if ((Options.samples options) P.< (Options.paralellism options)) then do
+  if ((options^.samples) P.< (options^.paralellism)) then do
     putStrLn "Error. `samples` should be larger than `paralellism`."
   else
     options
@@ -50,10 +52,10 @@ main = do
     >>= runProgram
 
 maybeSeedRNG :: Options.CLIOptions -> IO Options.CLIOptions
-maybeSeedRNG options@(Options.CLIOptions {Options.seed = 0}) = do
+maybeSeedRNG options@(Options.CLIOptions {Options._seed = 0}) = do
   auto_seed <- System.Random.getStdRandom System.Random.random
   putStrLn ("Using seed " P.++ (show auto_seed))
-  return (options {Options.seed = auto_seed})
+  return (options {Options._seed = auto_seed})
 
 maybeSeedRNG options = return options
 

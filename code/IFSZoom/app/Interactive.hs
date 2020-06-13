@@ -65,11 +65,11 @@ run transformations options = do
     height = options ^. render_height |> fromIntegral
     position = (10, 10)
     window = (Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
-    samples = options ^. samples |> fromIntegral
-    paralellism = options ^. paralellism |> fromIntegral
-    n_points_per_thread = samples `div` paralellism
+    samples' = options ^. samples |> fromIntegral
+    paralellism' = options ^. paralellism |> fromIntegral
+    n_points_per_thread = samples' `div` paralellism'
 
-  random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism)
+  random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism')
 
   Gloss.playIO
     window
@@ -82,17 +82,17 @@ run transformations options = do
 
 
 handleInput :: Event -> SimState -> IO SimState
-handleInput event state@SimState{_input} = do
+handleInput event sim_state = do
   -- putStrLn (show event)
   let
-    input' = handleInput' event _input
+    input' = handleInput' event (sim_state ^. input)
 
   -- putStrLn (show input')
 
-  if input' == input then
-    return state
+  if input' == (sim_state ^.input) then
+    return sim_state
   else do
-    applyInput input' state
+    applyInput input' sim_state
 
 handleInput' :: Event -> Input -> Input
 handleInput' event input =
@@ -103,10 +103,10 @@ handleInput' event input =
       input{_dragging = Just pos, _tx = 0, _ty = 0}
     (EventMotion (_x, _y), Input{_dragging = Nothing}) ->
       input
-    (EventMotion (x, y), Input{_dragging = Just (x0, y0), tx, ty}) ->
+    (EventMotion (x, y), Input{_dragging = Just (x0, y0), _tx, _ty}) ->
       input{_dragging = Just (x, y)
-           , _tx = tx + x'
-           , _ty = ty + y'
+           , _tx = _tx + x'
+           , _ty = _ty + y'
            }
       where
         x' = x - x0
@@ -129,18 +129,18 @@ applyInput input sim_state = do
   >>= maybeScreenshot
   >>= return . shouldUpdate
   where
-    fillInput input sim_state = sim_state{input = input}
-    shouldUpdate sim_state = sim_state{should_update = True}
+    fillInput input sim_state = sim_state{_input = input}
+    shouldUpdate sim_state = sim_state{_should_update = True}
 
 applyDragging :: SimState -> SimState
 applyDragging sim_state@SimState{_input = input@Input{_tx, _ty}, _camera, _dimensions = (screen_width, screen_height)} =
     sim_state
-    { _camera = Lib.Camera.translateCamera unit_x unit_y camera
+    { _camera = Lib.Camera.translateCamera unit_x unit_y _camera
     , _input = input{ _tx = 0, _ty = 0}
     }
   where
-    unit_x = tx / (fromIntegral screen_width)
-    unit_y = -ty / (fromIntegral screen_height)
+    unit_x = _tx / (fromIntegral screen_width)
+    unit_y = -_ty / (fromIntegral screen_height)
 
 applyZooming :: SimState -> SimState
 -- applyZooming sim_state@SimState{input = Input{zooming = Nothing}} =
@@ -161,28 +161,28 @@ applyZooming sim_state =
 
 
 maybeScreenshot :: SimState -> IO SimState
-maybeScreenshot sim_state@SimState{input = Input{saveScreenshot = False}} =
+maybeScreenshot sim_state@SimState{_input = Input{_saveScreenshot = False}} =
   return sim_state
-maybeScreenshot sim_state@SimState{input = input@Input{saveScreenshot = True}, picture} = do
-  IOBMP.writeImageToBMP "example_picture.bmp" picture
-  return sim_state{input = input{saveScreenshot = False}}
+maybeScreenshot sim_state@SimState{_input = input@Input{_saveScreenshot = True}, _picture} = do
+  IOBMP.writeImageToBMP "example_picture.bmp" _picture
+  return sim_state{_input = input{_saveScreenshot = False}}
 
 -- | Updates the state of the sim_state based on earlier user input.
 -- Runs once every frame
 updateSimState :: Float -> SimState -> IO SimState
-updateSimState _ sim_state@SimState{should_update} =
-  case should_update of
+updateSimState _ sim_state@SimState{_should_update} =
+  case _should_update of
     False -> return sim_state
     True -> do
       let
         new_picture = (renderSimState sim_state)
           -- |> applyInverseViewport viewport
-        new_sim_state = sim_state { should_update = False
-                                  , picture = new_picture
+        new_sim_state = sim_state { _should_update = False
+                                  , _picture = new_picture
                   -- , camera = viewportToCamera sim_state viewport
                   }
 
-      putStrLn (show (camera sim_state))
+      putStrLn (show (sim_state ^. camera))
       -- IOBMP.writeImageToBMP "example_picture.bmp" new_picture
 
       return new_sim_state
@@ -194,19 +194,19 @@ updateSimState _ sim_state@SimState{should_update} =
 drawSimState :: SimState -> IO Gloss.Picture
 drawSimState sim_state =
   sim_state
-  |> picture
+  ^. picture
   |> (\picture -> Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True)
   |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
   |> return
 
 renderSimState :: SimState -> Lib.RasterPicture
-renderSimState SimState{point_cloud, dimensions, camera} =
-  point_cloud
+renderSimState sim_state =
+  sim_state^.point_cloud
   |> Lib.naivePointCloudToPicture camera' width' height'
   |> Data.Array.Accelerate.LLVM.PTX.run
   where
-    (width, height) = dimensions
-    camera' = camera |> Accelerate.lift |> Accelerate.unit
+    (width, height) = sim_state^.dimensions
+    camera' = sim_state^.camera |> Accelerate.lift |> Accelerate.unit
     width'  = width  |> fromIntegral    |> Accelerate.unit
     height' = height |> fromIntegral    |> Accelerate.unit
 
@@ -227,7 +227,7 @@ initialSimState transformations_list options random_matrix =
   SimState
   { _picture = Accelerate.fromList (Z :. 0 :. 0) []
   , _should_update = True
-  , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism (Accelerate.use random_matrix)
+  , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism' (Accelerate.use random_matrix)
   , _dimensions = (picture_width, picture_height)
   , _camera = Lib.Camera.defaultCamera
   , _input = initialInput
@@ -236,7 +236,7 @@ initialSimState transformations_list options random_matrix =
     seed' = options ^. Options.seed
     samples' = options ^. Options.samples |> fromIntegral
     paralellism' = options ^. Options.paralellism |> fromIntegral
-    n_points_per_thread = samples `div` paralellism
+    n_points_per_thread = samples' `div` paralellism'
     picture_width = options ^. Options.render_width |> fromIntegral
     picture_height = options ^. Options.render_height |> fromIntegral
 
