@@ -9,7 +9,7 @@ module Interactive
 import Pipe
 
 import qualified Options
-import Options(CLIOptions)
+import Options(CLIOptions, HasCLIOptions(..))
 
 import Lib.Common
 import qualified Lib
@@ -233,12 +233,12 @@ initialSimState transformations_list options random_matrix =
   , _input = initialInput
   }
   where
-    seed' = options ^. seed
-    samples' = options ^. samples |> fromIntegral
-    paralellism' = options ^. paralellism |> fromIntegral
+    seed' = options ^. Options.seed
+    samples' = options ^. Options.samples |> fromIntegral
+    paralellism' = options ^. Options.paralellism |> fromIntegral
     n_points_per_thread = samples `div` paralellism
-    picture_width = options ^. render_width |> fromIntegral
-    picture_height = options ^. render_height |> fromIntegral
+    picture_width = options ^. Options.render_width |> fromIntegral
+    picture_height = options ^. Options.render_height |> fromIntegral
 
     transformations = buildTransformations transformations_list
 

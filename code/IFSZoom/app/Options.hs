@@ -5,6 +5,7 @@ module Options
   , commandLineOptionsWithHelp 
   , commandLineOptions
   , CLIOptions(..)
+  , HasCLIOptions(..)
   ) where
 
 import Options.Applicative
@@ -22,7 +23,7 @@ data CLIOptions = CLIOptions
   }
   deriving (Show)
 
-makeLenses ''CLIOptions
+makeClassy ''CLIOptions
 
 parseCommandLineOptions :: IO CLIOptions
 parseCommandLineOptions = execParser commandLineOptionsWithHelp
