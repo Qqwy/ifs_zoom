@@ -34,7 +34,9 @@ data Zooming = ZoomOut | ZoomIn
 
 
 data Input = Input
-  { _dragging :: Maybe (Float, Float) -- ^ Nothing if not dragging, Just ((x0, y0), (x, y)) if dragging, where (x0, y0) is the position we started the motion at.
+  { _dragging :: Maybe (Float, Float)
+    -- ^ Nothing if not dragging, Just (x, y) when we are dragging,
+    -- where (x, y) is the position we started to drag from
   , _tx :: Float
   , _ty :: Float
   , _zooming :: Maybe Zooming
