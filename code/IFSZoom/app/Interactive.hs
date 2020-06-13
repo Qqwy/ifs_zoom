@@ -1,5 +1,6 @@
 {-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Interactive
   ( run
@@ -15,6 +16,8 @@ import qualified Lib
 import qualified Lib.ChaosGame
 import qualified Lib.Camera
 
+import Lens.Micro.Platform
+
 import qualified Graphics.Gloss.Data.Picture
 import qualified Graphics.Gloss.Interface.IO.Game as Gloss
 import qualified Data.Array.Accelerate as Accelerate
@@ -29,23 +32,28 @@ import qualified Data.Array.Accelerate.System.Random.MWC
 data Zooming = ZoomOut | ZoomIn
   deriving (Eq, Ord, Show)
 
+
 data Input = Input
-  { dragging :: Maybe (Float, Float) -- ^ Nothing if not dragging, Just ((x0, y0), (x, y)) if dragging, where (x0, y0) is the position we started the motion at.
-  , tx :: Float
-  , ty :: Float
-  , zooming :: Maybe Zooming
-  , saveScreenshot :: Bool
+  { _dragging :: Maybe (Float, Float) -- ^ Nothing if not dragging, Just ((x0, y0), (x, y)) if dragging, where (x0, y0) is the position we started the motion at.
+  , _tx :: Float
+  , _ty :: Float
+  , _zooming :: Maybe Zooming
+  , _saveScreenshot :: Bool
   }
   deriving (Eq, Ord, Show)
 
+makeLenses ''Input
+
 data SimState = SimState
-  { picture :: !Lib.RasterPicture
-  , point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
-  , should_update :: Bool
-  , dimensions :: (Word, Word)
-  , camera :: Lib.Camera
-  , input :: Input
+  { _picture :: !Lib.RasterPicture
+  , _point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
+  , _should_update :: Bool
+  , _dimensions :: (Word, Word)
+  , _camera :: Lib.Camera
+  , _input :: Input
   }
+
+makeLenses ''SimState
 
 type IFSTransformation =
   ((Float, Float, Float, Float, Float, Float), Float)
@@ -53,12 +61,12 @@ type IFSTransformation =
 run :: [IFSTransformation] -> CLIOptions -> IO ()
 run transformations options = do
   let
-    width = options |> Options.render_width |> fromIntegral
-    height = options |> Options.render_height |> fromIntegral
+    width = options ^. render_width |> fromIntegral
+    height = options ^. render_height |> fromIntegral
     position = (10, 10)
     window = (Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
-    samples = options |> Options.samples |> fromIntegral
-    paralellism = options |> Options.paralellism |> fromIntegral
+    samples = options ^. samples |> fromIntegral
+    paralellism = options ^. paralellism |> fromIntegral
     n_points_per_thread = samples `div` paralellism
 
   random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism)
@@ -74,10 +82,10 @@ run transformations options = do
 
 
 handleInput :: Event -> SimState -> IO SimState
-handleInput event state@SimState{input} = do
+handleInput event state@SimState{_input} = do
   -- putStrLn (show event)
   let
-    input' = handleInput' event input
+    input' = handleInput' event _input
 
   -- putStrLn (show input')
 
@@ -90,25 +98,25 @@ handleInput' :: Event -> Input -> Input
 handleInput' event input =
   case (event, input) of
     (EventKey (MouseButton LeftButton) Up _ _, _) ->
-      input{dragging = Nothing}
+      input{_dragging = Nothing}
     (EventKey (MouseButton LeftButton) Down _ pos, _) ->
-      input{dragging = Just pos, tx = 0, ty = 0}
-    (EventMotion (_x, _y), Input{dragging = Nothing}) ->
+      input{_dragging = Just pos, _tx = 0, _ty = 0}
+    (EventMotion (_x, _y), Input{_dragging = Nothing}) ->
       input
-    (EventMotion (x, y), Input{dragging = Just (x0, y0), tx, ty}) ->
-      input{dragging = Just (x, y)
-           , tx = tx + x'
-           , ty = ty + y'
+    (EventMotion (x, y), Input{_dragging = Just (x0, y0), tx, ty}) ->
+      input{_dragging = Just (x, y)
+           , _tx = tx + x'
+           , _ty = ty + y'
            }
       where
         x' = x - x0
         y' = y - y0
     (EventKey (MouseButton WheelUp) _ _ _, _) ->
-      input{zooming = Just ZoomIn}
+      input{_zooming = Just ZoomIn}
     (EventKey (MouseButton WheelDown) _ _ _, _) ->
-      input{zooming = Just ZoomOut}
+      input{_zooming = Just ZoomOut}
     (EventKey (Char 's') Down _ _, Input{}) ->
-      input{saveScreenshot = True}
+      input{_saveScreenshot = True}
     _ ->
       input
 
@@ -125,22 +133,31 @@ applyInput input sim_state = do
     shouldUpdate sim_state = sim_state{should_update = True}
 
 applyDragging :: SimState -> SimState
-applyDragging sim_state@SimState{input = input@Input{tx, ty}, camera, dimensions = (screen_width, screen_height)} =
+applyDragging sim_state@SimState{_input = input@Input{_tx, _ty}, _camera, _dimensions = (screen_width, screen_height)} =
     sim_state
-    { camera = Lib.Camera.translateCamera unit_x unit_y camera
-    , input = input{ tx = 0, ty = 0}
+    { _camera = Lib.Camera.translateCamera unit_x unit_y camera
+    , _input = input{ _tx = 0, _ty = 0}
     }
   where
     unit_x = tx / (fromIntegral screen_width)
     unit_y = -ty / (fromIntegral screen_height)
 
 applyZooming :: SimState -> SimState
-applyZooming sim_state@SimState{input = Input{zooming = Nothing}} =
+-- applyZooming sim_state@SimState{input = Input{zooming = Nothing}} =
+--   sim_state
+-- applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomIn}, camera} =
+--   sim_state{camera = Lib.Camera.scaleCamera 1.025 camera, input = input{zooming = Nothing}}
+-- applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomOut}, camera} =
+--   sim_state{camera = Lib.Camera.scaleCamera 0.975 camera, input = input{zooming = Nothing}}
+applyZooming sim_state =
   sim_state
-applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomIn}, camera} =
-  sim_state{camera = Lib.Camera.scaleCamera 1.025 camera, input = input{zooming = Nothing}}
-applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomOut}, camera} =
-  sim_state{camera = Lib.Camera.scaleCamera 0.975 camera, input = input{zooming = Nothing}}
+  |> over camera maybeZoomCam
+  where
+    maybeZoomCam cam =
+      case sim_state^.input.zooming of
+        Nothing       -> id cam
+        Just ZoomIn   -> Lib.Camera.scaleCamera 1.025 cam
+        Just ZoomOut  -> Lib.Camera.scaleCamera 0.975 cam
 
 
 maybeScreenshot :: SimState -> IO SimState
@@ -208,31 +225,31 @@ renderSimState SimState{point_cloud, dimensions, camera} =
 initialSimState :: [IFSTransformation] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
 initialSimState transformations_list options random_matrix =
   SimState
-  { picture = Accelerate.fromList (Z :. 0 :. 0) []
-  , should_update = True
-  , point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism (Accelerate.use random_matrix)
-  , dimensions = (picture_width, picture_height)
-  , camera = Lib.Camera.defaultCamera
-  , input = initialInput
+  { _picture = Accelerate.fromList (Z :. 0 :. 0) []
+  , _should_update = True
+  , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism (Accelerate.use random_matrix)
+  , _dimensions = (picture_width, picture_height)
+  , _camera = Lib.Camera.defaultCamera
+  , _input = initialInput
   }
   where
-    seed = options |> Options.seed
-    samples = options |> Options.samples |> fromIntegral
-    paralellism = options |> Options.paralellism |> fromIntegral
+    seed' = options ^. seed
+    samples' = options ^. samples |> fromIntegral
+    paralellism' = options ^. paralellism |> fromIntegral
     n_points_per_thread = samples `div` paralellism
-    picture_width = options |> Options.render_width |> fromIntegral
-    picture_height = options |> Options.render_height |> fromIntegral
+    picture_width = options ^. render_width |> fromIntegral
+    picture_height = options ^. render_height |> fromIntegral
 
     transformations = buildTransformations transformations_list
 
 initialInput :: Input
 initialInput =
   Input
-  { dragging = Nothing
-  , zooming = Nothing
-  , tx = 0
-  , ty = 0
-  , saveScreenshot = False
+  { _dragging = Nothing
+  , _zooming = Nothing
+  , _tx = 0
+  , _ty = 0
+  , _saveScreenshot = False
   }
 
 buildTransformations :: [IFSTransformation] -> Accelerate.Acc IFS

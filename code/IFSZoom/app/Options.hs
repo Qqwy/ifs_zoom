@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Options
   ( parseCommandLineOptions
   , commandLineOptionsWithHelp 
@@ -7,17 +9,20 @@ module Options
 
 import Options.Applicative
 import Data.Semigroup ((<>))
-
 import Data.Word
 
+import Lens.Micro.Platform
+
 data CLIOptions = CLIOptions
-  { samples :: Word64
-  , paralellism :: Word64
-  , seed :: Word64
-  , render_width :: Word
-  , render_height :: Word
+  { _samples :: Word64
+  , _paralellism :: Word64
+  , _seed :: Word64
+  , _render_width :: Word
+  , _render_height :: Word
   }
   deriving (Show)
+
+makeLenses ''CLIOptions
 
 parseCommandLineOptions :: IO CLIOptions
 parseCommandLineOptions = execParser commandLineOptionsWithHelp

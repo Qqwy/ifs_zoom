@@ -39,6 +39,7 @@ library
 
   build-depends:
         base                        >= 4.7 && < 5
+      , microlens-platform
       , accelerate                  >= 1.0
       , colour-accelerate
       , linear
@@ -56,6 +57,7 @@ executable IFSZoom-exe
   build-depends:
         base
       , IFSZoom
+      , microlens-platform
       , random
       , accelerate
       , accelerate-io
