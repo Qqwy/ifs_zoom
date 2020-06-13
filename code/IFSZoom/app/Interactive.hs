@@ -96,26 +96,25 @@ handleInput event sim_state = do
 
 handleInput' :: Event -> Input -> Input
 handleInput' event input =
-  case (event, input) of
-    (EventKey (MouseButton LeftButton) Up _ _, _) ->
+  case event of
+    EventKey (MouseButton LeftButton) Up _ _ ->
       input{_dragging = Nothing}
-    (EventKey (MouseButton LeftButton) Down _ pos, _) ->
+    EventKey (MouseButton LeftButton) Down _ pos ->
       input{_dragging = Just pos, _tx = 0, _ty = 0}
-    (EventMotion (_x, _y), Input{_dragging = Nothing}) ->
-      input
-    (EventMotion (x, y), Input{_dragging = Just (x0, y0), _tx, _ty}) ->
-      input{_dragging = Just (x, y)
-           , _tx = _tx + x'
-           , _ty = _ty + y'
-           }
-      where
-        x' = x - x0
-        y' = y - y0
-    (EventKey (MouseButton WheelUp) _ _ _, _) ->
+    EventMotion (x, y) ->
+      case input ^. dragging of
+        Nothing ->
+          input
+        Just (x0, y0) ->
+          input
+          |> set dragging (Just (x, y))
+          |> tx +~ (x - x0)
+          |> ty +~ (y - y0)
+    EventKey (MouseButton WheelUp) _ _ _ ->
       input{_zooming = Just ZoomIn}
-    (EventKey (MouseButton WheelDown) _ _ _, _) ->
+    EventKey (MouseButton WheelDown) _ _ _ ->
       input{_zooming = Just ZoomOut}
-    (EventKey (Char 's') Down _ _, Input{}) ->
+    EventKey (Char 's') Down _ _ ->
       input{_saveScreenshot = True}
     _ ->
       input
@@ -150,14 +149,17 @@ applyZooming :: SimState -> SimState
 -- applyZooming sim_state@SimState{input = input@Input{zooming = Just ZoomOut}, camera} =
 --   sim_state{camera = Lib.Camera.scaleCamera 0.975 camera, input = input{zooming = Nothing}}
 applyZooming sim_state =
-  sim_state
-  |> over camera maybeZoomCam
-  where
-    maybeZoomCam cam =
-      case sim_state^.input.zooming of
-        Nothing       -> id cam
-        Just ZoomIn   -> Lib.Camera.scaleCamera 1.025 cam
-        Just ZoomOut  -> Lib.Camera.scaleCamera 0.975 cam
+  case sim_state^.input.zooming of
+    Nothing ->
+      sim_state
+    Just ZoomIn ->
+      sim_state
+      |> over camera (Lib.Camera.scaleCamera 1.025)
+      |> set (input.zooming) Nothing
+    Just ZoomOut ->
+      sim_state
+      |> over camera (Lib.Camera.scaleCamera 0.975)
+      |> set (input.zooming) Nothing
 
 
 maybeScreenshot :: SimState -> IO SimState
