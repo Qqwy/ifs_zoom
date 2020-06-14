@@ -35,6 +35,7 @@ library
     , Lib.Picture
     , Lib.Random
     , Lib.Sort
+    , Lib.BinarySearchTree
     , Helper
 
   build-depends:
