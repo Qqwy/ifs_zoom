@@ -27,7 +27,7 @@ library
 
   exposed-modules:
       Lib
-    , Pipe
+    , Lib.BinarySearchTree
     , Lib.Camera
     , Lib.ChaosGame
     , Lib.Common
@@ -36,6 +36,7 @@ library
     , Lib.Random
     , Lib.Sort
     , Helper
+    , Pipe
 
   build-depends:
         base                        >= 4.7 && < 5
