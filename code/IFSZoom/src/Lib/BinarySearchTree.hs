@@ -4,11 +4,14 @@ module Lib.BinarySearchTree
   ( BinarySearchTree
   , binarySearchTree
   , oneBSTLayer
+  , traverseBST
+  , inspectNodes
   ) where
 
 import Pipe
 import qualified Prelude as P
 import Data.Array.Accelerate
+import Data.Array.Accelerate.Data.Either
 
 import Lib.Common
 
@@ -77,3 +80,32 @@ oneBSTLayer prev_layer =
       in
         lift (min l1 l2, max h1 h2)
 
+traverseBST :: Acc BinarySearchTree -> Acc (Vector Int, Vector Int)
+traverseBST bst =
+  awhile nodesToBeVisited (inspectNodes bst) (use (initial_work, initial_finished))
+  where
+    initial_finished = fromList (Z :. 0) []
+    initial_work = fromList (Z :. 1) [0]
+    nodesToBeVisited :: (Acc (Vector Int, Vector Int)) -> Acc (Scalar Bool)
+    nodesToBeVisited input =
+      let
+        work = input |> unlift |> afst :: Acc (Vector Int)
+      in
+      unit (size work > (constant 0))
+
+inspectNodes :: Acc BinarySearchTree -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
+inspectNodes bst (unlift -> (prev_work, prev_finished)) =
+    lift (next_work, prev_finished ++ next_finished)
+  where
+    nodes' = prev_work |> map inspectNode :: Acc (Vector (Either Int Int))
+    next_work = nodes' |> rights |> afst :: Acc (Vector Int)
+    next_finished = nodes' |> lefts |> afst :: Acc (Vector Int)
+    inspectNode :: Exp Int -> Exp (Either Int Int)
+    inspectNode node =
+      if True then
+        -- visit children
+        -- TODO currently only visits single child
+        right (node * 2)
+      else
+        -- No more visiting necessary
+        left 0
