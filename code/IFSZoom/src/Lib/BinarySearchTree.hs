@@ -2,12 +2,15 @@
 
 module Lib.BinarySearchTree
   ( BinarySearchTree
+  , Bounds
   , binarySearchTree
   , oneBSTLayer
   , traverseBST
   , inspectNodes
   , parentsToChildren
   , depth
+  , numChildren
+  , log2
   ) where
 
 import Pipe
@@ -45,14 +48,14 @@ type BSTIndex = Int
 --
 -- In general, children of a node at index `i` àre at indexes `i*2` and `i*2+1`.
 binarySearchTree :: Int -> Acc (Vector Point) -> Acc BinarySearchTree
-binarySearchTree depth points =
+binarySearchTree bst_depth points =
   applications
   where
     applications =
       points
       |> firstBSTLayer
       |> P.iterate oneBSTLayer
-      |> P.take depth
+      |> P.take bst_depth
       |> P.tail
       |> P.foldl1 (\lower upper -> upper ++ lower)
 
@@ -92,13 +95,13 @@ oneBSTLayer prev_layer =
 -- - BST nodes smaller than a pixel don't need further expansion
 --
 -- TODO currently returns a datatype that is not the final thing.
-traverseBST :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> Acc (Vector Int, Vector Int)
-traverseBST camera_bounds bst =
+traverseBST :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> Acc (Vector Point) -> Acc (Vector Int, Vector Int)
+traverseBST (the -> camera_bounds) bst points =
   -- Implementation:
   -- Loop over `(work, result)`
   -- at every step accumulating more in `result`
   -- and mapping values in `work` to their children.
-  awhile nodesToBeVisited (inspectNodes camera_bounds bst) (use (initial_work, initial_result))
+  awhile nodesToBeVisited (inspectNodes camera_bounds bst points) (use (initial_work, initial_result))
   where
     initial_result = fromList (Z :. 0) []
     initial_work = fromList (Z :. 1) [0]
@@ -109,35 +112,82 @@ traverseBST camera_bounds bst =
       in
       unit (size work > (constant 0))
 
-inspectNodes :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
-inspectNodes camera_bounds bst (unlift -> (prev_work, prev_result)) =
+inspectNodes :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
+inspectNodes camera_bounds bst points (unlift -> (prev_work, prev_result)) =
     lift (next_work, prev_result ++ next_result)
   where
-    nodes' = prev_work |> map inspectNode :: Acc (Vector (Either Int BSTIndex))
-    next_work = nodes' |> rights |> afst |> parentsToChildren :: Acc (Vector Int)
+    nodes' = prev_work |> map (inspectNode camera_bounds bst points) :: Acc (Vector (Either BSTIndex BSTIndex))
+    next_work = nodes' |> rights |> afst |> filterUnimportantNodes |> parentsToChildren  :: Acc (Vector Int)
     next_result = nodes' |> lefts |> afst :: Acc (Vector Int)
-    inspectNode :: Exp Int -> Exp (Either Int BSTIndex)
-    inspectNode node =
-      if True then
-        -- visit children
-        right node
-      else
-        -- No more visiting necessary
-        -- return amount of points contained in node
-        left 0
+    filterUnimportantNodes :: Acc (Vector BSTIndex) -> Acc (Vector BSTIndex)
+    filterUnimportantNodes nodes = nodes |> filter (> 0) |> afst
+
+-- | checks if a node is in bounds.
+--
+-- returns:
+-- `Left 0` if the node is out of bounds. This node can be completely filtered without affecting the rsesult.
+-- `Left num` (where `num` is positive) if there is no need to iterate deeper (because we've reached a single point or (TODO) possibly are smaller than individual pixels).
+-- `Right idx` if the node is in bounds and we need to look at its children.
+inspectNode :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> Exp Int -> Exp (Either BSTIndex BSTIndex)
+inspectNode camera_bounds bst points node_index =
+  cond (nodeIsInBounds camera_bounds node) (
+    cond (isPoint node) (
+      left node_index
+    )(
+      right node_index
+    )
+  )(
+      left (0)
+   )
+  -- cond (not (isPoint node) && nodeIsInBounds camera_bounds node) (
+  --   -- visit children
+  --   right node_index
+  -- ) (
+  --   -- No more visiting necessary
+  --   -- return amount of points contained in node
+  --   -- TODO does not strip 'discardable' points
+  --   left node_index
+  -- )
+  where
+    isPoint node = fst node == snd node
+    node =
+      cond (node_index < (size bst))
+      (
+        -- Internal node
+        bst !! node_index
+      )(
+       -- leaf node, return single point as 'BST node'.
+        points
+        |> (!! (node_index - (size bst)))
+        |> (\point -> lift (point, point))
+       )
+
+nodeIsInBounds :: Exp Bounds -> Exp Bounds -> Exp Bool
+nodeIsInBounds camera_bounds bounds =
+  let
+    ((clx, cly), (chx, chy)) = unliftBound camera_bounds :: ((Exp Float, Exp Float), (Exp Float, Exp Float))
+    ((blx, bly), (bhx, bhy)) = unliftBound bounds :: ((Exp Float, Exp Float), (Exp Float, Exp Float))
+  in
+    (blx <= chx && clx <= bhx)
+    &&
+    (bly <= chy && cly <= bhy)
+
+unliftBound :: Exp Bounds -> ((Exp Float, Exp Float), (Exp Float, Exp Float))
+unliftBound (unlift -> (p1, p2)) = (unliftPoint p1, unliftPoint p2)
+
 
 -- | Maps parent-indices
 -- to their children
 --
 -- for every `i` in the input array
--- the output array will contain the subsequent elements `i*2, i*2+1`
+-- the output array will contain the consecutive elements `i*2, i*2+1`
 --
 -- ## Examples
 --
 -- >>> import qualified Data.Array.Accelerate.LLVM.Native as CPU
--- >>> arr = use $ fromList (Z :. 10) ([0, 3..]) :: Acc (Vector Int)
+-- >>> arr = use $ fromList (Z :. 5) ([0, 3..]) :: Acc (Vector Int)
 -- >>> CPU.run $ Lib.BinarySearchTree.parentsToChildren arr
--- Vector (Z :. 10) []
+-- Vector (Z :. 10) [1, 2, 7, 8, 13, 14, 19, 20, 25, 26]
 parentsToChildren :: Acc (Vector BSTIndex) -> Acc (Vector BSTIndex)
 parentsToChildren nodes =
   nodes
@@ -152,14 +202,33 @@ parentsToChildren nodes =
       in
         cond (child == 0) (val * 2 + 1) (val * 2 + 2)
 
--- | Returns the depth of a Binary Search Tree
+-- | Returns the depth of a particular Binary Search Tree
 depth :: Acc BinarySearchTree -> Exp Int
 depth bst =
   bst
   |> size
-  |> fromIntegral
   |> log2
-  |> ceiling
   where
-    log2 :: Exp Double -> Exp Double
-    log2 num = logBase (constant 2) num
+
+-- | Helper function calculating the _floored_ base-2 logarithm on integer inputs.
+log2 :: Exp Int -> Exp Int
+log2 num =
+  num
+  |> fromIntegral
+  |> (logBase (constant 2) :: Exp Float -> Exp Float)
+  |> floor
+
+-- | the number of points contained in a node at a particular `node_index`.
+--
+-- When `node_index` is larger than the BST size,
+-- it will return `1`, assuming that an index for a single point (a 'leaf node') was passed.
+numChildren :: Acc BinarySearchTree -> Exp Int -> Exp Int
+numChildren bst node_index =
+  cond (node_index > (size bst))
+  (
+    1
+  ) (
+    2^node_height
+  )
+  where
+    node_height = log2 ((size bst) - node_index) + 1

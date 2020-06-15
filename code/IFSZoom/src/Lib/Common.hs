@@ -22,6 +22,7 @@ module Lib.Common
   , homogeneousToPoint
   , transformationProbabilityFromSixtuplePair
   , transformationFromSixtuple
+  , unliftPoint
   ) where
 
 import Data.Array.Accelerate
@@ -44,10 +45,10 @@ type HomogeneousPoint = V3 Float
 type RNGVal = Word64
 
 pointToHomogeneous :: Exp Point -> Exp HomogeneousPoint
-pointToHomogeneous (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
+pointToHomogeneous (unliftPoint -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
 
 homogeneousToPoint :: Exp HomogeneousPoint -> Exp Point
-homogeneousToPoint (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
+homogeneousToPoint (unlift -> V3 x y _) = liftPoint (x, y)
 
 transformationProbabilityFromSixtuplePair :: Exp ((Float, Float, Float, Float, Float, Float), Probability) -> Exp (Transformation, Probability)
 transformationProbabilityFromSixtuplePair (unlift -> (sixtuple, p)) =
@@ -63,3 +64,13 @@ transformationFromSixtuple sixtuple =
                  (V3 0 0 1))
   in
     lift matrix
+
+-- | Common unlifting function with restricted type
+--
+-- helps Haskell's typechecking
+-- (so we do not have to give as many explicit type signatures)
+unliftPoint :: Exp Point -> (Exp Float, Exp Float)
+unliftPoint = unlift
+
+liftPoint :: (Exp Float, Exp Float) -> Exp Point
+liftPoint = lift
