@@ -9,7 +9,7 @@ module Lib.BinarySearchTree
   , inspectNodes
   , parentsToChildren
   , depth
-  , numChildren
+  , numContainedPoints
   , log2
   ) where
 
@@ -94,14 +94,16 @@ oneBSTLayer prev_layer =
 -- - points outside the viewport are discarded early
 -- - BST nodes smaller than a pixel don't need further expansion
 --
--- TODO currently returns a datatype that is not the final thing.
-traverseBST :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> Acc (Vector Point) -> Acc (Vector Int, Vector Int)
+traverseBST :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> Acc (Vector Point) -> Acc (Vector (Point, Int))
 traverseBST (the -> camera_bounds) bst points =
   -- Implementation:
   -- Loop over `(work, result)`
   -- at every step accumulating more in `result`
   -- and mapping values in `work` to their children.
-  awhile nodesToBeVisited (inspectNodes camera_bounds bst points) (use (initial_work, initial_result))
+  (use (initial_work, initial_result))
+  |> awhile nodesToBeVisited (inspectNodes camera_bounds bst points)
+  |> asnd
+  |> map finalTransform
   where
     initial_result = fromList (Z :. 0) []
     initial_work = fromList (Z :. 1) [0]
@@ -111,14 +113,21 @@ traverseBST (the -> camera_bounds) bst points =
         work = input |> unlift |> afst :: Acc (Vector Int)
       in
       unit (size work > (constant 0))
+    finalTransform :: Exp Int -> Exp (Point, Int)
+    finalTransform node_index =
+      let
+        location = node_index |> lookupNode bst points |> fst -- at this time bounds are always smaller than a pixel so we only need a single point
+        population = numContainedPoints bst node_index
+      in
+        lift (location, population)
 
 inspectNodes :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
 inspectNodes camera_bounds bst points (unlift -> (prev_work, prev_result)) =
     lift (next_work, prev_result ++ next_result)
   where
     nodes' = prev_work |> map (inspectNode camera_bounds bst points) :: Acc (Vector (Either BSTIndex BSTIndex))
-    next_work = nodes' |> rights |> afst |> filterUnimportantNodes |> parentsToChildren  :: Acc (Vector Int)
-    next_result = nodes' |> lefts |> afst :: Acc (Vector Int)
+    next_work = nodes' |> rights |> afst |> parentsToChildren  :: Acc (Vector Int)
+    next_result = nodes' |> lefts |> afst |> filterUnimportantNodes :: Acc (Vector Int)
     filterUnimportantNodes :: Acc (Vector BSTIndex) -> Acc (Vector BSTIndex)
     filterUnimportantNodes nodes = nodes |> filter (> 0) |> afst
 
@@ -126,7 +135,7 @@ inspectNodes camera_bounds bst points (unlift -> (prev_work, prev_result)) =
 --
 -- returns:
 -- `Left 0` if the node is out of bounds. This node can be completely filtered without affecting the rsesult.
--- `Left num` (where `num` is positive) if there is no need to iterate deeper (because we've reached a single point or (TODO) possibly are smaller than individual pixels).
+-- `Left idx` (where `idx` is positive) if there is no need to iterate deeper (because we've reached a single point or (TODO) possibly are smaller than individual pixels).
 -- `Right idx` if the node is in bounds and we need to look at its children.
 inspectNode :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> Exp Int -> Exp (Either BSTIndex BSTIndex)
 inspectNode camera_bounds bst points node_index =
@@ -149,8 +158,11 @@ inspectNode camera_bounds bst points node_index =
   --   left node_index
   -- )
   where
+    node = lookupNode bst points node_index
     isPoint node = fst node == snd node
-    node =
+
+lookupNode :: Acc BinarySearchTree -> Acc (Vector Point) -> Exp Int -> Exp Bounds
+lookupNode bst points node_index =
       cond (node_index < (size bst))
       (
         -- Internal node
@@ -222,9 +234,9 @@ log2 num =
 --
 -- When `node_index` is larger than the BST size,
 -- it will return `1`, assuming that an index for a single point (a 'leaf node') was passed.
-numChildren :: Acc BinarySearchTree -> Exp Int -> Exp Int
-numChildren bst node_index =
-  cond (node_index > (size bst))
+numContainedPoints :: Acc BinarySearchTree -> Exp Int -> Exp Int
+numContainedPoints bst node_index =
+  cond (node_index >= (size bst))
   (
     1
   ) (
