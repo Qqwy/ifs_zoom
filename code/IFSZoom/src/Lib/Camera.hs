@@ -31,6 +31,8 @@ import qualified Lib.Common
 
 import Data.Array.Accelerate.Linear (V3(..), M33)
 import Data.Array.Accelerate.Linear.Matrix ((!*))
+
+import qualified Linear.Matrix
 import Linear.Matrix ((!*!), (!+!), inv33)
 
 -- | A camera is 'just' a 2D affine transformation matrix.
@@ -85,5 +87,12 @@ defaultCamera =
   (((recip 11), 0, 0, -(recip 11), 0.5, 1))
   |> cameraFromSixtuple
 
-bounds :: Camera -> Bounds
+bounds :: Camera -> Lib.Common.Bounds
 bounds camera =
+  (topleft, bottomright)
+  where
+    inverse_camera = inv33 camera
+    V3 tlx tly _ = (V3 0 0 1) |> (\point -> inverse_camera Linear.Matrix.!* point)
+    V3 brx bry _ = (V3 1 1 1) |> (\point -> inverse_camera Linear.Matrix.!* point)
+    topleft = (Prelude.min tlx brx, Prelude.min tly bry)
+    bottomright = (Prelude.max tlx brx, Prelude.max tly bry)

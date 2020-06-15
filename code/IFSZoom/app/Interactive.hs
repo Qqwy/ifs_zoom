@@ -14,7 +14,9 @@ import Options(CLIOptions, HasCLIOptions(..))
 import Lib.Common
 import qualified Lib
 import qualified Lib.ChaosGame
+import qualified Lib.Sort
 import qualified Lib.Camera
+import qualified Lib.BinarySearchTree
 
 import Lens.Micro.Platform
 
@@ -49,6 +51,7 @@ makeLenses ''Input
 data SimState = SimState
   { _picture :: !Lib.RasterPicture
   , _point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
+  , _bst :: Accelerate.Acc Lib.BinarySearchTree.BinarySearchTree
   , _should_update :: Bool
   , _dimensions :: (Word, Word)
   , _camera :: Lib.Camera
@@ -210,19 +213,28 @@ renderSimState sim_state =
 
 initialSimState :: [IFSTransformation] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
 initialSimState transformations_list options random_matrix =
-  SimState
-  { _picture = Accelerate.fromList (Z :. 0 :. 0) []
-  , _should_update = True
-  , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism' (Accelerate.use random_matrix)
-  , _dimensions = (picture_width, picture_height)
-  , _camera = Lib.Camera.defaultCamera
-  , _input = initialInput
-  }
+  let
+    points =
+      random_matrix
+      |> Accelerate.use
+      |> Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism'
+      |> Lib.Sort.sortPoints
+  in
+    SimState
+    { _picture = Accelerate.fromList (Z :. 0 :. 0) []
+    , _should_update = True
+    , _point_cloud = points
+    , _bst = Lib.BinarySearchTree.binarySearchTree depth points -- TODO
+    , _dimensions = (picture_width, picture_height)
+    , _camera = Lib.Camera.defaultCamera
+    , _input = initialInput
+    }
   where
-    seed' = options ^. seed
-    samples' = options ^. samples |> fromIntegral
+    -- seed' = options ^. seed
+    depth = options ^. samples |> fromIntegral
+    samples'' = 2^depth
     paralellism' = options ^. paralellism |> fromIntegral
-    n_points_per_thread = samples' `div` paralellism'
+    n_points_per_thread = samples'' `div` paralellism'
     picture_width = options ^. render_width |> fromIntegral
     picture_height = options ^. render_height |> fromIntegral
     transformations = buildTransformations transformations_list
