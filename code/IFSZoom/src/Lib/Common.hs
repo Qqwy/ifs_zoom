@@ -17,6 +17,7 @@ module Lib.Common
   , IFS
   , Point
   , HomogeneousPoint
+  , Bounds
   , RNGVal
   , pointToHomogeneous
   , homogeneousToPoint
@@ -30,8 +31,10 @@ import Data.Array.Accelerate.Linear (V3(..), M33)
 
 -- | An affine transformation is manipulated in this program as its augmented matrix.
 type Transformation = M33 Float
+
 -- | Type that indicates that we are expecting a float in the [0..1) range.
 type Probability = Float
+
 -- | An Iterated Function System is described by a collection of transformations
 -- with, for the Chaos Game, associated probabilities
 type IFS = Vector (Transformation, Probability)
@@ -40,6 +43,9 @@ type Point = (Float, Float)
 
 -- | A point that we can easily transform using our `Transformation` type.
 type HomogeneousPoint = V3 Float
+
+-- | The top-left and bottom-right bounds of an area, respectively.
+type Bounds = (Point, Point)
 
 -- | A seed or randomly chosen value.
 type RNGVal = Word64

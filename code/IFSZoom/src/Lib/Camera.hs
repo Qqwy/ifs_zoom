@@ -84,3 +84,6 @@ defaultCamera =
   -- (1, 0, 0, 1, 0, 0)
   (((recip 11), 0, 0, -(recip 11), 0.5, 1))
   |> cameraFromSixtuple
+
+bounds :: Camera -> Bounds
+bounds camera =

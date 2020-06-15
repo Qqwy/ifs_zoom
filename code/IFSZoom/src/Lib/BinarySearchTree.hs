@@ -20,10 +20,6 @@ import Data.Array.Accelerate.Data.Either
 
 import Lib.Common
 
-
--- | The top-left and bottom-right bounds of the area, respectively.
-type Bounds = (Point, Point)
-
 -- | A collection of bounds.
 -- This BST is expected to be 2^n elements large,
 -- allowing us to know exactly how many children each element has
