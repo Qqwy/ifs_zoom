@@ -41,15 +41,13 @@ import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 
 
 main :: IO ()
-main = do
-  options <- Options.parseCommandLineOptions
-
-  if ((options^.samples) P.< (options^.paralellism)) then do
-    putStrLn "Error. `samples` should be larger than `paralellism`."
-  else
-    options
-    |> maybeSeedRNG
-    >>= runProgram
+main =
+  -- if ((options^.samples) P.< (options^.paralellism)) then do
+  --   putStrLn "Error. `samples` should be larger than `paralellism`."
+  -- else
+  Options.parseCommandLineOptions
+  >>= maybeSeedRNG
+  >>= runProgram
 
 maybeSeedRNG :: Options.CLIOptions -> IO Options.CLIOptions
 maybeSeedRNG options@(Options.CLIOptions {Options._seed = 0}) = do

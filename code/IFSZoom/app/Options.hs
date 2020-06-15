@@ -44,7 +44,7 @@ commandLineOptions = CLIOptions
     <> metavar "N_SAMPLES"
     <> help "The number of samples or points to generate using the 'chaos game' rendering method."
     <> showDefault
-    <> value 10000
+    <> value 10
   )
 
   <*> option auto

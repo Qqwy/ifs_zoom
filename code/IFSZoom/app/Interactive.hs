@@ -57,6 +57,7 @@ data SimState = SimState
   , _camera :: Lib.Camera
   , _input :: Input
   }
+  deriving (Show)
 
 makeLenses ''SimState
 
@@ -70,9 +71,10 @@ run transformations options = do
     height = options ^. render_height |> fromIntegral
     position = (10, 10)
     window = (Gloss.InWindow "Iterated Function Systems Exploration" (width, height) position)
-    samples' = options ^. samples |> fromIntegral
+    depth = options ^. samples |> fromIntegral
+    samples'' = 2^depth
     paralellism' = options ^. paralellism |> fromIntegral
-    n_points_per_thread = samples' `div` paralellism'
+    n_points_per_thread = samples'' `div` paralellism'
 
   random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism')
 
@@ -94,7 +96,9 @@ handleInput event sim_state = do
   if input' == (sim_state^.input) then
     return sim_state
   else do
-    applyInput input' sim_state
+    res <- applyInput input' sim_state
+    -- putStrLn (show res)
+    return res
 
 handleInput' :: Event -> Input -> Input
 handleInput' event input =
@@ -218,7 +222,7 @@ initialSimState transformations_list options random_matrix =
       random_matrix
       |> Accelerate.use
       |> Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism'
-      |> Lib.Sort.sortPoints
+      -- |> Lib.Sort.sortPoints
   in
     SimState
     { _picture = Accelerate.fromList (Z :. 0 :. 0) []
