@@ -7,6 +7,7 @@ module Lib.BinarySearchTree
   , traverseBST
   , inspectNodes
   , parentsToChildren
+  , depth
   ) where
 
 import Pipe
@@ -29,6 +30,8 @@ type Bounds = (Point, Point)
 -- since those only need half the storage
 -- (the lower and upper bound are the same for a single point)
 type BinarySearchTree = Vector Bounds
+
+type BSTIndex = Int
 
 -- | Builds a binary search tree bottom-up.
 -- Note that this function takes `depth` which is a power of two.
@@ -91,7 +94,7 @@ oneBSTLayer prev_layer =
 -- TODO currently returns a datatype that is not the final thing.
 traverseBST :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> Acc (Vector Int, Vector Int)
 traverseBST camera_bounds bst =
-  -- Implementation: 
+  -- Implementation:
   -- Loop over `(work, result)`
   -- at every step accumulating more in `result`
   -- and mapping values in `work` to their children.
@@ -110,16 +113,17 @@ inspectNodes :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> (Acc (Vector Int,
 inspectNodes camera_bounds bst (unlift -> (prev_work, prev_result)) =
     lift (next_work, prev_result ++ next_result)
   where
-    nodes' = prev_work |> map inspectNode :: Acc (Vector (Either Int Int))
+    nodes' = prev_work |> map inspectNode :: Acc (Vector (Either Int BSTIndex))
     next_work = nodes' |> rights |> afst |> parentsToChildren :: Acc (Vector Int)
     next_result = nodes' |> lefts |> afst :: Acc (Vector Int)
-    inspectNode :: Exp Int -> Exp (Either Int Int)
+    inspectNode :: Exp Int -> Exp (Either Int BSTIndex)
     inspectNode node =
       if True then
         -- visit children
-        right (node * 2)
+        right node
       else
         -- No more visiting necessary
+        -- return amount of points contained in node
         left 0
 
 -- | Maps parent-indices
@@ -127,7 +131,14 @@ inspectNodes camera_bounds bst (unlift -> (prev_work, prev_result)) =
 --
 -- for every `i` in the input array
 -- the output array will contain the subsequent elements `i*2, i*2+1`
-parentsToChildren :: Acc (Vector Int) -> Acc (Vector Int)
+--
+-- ## Examples
+--
+-- >>> import qualified Data.Array.Accelerate.LLVM.Native as CPU
+-- >>> arr = use $ fromList (Z :. 10) ([0, 3..]) :: Acc (Vector Int)
+-- >>> CPU.run $ Lib.BinarySearchTree.parentsToChildren arr
+-- Vector (Z :. 10) []
+parentsToChildren :: Acc (Vector BSTIndex) -> Acc (Vector BSTIndex)
 parentsToChildren nodes =
   nodes
   |> replicate (constant (Z :. All :. (2 :: Int)))
@@ -137,6 +148,18 @@ parentsToChildren nodes =
     parentToChildIndex :: Exp DIM2 -> Exp Int -> Exp Int
     parentToChildIndex (unindex2 -> indexes) val =
       let
-        (index, child) = unlift indexes :: (Exp Int, Exp Int)
+        (_index, child) = unlift indexes :: (Exp Int, Exp Int)
       in
-        cond (child == 0) (val * 2) (val * 2 + 1)
+        cond (child == 0) (val * 2 + 1) (val * 2 + 2)
+
+-- | Returns the depth of a Binary Search Tree
+depth :: Acc BinarySearchTree -> Exp Int
+depth bst =
+  bst
+  |> size
+  |> fromIntegral
+  |> log2
+  |> ceiling
+  where
+    log2 :: Exp Double -> Exp Double
+    log2 num = logBase (constant 2) num
