@@ -6,6 +6,7 @@ module Lib.BinarySearchTree
   , oneBSTLayer
   , traverseBST
   , inspectNodes
+  , parentsToChildren
   ) where
 
 import Pipe
@@ -80,11 +81,23 @@ oneBSTLayer prev_layer =
       in
         lift (min l1 l2, max h1 h2)
 
-traverseBST :: Acc BinarySearchTree -> Acc (Vector Int, Vector Int)
-traverseBST bst =
-  awhile nodesToBeVisited (inspectNodes bst) (use (initial_work, initial_finished))
+-- | Reduces the BST to return only the points that are useful
+-- for the current camera angle
+--
+-- this means:
+-- - points outside the viewport are discarded early
+-- - BST nodes smaller than a pixel don't need further expansion
+--
+-- TODO currently returns a datatype that is not the final thing.
+traverseBST :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> Acc (Vector Int, Vector Int)
+traverseBST camera_bounds bst =
+  -- Implementation: 
+  -- Loop over `(work, result)`
+  -- at every step accumulating more in `result`
+  -- and mapping values in `work` to their children.
+  awhile nodesToBeVisited (inspectNodes camera_bounds bst) (use (initial_work, initial_result))
   where
-    initial_finished = fromList (Z :. 0) []
+    initial_result = fromList (Z :. 0) []
     initial_work = fromList (Z :. 1) [0]
     nodesToBeVisited :: (Acc (Vector Int, Vector Int)) -> Acc (Scalar Bool)
     nodesToBeVisited input =
@@ -93,19 +106,37 @@ traverseBST bst =
       in
       unit (size work > (constant 0))
 
-inspectNodes :: Acc BinarySearchTree -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
-inspectNodes bst (unlift -> (prev_work, prev_finished)) =
-    lift (next_work, prev_finished ++ next_finished)
+inspectNodes :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
+inspectNodes camera_bounds bst (unlift -> (prev_work, prev_result)) =
+    lift (next_work, prev_result ++ next_result)
   where
     nodes' = prev_work |> map inspectNode :: Acc (Vector (Either Int Int))
-    next_work = nodes' |> rights |> afst :: Acc (Vector Int)
-    next_finished = nodes' |> lefts |> afst :: Acc (Vector Int)
+    next_work = nodes' |> rights |> afst |> parentsToChildren :: Acc (Vector Int)
+    next_result = nodes' |> lefts |> afst :: Acc (Vector Int)
     inspectNode :: Exp Int -> Exp (Either Int Int)
     inspectNode node =
       if True then
         -- visit children
-        -- TODO currently only visits single child
         right (node * 2)
       else
         -- No more visiting necessary
         left 0
+
+-- | Maps parent-indices
+-- to their children
+--
+-- for every `i` in the input array
+-- the output array will contain the subsequent elements `i*2, i*2+1`
+parentsToChildren :: Acc (Vector Int) -> Acc (Vector Int)
+parentsToChildren nodes =
+  nodes
+  |> replicate (constant (Z :. All :. (2 :: Int)))
+  |> imap parentToChildIndex
+  |> flatten
+  where
+    parentToChildIndex :: Exp DIM2 -> Exp Int -> Exp Int
+    parentToChildIndex (unindex2 -> indexes) val =
+      let
+        (index, child) = unlift indexes :: (Exp Int, Exp Int)
+      in
+        cond (child == 0) (val * 2) (val * 2 + 1)
