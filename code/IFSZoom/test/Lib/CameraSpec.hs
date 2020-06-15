@@ -19,29 +19,27 @@ spec = do
         let
           camera =
            (camera_tuple :: (Float, Float, Float, Float, Float, Float))
-           |> lift
            |> Lib.Camera.cameraFromSixtuple
           res =
             camera
             |> Lib.Camera.scaleCamera 1
         in
-          (runE res) Prelude.== (runE camera)
+          (res) Prelude.== camera
     it "can zoom in and then back out" $ do
       property $ \camera_tuple zoom_scale ->
         let
           camera =
            (camera_tuple :: (Float, Float, Float, Float, Float, Float))
-           |> lift
            |> Lib.Camera.cameraFromSixtuple
           res =
             camera
-            |> Lib.Camera.scaleCamera (constant zoom_scale)
-            |> Lib.Camera.scaleCamera (recip (constant zoom_scale))
+            |> Lib.Camera.scaleCamera zoom_scale
+            |> Lib.Camera.scaleCamera (recip zoom_scale)
         in
           zoom_scale Prelude./= 0
           ==>
           -- Check for 'subjective' floating-point 'equality'.
-          Linear.Epsilon.nearZero ((runE res) Prelude.- (runE camera))
+          Linear.Epsilon.nearZero ((res) Prelude.- (camera))
 
   describe"Lib.Camera.translateCamera" $ do
     it "the identity-camera translates (0, 0) exactly where we want it" $ do
@@ -49,14 +47,13 @@ spec = do
         let
           camera =
             ((1,0,0,1,0,0) :: (Float, Float, Float, Float, Float, Float))
-            |> lift
             |> Lib.Camera.cameraFromSixtuple
-            |> Lib.Camera.translateCamera (constant horizontal) (constant vertical)
+            |> Lib.Camera.translateCamera horizontal vertical
           res =
             ((0, 0) :: (Float, Float))
             |> lift
             |> Lib.Common.pointToHomogeneous
-            |> Lib.Camera.cameraTransform camera
+            |> Lib.Camera.cameraTransform (lift camera)
             |> Lib.Common.homogeneousToPoint
           in
           (runE res) Prelude.== (horizontal, vertical)

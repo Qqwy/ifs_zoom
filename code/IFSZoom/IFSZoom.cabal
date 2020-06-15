@@ -45,6 +45,7 @@ library
       , colour-accelerate
       , linear
       , linear-accelerate
+      , Glob == 0.10.*
 
 executable IFSZoom-exe
   default-language:     Haskell2010
