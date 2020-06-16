@@ -96,13 +96,14 @@ traverseBST camera_bounds bst points =
   -- Loop over `(work, result)`
   -- at every step accumulating more in `result`
   -- and mapping values in `work` to their children.
-  (use (initial_work, initial_result))
-  |> awhile nodesToBeVisited (inspectNodes camera_bounds bst points)
-  |> asnd
-  |> map finalTransform
+  points |> map (\point -> lift (point, (1 :: Int)))
+  -- (use (initial_work, initial_result))
+  -- |> awhile nodesToBeVisited (inspectNodes camera_bounds bst points)
+  -- |> asnd
+  -- |> map finalTransform
   where
-    initial_result = fromList (Z :. 0) []
-    initial_work = fromList (Z :. 1) [0]
+    -- initial_result = fromList (Z :. 0) []
+    -- initial_work = fromList (Z :. 1) [0]
     nodesToBeVisited :: (Acc (Vector Int, Vector Int)) -> Acc (Scalar Bool)
     nodesToBeVisited input =
       let

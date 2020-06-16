@@ -187,7 +187,7 @@ updateSimState _time_elapsed sim_state =
           |> set picture (renderSimState sim_state)
           |> set should_update False
 
-      putStrLn (show (sim_state^.camera))
+      -- putStrLn (show (sim_state^.camera))
 
       return new_sim_state
 
