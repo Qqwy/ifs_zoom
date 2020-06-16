@@ -12,6 +12,7 @@
 
 module Lib
   ( naivePointCloudToPicture
+  , pointCloudToPicture
   , Lib.Camera.Camera
   , Lib.Picture.RasterPicture
   -- binarySearch,
@@ -31,6 +32,7 @@ import Lib.Common
 import qualified Lib.MortonCode
 import qualified Lib.Random
 import qualified Lib.Sort
+import qualified Lib.BinarySearchTree
 import qualified Lib.Camera
 import qualified Lib.Picture
 
@@ -45,6 +47,9 @@ naivePointCloudToPicture :: Acc (Scalar Lib.Camera.Camera) -> Acc (Scalar Int) -
 naivePointCloudToPicture (the ->camera) (the -> width) (the -> height) point_cloud =
   Lib.Picture.naivePointCloudToPicture camera width height point_cloud
 
+pointCloudToPicture :: Lib.Camera.Camera -> Int -> Int -> Acc Lib.BinarySearchTree.BinarySearchTree -> Acc (Vector Point) -> Acc Lib.Picture.RasterPicture
+pointCloudToPicture = Lib.Picture.pointCloudToPicture
+  
 -- |
 -- Main function to run once on the GPU
 -- when the simulation starts

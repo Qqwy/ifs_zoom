@@ -204,16 +204,15 @@ drawSimState sim_state =
 renderSimState :: SimState -> Lib.RasterPicture
 renderSimState sim_state =
   sim_state^.point_cloud
-  |> Lib.naivePointCloudToPicture camera' width height
+  |> Lib.pointCloudToPicture camera' width height bst'
   |> Data.Array.Accelerate.LLVM.PTX.run
   where
     (width, height) =
       sim_state^.dimensions
-      |> over both (\val -> val |> fromIntegral |> Accelerate.unit)
+      |> over both (\val -> val |> fromIntegral)
     camera' =
       sim_state^.camera
-      |> Accelerate.lift
-      |> Accelerate.unit
+    bst' = sim_state^.bst
 
 initialSimState :: [IFSTransformation] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
 initialSimState transformations_list options random_matrix =

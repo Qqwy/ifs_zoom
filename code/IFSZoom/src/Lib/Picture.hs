@@ -52,7 +52,7 @@ pointCloudToPicture camera width height bst point_cloud =
   |> screenToPixels (constant width) (constant height)
   |> pixelsToColours
   where
-    camera_bounds = camera |> Lib.Camera.bounds |> pure |> fromList (Z) |> use
+    camera_bounds = camera |> Lib.Camera.bounds |> constant |> Accelerate.unit
     filterUsefulPoints points = Lib.BinarySearchTree.traverseBST (camera_bounds) bst points
 
 -- | Maps the camera transformation over all points.
