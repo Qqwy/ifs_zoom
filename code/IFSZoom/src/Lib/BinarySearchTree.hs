@@ -90,14 +90,14 @@ oneBSTLayer prev_layer =
 -- - points outside the viewport are discarded early
 -- - BST nodes smaller than a pixel don't need further expansion
 --
-traverseBST :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> Acc (Vector (Point, Int))
-traverseBST camera_bounds bst points =
+traverseBST :: Exp Bounds -> Exp Int -> Exp Int -> Acc BinarySearchTree -> Acc (Vector Point) -> Acc (Vector (Point, Int))
+traverseBST camera_bounds width height bst points =
   -- Implementation:
   -- Loop over `(work, result)`
   -- at every step accumulating more in `result`
   -- and mapping values in `work` to their children.
   (use (initial_work, initial_result))
-  |> awhile nodesToBeVisited (inspectNodes camera_bounds bst points)
+  |> awhile nodesToBeVisited (inspectNodes camera_bounds width height bst points)
   |> asnd
   |> map finalTransform
   where
@@ -117,15 +117,17 @@ traverseBST camera_bounds bst points =
       in
         lift (location, population)
 
-inspectNodes :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
-inspectNodes camera_bounds bst points (unlift -> (prev_work, prev_result)) =
+inspectNodes :: Exp Bounds -> Exp Int -> Exp Int -> Acc BinarySearchTree -> Acc (Vector Point) -> (Acc (Vector Int, Vector Int)) -> (Acc (Vector Int, Vector Int))
+inspectNodes camera_bounds width height bst points (unlift -> (prev_work, prev_result)) =
     lift (next_work, prev_result ++ next_result)
   where
-    nodes' = prev_work |> map (inspectNode camera_bounds bst points) :: Acc (Vector (Either BSTIndex BSTIndex))
+    nodes' = prev_work |> map (inspectNode camera_bounds pixel_width pixel_height bst points) :: Acc (Vector (Either BSTIndex BSTIndex))
     next_work = nodes' |> rights |> afst |> parentsToChildren  :: Acc (Vector Int)
     next_result = nodes' |> lefts |> afst |> filterUnimportantNodes :: Acc (Vector Int)
     filterUnimportantNodes :: Acc (Vector BSTIndex) -> Acc (Vector BSTIndex)
     filterUnimportantNodes nodes = nodes |> filter (> 0) |> afst
+    pixel_width = width |> fromIntegral |> recip
+    pixel_height = height |> fromIntegral |> recip
 
 -- | checks if a node is in bounds.
 --
@@ -133,10 +135,10 @@ inspectNodes camera_bounds bst points (unlift -> (prev_work, prev_result)) =
 -- `Left 0` if the node is out of bounds. This node can be completely filtered without affecting the rsesult.
 -- `Left idx` (where `idx` is positive) if there is no need to iterate deeper (because we've reached a single point or (TODO) possibly are smaller than individual pixels).
 -- `Right idx` if the node is in bounds and we need to look at its children.
-inspectNode :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> Exp Int -> Exp (Either BSTIndex BSTIndex)
-inspectNode camera_bounds bst points node_index =
+inspectNode :: Exp Bounds -> Exp Float -> Exp Float -> Acc BinarySearchTree -> Acc (Vector Point) -> Exp Int -> Exp (Either BSTIndex BSTIndex)
+inspectNode camera_bounds pixel_width pixel_height bst points node_index =
   cond (nodeIsInBounds camera_bounds node) (
-    cond (isPoint node) (
+    cond (isSmall pixel_width pixel_height node) (
       left node_index
     )(
       right node_index
@@ -156,6 +158,13 @@ inspectNode camera_bounds bst points node_index =
   where
     node = lookupNode bst points node_index
     isPoint node = fst node == snd node
+    isSmall pw ph node =
+      let
+        (lx, ly) = unliftPoint (fst node)
+        (hx, hy) = unliftPoint (snd node)
+        (dx, dy) = ((hx - lx), (hy - ly)) :: (Exp Float, Exp Float)
+      in
+        dx < 10*pw && dy < 10*ph
 
 lookupNode :: Acc BinarySearchTree -> Acc (Vector Point) -> Exp Int -> Exp Bounds
 lookupNode bst points node_index =

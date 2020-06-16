@@ -52,7 +52,7 @@ pointCloudToPicture camera camera_bounds width height bst point_cloud =
   |> screenToPixels width height
   |> pixelsToColours
   where
-    filterUsefulPoints points = Lib.BinarySearchTree.traverseBST camera_bounds bst points
+    filterUsefulPoints points = Lib.BinarySearchTree.traverseBST camera_bounds width height bst points
 
 -- | Maps the camera transformation over all points.
 naiveWorldToScreen :: Exp Camera -> Acc (Vector Point) -> Acc (Vector Point)

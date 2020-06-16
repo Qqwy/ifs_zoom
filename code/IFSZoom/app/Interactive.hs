@@ -187,7 +187,7 @@ updateSimState _time_elapsed sim_state =
           |> set picture (renderSimState sim_state)
           |> set should_update False
 
-      putStrLn (show (sim_state^.camera))
+      -- putStrLn (show (sim_state^.camera))
 
       return new_sim_state
 
@@ -226,7 +226,7 @@ initialSimState transformations_list options random_matrix =
       random_matrix
       |> Accelerate.use
       |> Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism'
-      -- |> Lib.Sort.sortPoints
+      |> Lib.Sort.sortPoints
   in
     SimState
     { _picture = Accelerate.fromList (Z :. 0 :. 0) []
