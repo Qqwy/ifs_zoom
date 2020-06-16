@@ -15,12 +15,17 @@ Transforming a point cloud to a rasterized picture, using a camera transformatio
 module Lib.Picture
   ( RasterPicture
   , naivePointCloudToPicture
+  , pointCloudToPicture
   ) where
 
 import Pipe
 import Lib.Common
 import qualified Lib.Camera
+import qualified Lib.BinarySearchTree
 import Lib.Camera (Camera)
+
+import Control.Arrow
+import Control.Applicative
 
 import Data.Array.Accelerate as Accelerate
 import Data.Array.Accelerate.Data.Colour.HSL as HSL
@@ -35,22 +40,43 @@ type RasterPicture = Matrix Word32
 naivePointCloudToPicture :: Exp Camera -> Exp Int -> Exp Int -> Acc (Vector Point) -> Acc RasterPicture
 naivePointCloudToPicture camera width height point_cloud =
   point_cloud
-  |> worldToScreen camera
-  |> screenToPixels width height
+  |> naiveWorldToScreen camera
+  |> naiveScreenToPixels width height
   |> pixelsToColours
 
+pointCloudToPicture :: Camera -> Int -> Int -> Acc Lib.BinarySearchTree.BinarySearchTree -> Acc (Vector Point) -> Acc RasterPicture
+pointCloudToPicture camera width height bst point_cloud =
+  point_cloud
+  |> filterUsefulPoints
+  |> worldToScreen (constant camera)
+  |> screenToPixels (constant width) (constant height)
+  |> pixelsToColours
+  where
+    camera_bounds = camera |> Lib.Camera.bounds |> pure |> fromList (Z) |> use
+    filterUsefulPoints points = Lib.BinarySearchTree.traverseBST (camera_bounds) bst points
+
 -- | Maps the camera transformation over all points.
-worldToScreen :: Exp Camera -> Acc (Vector Point) -> Acc (Vector Point)
-worldToScreen camera point_cloud =
+naiveWorldToScreen :: Exp Camera -> Acc (Vector Point) -> Acc (Vector Point)
+naiveWorldToScreen camera point_cloud =
   point_cloud
   |> Accelerate.map (Lib.Common.pointToHomogeneous)
   |> Accelerate.map (Lib.Camera.cameraTransform camera)
   |> Accelerate.map (Lib.Common.homogeneousToPoint)
 
+worldToScreen :: Exp Camera -> Acc (Vector (Point, Int)) -> Acc (Vector (Point, Int))
+worldToScreen camera point_cloud =
+  point_cloud
+  |> Accelerate.map (unlift' >>> first Lib.Common.pointToHomogeneous >>> lift)
+  |> Accelerate.map (unlift' >>> first (Lib.Camera.cameraTransform camera) >>> lift)
+  |> Accelerate.map (unlift' >>> first Lib.Common.homogeneousToPoint >>> lift)
+  where
+    unlift'  :: Elt a => Exp (a, Int) -> (Exp a, Exp Int)
+    unlift' = unlift
+
 -- | Turns points in screen-space to pixels in a 2D 'histogram' representation
 -- where every pixel counts how many points it contains.
-screenToPixels :: Exp Int -> Exp Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Int)
-screenToPixels width height input = permute (+) zeros (mapping input) (ones input)
+naiveScreenToPixels :: Exp Int -> Exp Int -> Acc (Vector (Float, Float)) -> Acc (Matrix Int)
+naiveScreenToPixels width height input = permute (+) zeros (mapping input) (ones input)
   where
     zeros :: Acc (Matrix Int)
     zeros = fill (index2 height width) 0
@@ -58,6 +84,17 @@ screenToPixels width height input = permute (+) zeros (mapping input) (ones inpu
     ones array = fill (shape array) 1
     mapping :: Acc (Vector (Float, Float)) -> Exp DIM1 -> Exp DIM2
     mapping array index = pointToPixel width height (array ! index)
+
+-- | TODO read actual point density information
+screenToPixels :: Exp Int -> Exp Int -> Acc (Vector (Point, Int)) -> Acc (Matrix Int)
+screenToPixels width height input = permute (+) zeros (mapping input) (ones input)
+  where
+    zeros :: Acc (Matrix Int)
+    zeros = fill (index2 height width) 0
+    ones :: Acc (Vector (Point, Int)) -> Acc (Vector Int)
+    ones array = fill (shape array) 1
+    mapping :: Acc (Vector (Point, Int)) -> Exp DIM1 -> Exp DIM2
+    mapping array index = pointToPixel width height (array ! index |> fst)
 
 -- | Currently a very simple (and not very beautiful) implementation,
 -- where we use 'black' to indicate no points

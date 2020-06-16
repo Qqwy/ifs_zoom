@@ -22,6 +22,7 @@ module Lib.Camera
   , cameraFromSixtuple
   , cameraTransform
   , defaultCamera
+  , bounds
   ) where
 
 import Pipe
