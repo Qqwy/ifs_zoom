@@ -47,8 +47,9 @@ naivePointCloudToPicture :: Acc (Scalar Lib.Camera.Camera) -> Acc (Scalar Int) -
 naivePointCloudToPicture (the ->camera) (the -> width) (the -> height) point_cloud =
   Lib.Picture.naivePointCloudToPicture camera width height point_cloud
 
-pointCloudToPicture :: Lib.Camera.Camera -> Int -> Int -> Acc Lib.BinarySearchTree.BinarySearchTree -> Acc (Vector Point) -> Acc Lib.Picture.RasterPicture
-pointCloudToPicture = Lib.Picture.pointCloudToPicture
+pointCloudToPicture :: Acc (Scalar Lib.Camera.Camera) -> Acc (Scalar Bounds) -> Acc (Scalar Int) -> Acc (Scalar Int) -> Acc Lib.BinarySearchTree.BinarySearchTree -> Acc (Vector Point) -> Acc Lib.Picture.RasterPicture
+pointCloudToPicture (the -> camera) (the -> camera_bounds) (the -> width) (the -> height) bst point_cloud =
+  Lib.Picture.pointCloudToPicture camera camera_bounds width height bst point_cloud
   
 -- |
 -- Main function to run once on the GPU

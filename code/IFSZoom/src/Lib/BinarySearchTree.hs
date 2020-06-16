@@ -90,8 +90,8 @@ oneBSTLayer prev_layer =
 -- - points outside the viewport are discarded early
 -- - BST nodes smaller than a pixel don't need further expansion
 --
-traverseBST :: Acc (Scalar Bounds) -> Acc BinarySearchTree -> Acc (Vector Point) -> Acc (Vector (Point, Int))
-traverseBST (the -> camera_bounds) bst points =
+traverseBST :: Exp Bounds -> Acc BinarySearchTree -> Acc (Vector Point) -> Acc (Vector (Point, Int))
+traverseBST camera_bounds bst points =
   -- Implementation:
   -- Loop over `(work, result)`
   -- at every step accumulating more in `result`

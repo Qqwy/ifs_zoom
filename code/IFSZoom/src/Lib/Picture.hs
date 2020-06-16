@@ -44,16 +44,15 @@ naivePointCloudToPicture camera width height point_cloud =
   |> naiveScreenToPixels width height
   |> pixelsToColours
 
-pointCloudToPicture :: Camera -> Int -> Int -> Acc Lib.BinarySearchTree.BinarySearchTree -> Acc (Vector Point) -> Acc RasterPicture
-pointCloudToPicture camera width height bst point_cloud =
+pointCloudToPicture :: Exp Camera -> Exp Bounds -> Exp Int -> Exp Int -> Acc Lib.BinarySearchTree.BinarySearchTree -> Acc (Vector Point) -> Acc RasterPicture
+pointCloudToPicture camera camera_bounds width height bst point_cloud =
   point_cloud
   |> filterUsefulPoints
-  |> worldToScreen (constant camera)
-  |> screenToPixels (constant width) (constant height)
+  |> worldToScreen camera
+  |> screenToPixels width height
   |> pixelsToColours
   where
-    camera_bounds = camera |> Lib.Camera.bounds |> constant |> Accelerate.unit
-    filterUsefulPoints points = Lib.BinarySearchTree.traverseBST (camera_bounds) bst points
+    filterUsefulPoints points = Lib.BinarySearchTree.traverseBST camera_bounds bst points
 
 -- | Maps the camera transformation over all points.
 naiveWorldToScreen :: Exp Camera -> Acc (Vector Point) -> Acc (Vector Point)

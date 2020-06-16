@@ -16,6 +16,7 @@ import qualified Lib
 import qualified Lib.ChaosGame
 import qualified Lib.Sort
 import qualified Lib.Camera
+import qualified Lib.Picture
 import qualified Lib.BinarySearchTree
 
 import Lens.Micro.Platform
@@ -23,7 +24,7 @@ import Lens.Micro.Platform
 import qualified Graphics.Gloss.Data.Picture
 import qualified Graphics.Gloss.Interface.IO.Game as Gloss
 import qualified Data.Array.Accelerate as Accelerate
-import Data.Array.Accelerate(Z(..), (:.)(..))
+import Data.Array.Accelerate(Z(..), (:.)(..), Acc, Scalar, Vector)
 import Graphics.Gloss.Interface.IO.Game(Event(..), Key(..), MouseButton(..), KeyState(..))
 import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.LLVM.PTX
@@ -50,8 +51,8 @@ makeLenses ''Input
 
 data SimState = SimState
   { _picture :: !Lib.RasterPicture
-  , _point_cloud :: Accelerate.Acc (Accelerate.Vector Point)
-  , _bst :: Accelerate.Acc Lib.BinarySearchTree.BinarySearchTree
+  , _point_cloud :: Accelerate.Vector Point
+  , _bst :: Lib.BinarySearchTree.BinarySearchTree
   , _should_update :: Bool
   , _dimensions :: (Word, Word)
   , _camera :: Lib.Camera
@@ -203,16 +204,20 @@ drawSimState sim_state =
 
 renderSimState :: SimState -> Lib.RasterPicture
 renderSimState sim_state =
-  sim_state^.point_cloud
-  |> Lib.pointCloudToPicture camera' width height bst'
-  |> Data.Array.Accelerate.LLVM.PTX.run
+  -- sim_state^.point_cloud
+  -- |> Lib.pointCloudToPicture camera' camera_bounds width height bst'
+  -- |> Data.Array.Accelerate.LLVM.PTX.run
+  fun camera' camera_bounds width height bst' (sim_state^.point_cloud)
   where
+    fun :: (Scalar Lib.Camera.Camera) -> (Scalar Bounds) -> (Scalar Int) -> (Scalar Int) -> Lib.BinarySearchTree.BinarySearchTree -> (Vector Point) -> Lib.Picture.RasterPicture
+    fun = Data.Array.Accelerate.LLVM.PTX.runN Lib.pointCloudToPicture
     (width, height) =
       sim_state^.dimensions
-      |> over both (\val -> val |> fromIntegral)
+      |> over both (\val -> val |> fromIntegral |> pure |> Accelerate.fromList (Z))
     camera' =
-      sim_state^.camera
-    bst' = sim_state^.bst
+      sim_state^.camera |> pure |> Accelerate.fromList (Z)
+    camera_bounds = Lib.Camera.bounds (sim_state^.camera) |> pure |> Accelerate.fromList (Z)
+    bst' = sim_state^.bst 
 
 initialSimState :: [IFSTransformation] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
 initialSimState transformations_list options random_matrix =
@@ -226,8 +231,8 @@ initialSimState transformations_list options random_matrix =
     SimState
     { _picture = Accelerate.fromList (Z :. 0 :. 0) []
     , _should_update = True
-    , _point_cloud = points
-    , _bst = Lib.BinarySearchTree.binarySearchTree depth points -- TODO
+    , _point_cloud = Data.Array.Accelerate.LLVM.PTX.run points
+    , _bst = Data.Array.Accelerate.LLVM.PTX.run (Lib.BinarySearchTree.binarySearchTree depth points) -- TODO
     , _dimensions = (picture_width, picture_height)
     , _camera = Lib.Camera.defaultCamera
     , _input = initialInput

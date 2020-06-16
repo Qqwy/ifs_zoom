@@ -31,10 +31,10 @@ import Data.Array.Accelerate as Accelerate
 import qualified Lib.Common
 
 import Data.Array.Accelerate.Linear (V3(..), M33)
-import Data.Array.Accelerate.Linear.Matrix ((!*))
+import qualified Data.Array.Accelerate.Linear.Matrix
 
 import qualified Linear.Matrix
-import Linear.Matrix ((!*!), (!+!), inv33)
+-- import Linear.Matrix ((!*!), (!+!), inv33)
 
 -- | A camera is 'just' a 2D affine transformation matrix.
 type Camera = M33 Float
@@ -43,7 +43,7 @@ type Camera = M33 Float
 -- | Transforms a point from world space to screen space.
 -- (Runs on the GPU!)
 cameraTransform :: Exp Camera -> Exp (V3 Float) -> Exp (V3 Float)
-cameraTransform camera point = camera !* point
+cameraTransform camera point = camera Data.Array.Accelerate.Linear.Matrix.!* point
 
 -- | Inverts the transformation the camera makes.
 -- useful for e.g. checking where the picure bounds (screen space) end up in world space.
@@ -53,7 +53,7 @@ cameraTransform camera point = camera !* point
 -- | Scales the camera in equal proportions using the given `scale` float.
 scaleCamera :: Float -> Camera -> Camera
 scaleCamera scale camera =
-  scaleMatrix !*! camera
+  scaleMatrix Linear.Matrix.!*! camera
   where
     scaleMatrix = (V3
                     (V3 scale 0     0)
@@ -64,7 +64,7 @@ scaleCamera scale camera =
 -- | Translates the camera position using the given `horizontal` and `vertical` offsets.
 translateCamera :: Float -> Float -> Camera -> Camera
 translateCamera horizontal vertical camera =
-  translationMatrix !+! camera
+  translationMatrix Linear.Matrix.!+! camera
   where
     translationMatrix = (V3
                           (V3 0 0 horizontal)
@@ -92,8 +92,18 @@ bounds :: Camera -> Lib.Common.Bounds
 bounds camera =
   (topleft, bottomright)
   where
-    inverse_camera = inv33 camera
+    inverse_camera = Linear.Matrix.inv33 camera
     V3 tlx tly _ = (V3 0 0 1) |> (\point -> inverse_camera Linear.Matrix.!* point)
     V3 brx bry _ = (V3 1 1 1) |> (\point -> inverse_camera Linear.Matrix.!* point)
     topleft = (Prelude.min tlx brx, Prelude.min tly bry)
     bottomright = (Prelude.max tlx brx, Prelude.max tly bry)
+
+-- boundsOnGPU :: Exp Camera -> Exp Lib.Common.Bounds
+-- boundsOnGPU camera =
+--   (topleft, bottomright)
+--   where
+--     inverse_camera = Data.Array.Accelerate.Linear.Matrix.inv33 camera
+--     V3 tlx tly _ = (V3 0 0 1) |> constant |> (\point -> inverse_camera Data.Array.Accelerate.Linear.Matrix.!* point) |> lift
+--     V3 brx bry _ = (V3 1 1 1) |> constant |> (\point -> inverse_camera Data.Array.Accelerate.Linear.Matrix.!* point) |> lift
+--     topleft = (min tlx brx, min tly bry)
+--     bottomright = (max tlx brx, max tly bry)
