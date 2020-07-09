@@ -44,3 +44,16 @@ To build this project:
   - Use `stack run` to run the main application binary. 
   - Use `stack ghci` to run an interactive shell in which the modules the binary contains are in scope to test/explore indiual parts.
   - TODO automated testing
+
+## How to run
+
+The program expects an IFS configuration as input on STDIN. Some example files can be found in the `./examples` folder.
+Possible usage is thus:
+
+```
+stack run < ./examples/barnsley.ifs
+# or:
+cat ./examples/barnsley.ifs | stack run
+# or:
+cat ./examples/barnsley.ifs | stack run -- --maybe --some="options"
+```
