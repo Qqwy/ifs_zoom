@@ -24,6 +24,7 @@ import qualified IFSConfig
 import qualified Interactive
 
 import Prelude                                                      as P
+import qualified Data.Text.IO
 import qualified System.Random
 import Lens.Micro.Platform
 
@@ -63,7 +64,8 @@ maybeSeedRNG options = return options
 
 runProgram :: Options.CLIOptions -> IO ()
 runProgram options = do
-  ifsdata <- IFSConfig.read (options^.ifs_filename)
+  stdin <- Data.Text.IO.getContents
+  ifsdata <- IFSConfig.read stdin
   -- let
     -- Barnsley Fern:
     -- transformations =

@@ -74,7 +74,7 @@ run ifsconfig options = do
     samples' = options ^. samples |> fromIntegral
     paralellism' = options ^. paralellism |> fromIntegral
     n_points_per_thread = samples' `div` paralellism'
-    ts = (ifsconfig ^. transformations)
+    ts = (IFSConfig.transformations ifsconfig)
 
   random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism')
 

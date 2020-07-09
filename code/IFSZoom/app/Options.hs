@@ -2,7 +2,7 @@
 
 module Options
   ( parseCommandLineOptions
-  , commandLineOptionsWithHelp 
+  , commandLineOptionsWithHelp
   , commandLineOptions
   , CLIOptions(..)
   , HasCLIOptions(..)
@@ -21,7 +21,7 @@ data CLIOptions = CLIOptions
   , _seed :: Word64
   , _render_width :: Word
   , _render_height :: Word
-  , _ifs_filename :: Text
+  -- , _ifs_filename :: Text
   }
   deriving (Show)
 
@@ -85,9 +85,9 @@ commandLineOptions = CLIOptions
     <> value 800
   )
 
-  <*> option auto
-  (
-    long "ifs_settings_file"
-    <> metavar "IFS_FILENAME"
-    <> help "The path to the file containing the transformations + initial camera transform of the IFS to render."
-  )
+  -- <*> option auto
+  -- (
+  --   long "ifs_settings_file"
+  --   <> metavar "IFS_FILENAME"
+  --   <> help "The path to the file containing the transformations + initial camera transform of the IFS to render."
+  -- )
