@@ -60,6 +60,10 @@ extra-deps:
 - colour-accelerate-0.3.0.0@sha256:968922b620c5ffc4365df2b33e7ff273e6ae77611a7be3db43d8a4d11b4f7fd5,1866
 - gloss-accelerate-2.0.0.1@sha256:526a203bdda7a50f18a8d0004556215083fb576ce1e44d7e15281fdbbff7890c,1288
 - mwc-random-accelerate-0.1.0.0@sha256:2c1a16f145e57d743981f9ee61b55e6fff9717e6fd878769e92e45caeae8fda8,1359
+- dhall-1.33.1@sha256:642dea3b0d9154eafb7967589817048bcd1b2f08cf0df44a8cddf476d032c08a,33324
+- prettyprinter-1.6.2@sha256:d9fa76aebce33c5c179a66128dfb5639e9257325d11c68569c6574dd8e112cde,5459
+- repline-0.4.0.0@sha256:3324479e497d27c40c3d4762bffc52058f9921621d20d2947dcf9a554b94cd0d,2253
+- haskeline-0.8.0.0@sha256:0630452b759a5b40e0e3e7ca2ef4b0d55d5161d95e8d7b0dd3cf55888971437f,5440
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -54,6 +54,7 @@ executable IFSZoom-exe
   other-modules:
       Options
     , Interactive
+    , IFSConfig
 
   build-depends:
         base
@@ -66,6 +67,7 @@ executable IFSZoom-exe
       , gloss
       , optparse-applicative >= 0.14
       , mwc-random-accelerate
+      , dhall >= 1.33
   ghc-options:
       -O2
       -threaded

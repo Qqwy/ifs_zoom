@@ -67,6 +67,34 @@ packages:
       sha256: 05020dd9b338e2038da0d8a51b061c56f25eb6a3421e01d282021b7405da3f9a
   original:
     hackage: mwc-random-accelerate-0.1.0.0@sha256:2c1a16f145e57d743981f9ee61b55e6fff9717e6fd878769e92e45caeae8fda8,1359
+- completed:
+    hackage: dhall-1.33.1@sha256:642dea3b0d9154eafb7967589817048bcd1b2f08cf0df44a8cddf476d032c08a,33324
+    pantry-tree:
+      size: 283503
+      sha256: e5e07c5fa0c75a5098b9470741a0b0c50d484495e1c1e3e38bc262d4123a490f
+  original:
+    hackage: dhall-1.33.1@sha256:642dea3b0d9154eafb7967589817048bcd1b2f08cf0df44a8cddf476d032c08a,33324
+- completed:
+    hackage: prettyprinter-1.6.2@sha256:d9fa76aebce33c5c179a66128dfb5639e9257325d11c68569c6574dd8e112cde,5459
+    pantry-tree:
+      size: 2194
+      sha256: d84bf9b50055f5fff831f48b447737eb41bfff144352b6a0c6dee08b43d04d96
+  original:
+    hackage: prettyprinter-1.6.2@sha256:d9fa76aebce33c5c179a66128dfb5639e9257325d11c68569c6574dd8e112cde,5459
+- completed:
+    hackage: repline-0.4.0.0@sha256:3324479e497d27c40c3d4762bffc52058f9921621d20d2947dcf9a554b94cd0d,2253
+    pantry-tree:
+      size: 564
+      sha256: bff43f9a5b0a212c29c12e2e22b528d9071b2a7d13489ce5bdc54ae9eac853cf
+  original:
+    hackage: repline-0.4.0.0@sha256:3324479e497d27c40c3d4762bffc52058f9921621d20d2947dcf9a554b94cd0d,2253
+- completed:
+    hackage: haskeline-0.8.0.0@sha256:0630452b759a5b40e0e3e7ca2ef4b0d55d5161d95e8d7b0dd3cf55888971437f,5440
+    pantry-tree:
+      size: 3013
+      sha256: 235d9b78cb87e21651fd36421c30ff4e0638e463fac7ec8b70887db06c3ff88f
+  original:
+    hackage: haskeline-0.8.0.0@sha256:0630452b759a5b40e0e3e7ca2ef4b0d55d5161d95e8d7b0dd3cf55888971437f,5440
 snapshots:
 - completed:
     size: 524996
