@@ -11,6 +11,10 @@ import Pipe
 import qualified Options
 import Options(CLIOptions, HasCLIOptions(..))
 
+import qualified IFSConfig
+import IFSConfig(transformations)
+
+
 import Lib.Common
 import qualified Lib
 import qualified Lib.ChaosGame
@@ -60,8 +64,8 @@ makeLenses ''SimState
 type IFSTransformation =
   ((Float, Float, Float, Float, Float, Float), Float)
 
-run :: [IFSTransformation] -> CLIOptions -> IO ()
-run transformations options = do
+run :: IFSConfig.IFS -> CLIOptions -> IO ()
+run ifsconfig options = do
   let
     width = options ^. render_width |> fromIntegral
     height = options ^. render_height |> fromIntegral
@@ -70,6 +74,7 @@ run transformations options = do
     samples' = options ^. samples |> fromIntegral
     paralellism' = options ^. paralellism |> fromIntegral
     n_points_per_thread = samples' `div` paralellism'
+    ts = (ifsconfig ^. transformations)
 
   random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism')
 
@@ -77,11 +82,10 @@ run transformations options = do
     window
     Gloss.black
     20
-    (initialSimState transformations options random_matrix)
+    (initialSimState ts options random_matrix)
     drawSimState
     handleInput
     updateSimState
-
 
 handleInput :: Event -> SimState -> IO SimState
 handleInput event sim_state = do
@@ -208,7 +212,7 @@ renderSimState sim_state =
       |> Accelerate.lift
       |> Accelerate.unit
 
-initialSimState :: [IFSTransformation] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
+initialSimState :: [IFSConfig.TransformationWithProbability] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
 initialSimState transformations_list options random_matrix =
   SimState
   { _picture = Accelerate.fromList (Z :. 0 :. 0) []
@@ -237,9 +241,10 @@ initialInput =
   , _save_screenshot = False
   }
 
-buildTransformations :: [IFSTransformation] -> Accelerate.Acc IFS
+buildTransformations :: [IFSConfig.TransformationWithProbability] -> Accelerate.Acc IFS
 buildTransformations transformations_list =
   transformations_list
+  |> map IFSConfig.transformationWithProbabilityToSixtuplePair
   |> Accelerate.fromList (Z :. (length transformations_list))
   |> Accelerate.use
   |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)

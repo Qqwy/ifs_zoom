@@ -11,6 +11,7 @@ module Options
 import Options.Applicative
 import Data.Semigroup ((<>))
 import Data.Word
+import Data.Text (Text)
 
 import Lens.Micro.Platform
 
@@ -20,6 +21,7 @@ data CLIOptions = CLIOptions
   , _seed :: Word64
   , _render_width :: Word
   , _render_height :: Word
+  , _ifs_filename :: Text
   }
   deriving (Show)
 
@@ -81,4 +83,11 @@ commandLineOptions = CLIOptions
     <> help "The height in pixels of the rendering we are generating."
     <> showDefault
     <> value 800
+  )
+
+  <*> option auto
+  (
+    long "ifs_settings_file"
+    <> metavar "IFS_FILENAME"
+    <> help "The path to the file containing the transformations + initial camera transform of the IFS to render."
   )

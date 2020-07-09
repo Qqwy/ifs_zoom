@@ -68,6 +68,7 @@ executable IFSZoom-exe
       , optparse-applicative >= 0.14
       , mwc-random-accelerate
       , dhall >= 1.33
+      , text
   ghc-options:
       -O2
       -threaded

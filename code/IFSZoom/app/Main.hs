@@ -19,6 +19,8 @@ import qualified Lib.Camera
 import qualified Options
 import Options(CLIOptions, HasCLIOptions(..))
 
+import qualified IFSConfig
+
 import qualified Interactive
 
 import Prelude                                                      as P
@@ -61,18 +63,19 @@ maybeSeedRNG options = return options
 
 runProgram :: Options.CLIOptions -> IO ()
 runProgram options = do
-  let
+  ifsdata <- IFSConfig.read (options^.ifs_filename)
+  -- let
     -- Barnsley Fern:
-    transformations =
-      [ ((0,0,0,0.16,0.0, 0), 0.01)
-      , ((0.85,0.04, -0.04, 0.85,  0, 1.60), 0.85)
-      , ((0.20, -0.26, 0.23, 0.22, 0, 1.60), 0.07)
-      , ((-0.15, 0.28, 0.26, 0.24, 0, 0.44), 0.07)
-      ]
+    -- transformations =
+    --   [ ((0,0,0,0.16,0.0, 0), 0.01)
+    --   , ((0.85,0.04, -0.04, 0.85,  0, 1.60), 0.85)
+    --   , ((0.20, -0.26, 0.23, 0.22, 0, 1.60), 0.07)
+    --   , ((-0.15, 0.28, 0.26, 0.24, 0, 0.44), 0.07)
+    --   ]
     -- Sierpińsky Triangle:
       -- [ ((0.5, 0, 0, 0.5, 0, 0), 1/3)
       -- , ((0.5, 0, 0, 0.5, 0.5, 0), 1/3)
       -- , ((0.5, 0, 0, 0.5, 0.25, (sqrt 3) / 4), 1/3)
       -- ]
 
-  Interactive.run transformations options
+  Interactive.run ifsdata options
