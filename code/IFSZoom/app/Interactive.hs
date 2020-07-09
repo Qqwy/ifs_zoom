@@ -65,7 +65,7 @@ type IFSTransformation =
   ((Float, Float, Float, Float, Float, Float), Float)
 
 run :: IFSConfig.IFS -> CLIOptions -> IO ()
-run ifsconfig options = do
+run ifs_config options = do
   let
     width = options ^. render_width |> fromIntegral
     height = options ^. render_height |> fromIntegral
@@ -74,7 +74,6 @@ run ifsconfig options = do
     samples' = options ^. samples |> fromIntegral
     paralellism' = options ^. paralellism |> fromIntegral
     n_points_per_thread = samples' `div` paralellism'
-    ts = (IFSConfig.transformations ifsconfig)
 
   random_matrix <- Data.Array.Accelerate.System.Random.MWC.randomArray Data.Array.Accelerate.System.Random.MWC.uniform (Z :. n_points_per_thread :. paralellism')
 
@@ -82,7 +81,7 @@ run ifsconfig options = do
     window
     Gloss.black
     20
-    (initialSimState ts options random_matrix)
+    (initialSimState ifs_config options random_matrix)
     drawSimState
     handleInput
     updateSimState
@@ -212,14 +211,14 @@ renderSimState sim_state =
       |> Accelerate.lift
       |> Accelerate.unit
 
-initialSimState :: [IFSConfig.TransformationWithProbability] -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
-initialSimState transformations_list options random_matrix =
+initialSimState :: IFSConfig.IFS -> CLIOptions -> Accelerate.Array Accelerate.DIM2 Accelerate.Word64 -> SimState
+initialSimState ifs_config options random_matrix =
   SimState
   { _picture = Accelerate.fromList (Z :. 0 :. 0) []
   , _should_update = True
   , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism' (Accelerate.use random_matrix)
   , _dimensions = (picture_width, picture_height)
-  , _camera = Lib.Camera.defaultCamera
+  , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   , _input = initialInput
   }
   where
@@ -229,6 +228,7 @@ initialSimState transformations_list options random_matrix =
     n_points_per_thread = samples' `div` paralellism'
     picture_width = options ^. render_width |> fromIntegral
     picture_height = options ^. render_height |> fromIntegral
+    transformations_list = ifs_config |> IFSConfig.transformations
     transformations = buildTransformations transformations_list
 
 initialInput :: Input
