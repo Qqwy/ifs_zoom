@@ -57,3 +57,8 @@ cat ./examples/barnsley.ifs | stack run
 # or:
 cat ./examples/barnsley.ifs | stack run -- --maybe --some="options"
 ```
+
+## The IFS configuration format
+
+IFS configuration is done using the '[Dhall](http://dhall-lang.org/)' configuration language.
+Check the examples to see what settings are currently supported.
