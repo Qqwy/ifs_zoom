@@ -196,10 +196,21 @@ drawSimStateWithHelpers sim_state =
   |> return
 
 drawGuides :: SimState -> Gloss.Picture
-drawGuides _sim_state = Graphics.Gloss.Data.Picture.blank
+drawGuides sim_state =
+  drawGuide (0, 0, hw, hh) (sim_state^.camera)
+  |> Graphics.Gloss.Data.Picture.color Gloss.red
+  --Graphics.Gloss.Data.Picture.blank
+  where
+    (w', h') = sim_state^.dimensions
+    (w, h) = (fromIntegral w', fromIntegral h')
+    (hw, hh) = (w / 2, h / 2)
 
+drawGuide :: (Float, Float, Float, Float) -> Lib.Camera -> Gloss.Picture
 drawGuide (x, y, w, h) camera =
-  Graphics.Gloss.Data.Picture.blank
+  -- Graphics.Gloss.Data.Picture.blank
+  [(x-w, y-h), (x+w, y-h), (x+w, y+h), (x-w, y+h), (x-w, y-h)]
+  |> fmap (Lib.Camera.cameraTransform camera)
+  |> Graphics.Gloss.Data.Picture.line
 
 -- | Called every frame.
 -- When drawing, we simply return the picture we made earlier,
