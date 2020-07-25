@@ -66,11 +66,24 @@ pixelsToColours :: Acc (Matrix Int) -> Acc (Matrix Word32)
 pixelsToColours pixels =
   pixels
   |> Accelerate.map pixelToColour
-  |> Accelerate.map HSL.toRGB
+  -- |> Accelerate.map HSL.toRGB
   |> Accelerate.map RGB.packRGB
   where
-    pixelToColour :: Exp Int -> Exp (HSL Float)
-    pixelToColour pixel = Accelerate.cond (pixel Accelerate.== 0) black white
+    pixelToColour :: Exp Int -> Exp (RGB Float)
+    pixelToColour val =
+      let
+        val' =
+          val
+          |> fromIntegral
+          |> (/ 256)
+          |> sqrt
+          |> sqrt
+      in
+        RGB.rgb val' val' val'
+        |> RGB.clamp
+    -- pixelToColour l = HSL.hsl 0 1.0 ((fromIntegral l) / 255.0)
+    -- pixelToColour :: Exp Int -> Exp (HSL Float)
+    -- pixelToColour pixel = Accelerate.cond (pixel Accelerate.== 0) black white
 
 -- | Turns a point to a pixel coordinate using the given `width` and `height` as picture dimensions.
 --
