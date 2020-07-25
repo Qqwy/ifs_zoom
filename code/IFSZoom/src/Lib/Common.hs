@@ -19,11 +19,16 @@ module Lib.Common
   , HomogeneousPoint
   , RNGVal
   , pointToHomogeneous
+  , pointToHomogeneousGPU
   , homogeneousToPoint
+  , homogeneousToPointGPU
+  , mapPointAsHomogeneous
+  , mapPointAsHomogeneousGPU
   , transformationProbabilityFromSixtuplePair
   , transformationFromSixtuple
   ) where
 
+import Pipe
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Linear (V3(..), M33)
 
@@ -43,11 +48,38 @@ type HomogeneousPoint = V3 Float
 -- | A seed or randomly chosen value.
 type RNGVal = Word64
 
-pointToHomogeneous :: Exp Point -> Exp HomogeneousPoint
-pointToHomogeneous (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
+-- | Turns a 2D (x, y) point into a 3D vector ('homogeneous notation') where the 'z' component is 1
+pointToHomogeneous :: Point -> HomogeneousPoint
+pointToHomogeneous (x, y) = V3 x y 1
 
-homogeneousToPoint :: Exp HomogeneousPoint -> Exp Point
-homogeneousToPoint (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
+-- | Identical to `pointToHomogeneous` but runs on the GPU
+pointToHomogeneousGPU :: Exp Point -> Exp HomogeneousPoint
+pointToHomogeneousGPU (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
+
+-- | Inverse of `pointToHomogeneous`
+homogeneousToPoint :: HomogeneousPoint -> Point
+homogeneousToPoint (V3 x y _) = (x, y)
+
+-- | Identical to `homogeneousToPoint` but runs on the GPU
+homogeneousToPointGPU :: Exp HomogeneousPoint -> Exp Point
+homogeneousToPointGPU (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
+
+-- | Runs a function working on a point in homogeneous form on a 'normal' 2D point.
+-- by wrapping it in a conversion to and from homogeneous notation
+mapPointAsHomogeneous :: (HomogeneousPoint -> HomogeneousPoint) -> Point -> Point
+mapPointAsHomogeneous fun point =
+  point
+  |> pointToHomogeneous
+  |> fun
+  |> homogeneousToPoint
+
+-- | Identical to `mapPointAsHomogeneous` but runs on the GPU
+mapPointAsHomogeneousGPU :: (Exp HomogeneousPoint -> Exp HomogeneousPoint) -> Exp Point -> Exp Point
+mapPointAsHomogeneousGPU fun point =
+  point
+  |> pointToHomogeneousGPU
+  |> fun
+  |> homogeneousToPointGPU
 
 transformationProbabilityFromSixtuplePair :: Exp ((Float, Float, Float, Float, Float, Float), Probability) -> Exp (Transformation, Probability)
 transformationProbabilityFromSixtuplePair (unlift -> (sixtuple, p)) =

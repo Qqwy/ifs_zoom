@@ -42,10 +42,7 @@ naivePointCloudToPicture camera width height point_cloud =
 -- | Maps the camera transformation over all points.
 worldToScreen :: Exp Camera -> Acc (Vector Point) -> Acc (Vector Point)
 worldToScreen camera point_cloud =
-  point_cloud
-  |> Accelerate.map (Lib.Common.pointToHomogeneous)
-  |> Accelerate.map (Lib.Camera.cameraTransform camera)
-  |> Accelerate.map (Lib.Common.homogeneousToPoint)
+  Accelerate.map (Lib.Camera.cameraTransformGPU camera) point_cloud
 
 -- | Turns points in screen-space to pixels in a 2D 'histogram' representation
 -- where every pixel counts how many points it contains.

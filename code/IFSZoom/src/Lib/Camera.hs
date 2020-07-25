@@ -21,6 +21,7 @@ module Lib.Camera
   , translateCamera
   , cameraFromSixtuple
   , cameraTransform
+  , cameraTransformGPU
   , defaultCamera
   ) where
 
@@ -30,27 +31,40 @@ import Data.Array.Accelerate as Accelerate
 import qualified Lib.Common
 
 import Data.Array.Accelerate.Linear (V3(..), M33)
-import Data.Array.Accelerate.Linear.Matrix ((!*))
-import Linear.Matrix ((!*!), (!+!), inv33)
+import qualified Data.Array.Accelerate.Linear.Matrix as GPU.Matrix
+import qualified Linear.Matrix as Matrix
 
 -- | A camera is 'just' a 2D affine transformation matrix.
 type Camera = M33 Float
 
+-- | Transforms a point from world space to screen space.
+cameraTransform :: Camera -> Lib.Common.Point -> Lib.Common.Point
+cameraTransform camera point =
+  Lib.Common.mapPointAsHomogeneous (cameraTransform' camera) point
+
+cameraTransform' :: Camera -> (V3 Float) -> (V3 Float)
+cameraTransform' camera point = camera Matrix.!* point
+
 
 -- | Transforms a point from world space to screen space.
 -- (Runs on the GPU!)
-cameraTransform :: Exp Camera -> Exp (V3 Float) -> Exp (V3 Float)
-cameraTransform camera point = camera !* point
+cameraTransformGPU :: Exp Camera -> Exp Lib.Common.Point -> Exp Lib.Common.Point
+cameraTransformGPU camera point =
+  Lib.Common.mapPointAsHomogeneousGPU (cameraTransformGPU' camera) point
+
+cameraTransformGPU' :: Exp Camera -> Exp (V3 Float) -> Exp (V3 Float)
+cameraTransformGPU' camera point = camera GPU.Matrix.!* point
+
 
 -- | Inverts the transformation the camera makes.
 -- useful for e.g. checking where the picure bounds (screen space) end up in world space.
--- inverseCamera :: Exp Camera -> Exp Camera
--- inverseCamera camera = inv33 camera
+-- inverseCamera :: Camera -> Camera
+-- inverseCamera camera = Matrix.inv33 camera
 
 -- | Scales the camera in equal proportions using the given `scale` float.
 scaleCamera :: Float -> Camera -> Camera
 scaleCamera scale camera =
-  scaleMatrix !*! camera
+  scaleMatrix Matrix.!*! camera
   where
     scaleMatrix = (V3
                     (V3 scale 0     0)
@@ -61,7 +75,7 @@ scaleCamera scale camera =
 -- | Translates the camera position using the given `horizontal` and `vertical` offsets.
 translateCamera :: Float -> Float -> Camera -> Camera
 translateCamera horizontal vertical camera =
-  translationMatrix !+! camera
+  translationMatrix Matrix.!+! camera
   where
     translationMatrix = (V3
                           (V3 0 0 horizontal)

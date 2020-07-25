@@ -105,10 +105,7 @@ pointBasedTransform transformations prev_point current_point =
       |> toFloating
       |> pickTransformation transformations
   in
-    prev_point
-    |> pointToHomogeneous
-    |> chaosTransform transformation
-    |> homogeneousToPoint
+    mapPointAsHomogeneousGPU (chaosTransform transformation) prev_point
 
 -- | Picks the correct transformation
 -- based on the `rngval` passed in.

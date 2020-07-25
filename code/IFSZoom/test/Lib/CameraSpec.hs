@@ -52,9 +52,7 @@ spec = do
           res =
             ((0, 0) :: (Float, Float))
             |> lift
-            |> Lib.Common.pointToHomogeneous
-            |> Lib.Camera.cameraTransform (lift camera)
-            |> Lib.Common.homogeneousToPoint
+            |> (Lib.Camera.cameraTransformGPU (lift camera))
           in
           (runE res) Prelude.== (horizontal, vertical)
 

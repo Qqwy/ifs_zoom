@@ -57,6 +57,7 @@ data SimState = SimState
   , _dimensions :: (Word, Word)
   , _camera :: Lib.Camera
   , _input :: Input
+  , _transformations :: [IFSConfig.TransformationWithProbability]
   }
 
 makeLenses ''SimState
@@ -82,7 +83,7 @@ run ifs_config options = do
     Gloss.black
     20
     (initialSimState ifs_config options random_matrix)
-    drawSimState
+    drawSimStateWithHelpers
     handleInput
     updateSimState
 
@@ -186,16 +187,29 @@ updateSimState _time_elapsed sim_state =
 
       return new_sim_state
 
+drawSimStateWithHelpers :: SimState -> IO Gloss.Picture
+drawSimStateWithHelpers sim_state =
+  Graphics.Gloss.Data.Picture.pictures
+  [ drawSimState sim_state,
+    drawGuides sim_state
+  ]
+  |> return
+
+drawGuides :: SimState -> Gloss.Picture
+drawGuides _sim_state = Graphics.Gloss.Data.Picture.blank
+
+drawGuide (x, y, w, h) camera =
+  Graphics.Gloss.Data.Picture.blank
+
 -- | Called every frame.
 -- When drawing, we simply return the picture we made earlier,
 -- so we only re-render when the sim_state (camera position etc) changes
 -- rather than every frame.
-drawSimState :: SimState -> IO Gloss.Picture
+drawSimState :: SimState -> Gloss.Picture
 drawSimState sim_state =
   sim_state^.picture
   |> (\picture -> Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True)
   |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
-  |> return
 
 renderSimState :: SimState -> Lib.RasterPicture
 renderSimState sim_state =
@@ -220,6 +234,7 @@ initialSimState ifs_config options random_matrix =
   , _dimensions = (picture_width, picture_height)
   , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   , _input = initialInput
+  , _transformations = transformations_list
   }
   where
     seed' = options ^. seed
