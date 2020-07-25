@@ -81,6 +81,4 @@ cameraFromSixtuple (a, b, c, d, e, f) =
 
 defaultCamera :: (Float, Float, Float, Float, Float, Float) -> Camera
 defaultCamera transformation_sixtuple =
-  -- (1, 0, 0, 1, 0, 0)
-  -- (((recip 11), 0, 0, -(recip 11), 0.5, 1))
   cameraFromSixtuple transformation_sixtuple
