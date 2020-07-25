@@ -58,6 +58,7 @@ data SimState = SimState
   , _camera :: Lib.Camera
   , _input :: Input
   , _transformations :: [IFSConfig.TransformationWithProbability]
+  , _initial_camera :: Lib.Camera
   }
 
 makeLenses ''SimState
@@ -197,20 +198,20 @@ drawSimStateWithHelpers sim_state =
 
 drawGuides :: SimState -> Gloss.Picture
 drawGuides sim_state =
-  drawGuide (0, 0, hw, hh) (sim_state^.camera)
+  drawGuide (0, 0, 1, 1) (sim_state^.camera) (sim_state^.initial_camera) dims
   |> Graphics.Gloss.Data.Picture.color Gloss.red
-  --Graphics.Gloss.Data.Picture.blank
   where
-    (w', h') = sim_state^.dimensions
-    (w, h) = (fromIntegral w', fromIntegral h')
-    (hw, hh) = (w / 2, h / 2)
+    dims = sim_state^.dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
 
-drawGuide :: (Float, Float, Float, Float) -> Lib.Camera -> Gloss.Picture
-drawGuide (x, y, w, h) camera =
+drawGuide :: (Float, Float, Float, Float) -> Lib.Camera -> Lib.Camera -> (Float, Float) -> Gloss.Picture
+drawGuide (x, y, w, h) camera initial_camera (pw, ph) =
   -- Graphics.Gloss.Data.Picture.blank
-  [(x-w, y-h), (x+w, y-h), (x+w, y+h), (x-w, y+h), (x-w, y-h)]
+  [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
+  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
   |> fmap (Lib.Camera.cameraTransform camera)
+  |> fmap (\(x, y) -> (x*pw, y*(-ph)))
   |> Graphics.Gloss.Data.Picture.line
+  |> Graphics.Gloss.Data.Picture.translate (-pw/2) (ph/2)
 
 -- | Called every frame.
 -- When drawing, we simply return the picture we made earlier,
@@ -246,6 +247,7 @@ initialSimState ifs_config options random_matrix =
   , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   , _input = initialInput
   , _transformations = transformations_list
+  , _initial_camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   }
   where
     seed' = options ^. seed
