@@ -45,6 +45,7 @@ library
       , colour-accelerate
       , linear
       , linear-accelerate
+      , gloss
       , Glob == 0.10.*
 
 executable IFSZoom-exe
