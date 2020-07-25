@@ -1,6 +1,7 @@
 module Lib.Guide
   (
-    drawGuides
+    drawGuides,
+    allCombinations
   ) where
 
 import Pipe
@@ -36,3 +37,20 @@ guideToPicture camera (screen_width, screen_height) guide =
   |> fmap (\(x, y) -> (x*screen_width, y*(-screen_height)))
   |> Graphics.Gloss.Data.Picture.line
   |> Graphics.Gloss.Data.Picture.translate (-screen_width/2) (screen_height/2)
+
+-- | Returns all combinations of the elements in a list
+-- This goes on forever.
+-- Shorter combinations are first
+-- e.g.:
+--
+-- >>> take 4 $ allCombinations [1, 2, 3]
+-- [[],[1],[2],[3]]
+-- >>> take 13 $ allCombinations [1, 2, 3]
+-- [[],[1],[2],[3],[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]]
+allCombinations elems =
+  [[]]
+  |> iterate (fun elems)
+  |> concat
+  where
+    fun elems xs =
+      [elem : x | elem <- elems, x <- xs]
