@@ -19,6 +19,7 @@ import Lib.Common
 import qualified Lib
 import qualified Lib.ChaosGame
 import qualified Lib.Camera
+import qualified Lib.Guide
 
 import Lens.Micro.Platform
 
@@ -192,26 +193,10 @@ drawSimStateWithHelpers :: SimState -> IO Gloss.Picture
 drawSimStateWithHelpers sim_state =
   Graphics.Gloss.Data.Picture.pictures
   [ drawSimState sim_state,
-    drawGuides sim_state
+    Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions)
   ]
   |> return
 
-drawGuides :: SimState -> Gloss.Picture
-drawGuides sim_state =
-  drawGuide (0, 0, 1, 1) (sim_state^.camera) (sim_state^.initial_camera) dims
-  |> Graphics.Gloss.Data.Picture.color Gloss.red
-  where
-    dims = sim_state^.dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
-
-drawGuide :: (Float, Float, Float, Float) -> Lib.Camera -> Lib.Camera -> (Float, Float) -> Gloss.Picture
-drawGuide (x, y, w, h) camera initial_camera (pw, ph) =
-  -- Graphics.Gloss.Data.Picture.blank
-  [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
-  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
-  |> fmap (Lib.Camera.cameraTransform camera)
-  |> fmap (\(x, y) -> (x*pw, y*(-ph)))
-  |> Graphics.Gloss.Data.Picture.line
-  |> Graphics.Gloss.Data.Picture.translate (-pw/2) (ph/2)
 
 -- | Called every frame.
 -- When drawing, we simply return the picture we made earlier,

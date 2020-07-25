@@ -31,6 +31,7 @@ library
     , Lib.Camera
     , Lib.ChaosGame
     , Lib.Common
+    , Lib.Guide
     , Lib.MortonCode
     , Lib.Picture
     , Lib.Random
