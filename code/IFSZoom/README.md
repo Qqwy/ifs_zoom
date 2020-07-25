@@ -43,7 +43,7 @@ To build this project:
 8. Done.
   - Use `stack run` to run the main application binary. 
   - Use `stack ghci` to run an interactive shell in which the modules the binary contains are in scope to test/explore indiual parts.
-  - TODO automated testing
+  - Use `stack test` to run the test suite.
 
 ## How to run
 
