@@ -196,8 +196,8 @@ updateSimState _time_elapsed sim_state =
       putStrLn (show (sim_state^.camera))
       -- let cam = ((sim_state^.camera) |> Lib.Camera.withInitialCamera (sim_state^.initial_camera) )
       let cam = sim_state^.camera
-      -- let res = map (Lib.Camera.isCameraInsideTransformation cam (sim_state^.initial_camera)) (extractTransformations (sim_state^.transformations_list))
-      let res = map (Lib.Camera.isCameraInsideTransformation cam) (extractTransformations (sim_state^.transformations_list))
+      let res = map (Lib.Guide.isCameraInsideTransformation cam (sim_state^.initial_camera)) (extractTransformations (sim_state^.transformations_list))
+      -- let res = map (Lib.Camera.isCameraInsideTransformation cam) (extractTransformations (sim_state^.transformations_list))
       putStrLn (show res)
 
       return new_sim_state

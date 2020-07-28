@@ -1,14 +1,15 @@
 module Lib.Guide
-  (
-    drawGuides,
-    allCombinations,
-    combinationsUpToDepth
+  ( drawGuides
+  ,  allCombinations
+  , combinationsUpToDepth
+  , isCameraInsideTransformation
   ) where
 
 import Pipe
 import qualified Lib
 import qualified Lib.Common
 import Lib.Common (Transformation, Point)
+import qualified Lib.Geometry
 
 import qualified Control.Applicative
 
@@ -34,39 +35,48 @@ drawGuides camera initial_camera dimensions transformations =
       transformations
       |> combinationsUpToDepth' 8
       |> (zip colors)
-      |> map (\(color, transformations) -> map (\ts -> (color, combineTransformations ts)) transformations)
+      |> map (\(color, transformations) -> map (\ts -> (color, ts)) transformations)
       |> concat
-      |> map (\(color, transformation) -> drawGuide camera initial_camera dims transformation color)
+      |> map (\(color, transformations) -> drawGuide camera initial_camera dims transformations color)
 
 combineTransformations :: [Transformation] -> Transformation
 combineTransformations multiple =
   foldr (Linear.Matrix.!*!) Lib.Common.identityTransformation multiple
 
-
-drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Color -> Gloss.Picture
-drawGuide camera initial_camera dimensions transformation color =
+buildGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> [Point]
+buildGuide camera initial_camera dimensions transformations =
   (0, 0, 1, 1)
   |> guideFromCoords initial_camera
-  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
-  |> transformGuide transformation
+  |> transformGuide (combineTransformations transformations)
   |> fmap (Lib.Camera.cameraTransform initial_camera)
-  |> fmap (Lib.Camera.cameraTransform camera)
-  |> guideToPicture camera dimensions
+  |> guideToScreen camera dimensions
+
+
+drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> Gloss.Color -> Gloss.Picture
+drawGuide camera initial_camera dimensions transformations color =
+  buildGuide camera initial_camera dimensions transformations
+  |> guideToPicture dimensions
   |> Graphics.Gloss.Data.Picture.color (color |> Gloss.withAlpha 0.5)
 
 guideFromCoords :: Lib.Camera ->(Float, Float, Float, Float) ->  [Point]
 guideFromCoords initial_camera (x, y, w, h) =
   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
+  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
 
 transformGuide :: Transformation -> [Point] -> [Point]
 transformGuide transformation guide_points =
   guide_points
   |> fmap (Lib.Camera.cameraTransform transformation)
 
-guideToPicture :: Lib.Camera -> (Float, Float) -> [Point] -> Gloss.Picture
-guideToPicture camera (screen_width, screen_height) guide_points =
+guideToScreen :: Lib.Camera -> (Float, Float) -> [Point] -> [Point]
+guideToScreen camera (screen_width, screen_height) guide_points =
   guide_points
+  |> fmap (Lib.Camera.cameraTransform camera)
   |> fmap (\(x, y) -> (x*screen_width, y*(-screen_height)))
+
+guideToPicture :: (Float, Float) -> [Point] -> Gloss.Picture
+guideToPicture (screen_width, screen_height) guide_points =
+  guide_points
   |> Graphics.Gloss.Data.Picture.line
   |> Graphics.Gloss.Data.Picture.translate (-screen_width/2) (screen_height/2)
 
@@ -114,3 +124,29 @@ combinationsUpToDepth' depth elems =
   elems
   |> allCombinations'
   |> take depth
+
+
+isCameraInsideTransformation :: Lib.Camera -> Lib.Camera -> Transformation -> Bool
+isCameraInsideTransformation camera initial_camera transformation =
+  if Linear.Matrix.det33 transformation == 0 then False
+  else Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
+  where
+    camera_coords = buildGuide camera initial_camera (1, 1) []
+    transformation_coords = buildGuide camera initial_camera (1, 1) [transformation]
+  -- where
+  --   unit_square =
+  --     guideFromCoords initial_camera (0, 0, 1, 1)
+  --   camera_coords =
+  --     unit_square
+  --     |> Prelude.fmap (Lib.Camera.cameraTransform (initial_camera))
+  --     |> Prelude.fmap (Lib.Camera.cameraTransform (camera))
+  --   transformation_coords =
+  --     unit_square
+  --     |> Prelude.fmap (Lib.Camera.cameraTransform transformation)
+  --     |> Prelude.fmap (Lib.Camera.cameraTransform (initial_camera))
+  --     |> Prelude.fmap (Lib.Camera.cameraTransform (camera))
+
+-- guideFromCoords :: (Float, Float, Float, Float) ->  [Point]
+-- guideFromCoords (x, y, w, h)  =
+--   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
+

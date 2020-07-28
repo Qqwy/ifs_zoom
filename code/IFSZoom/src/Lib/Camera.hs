@@ -25,7 +25,7 @@ module Lib.Camera
   , inverseCamera
   , defaultCamera
   , withInitialCamera
-  , isCameraInsideTransformation
+  -- , isCameraInsideTransformation
   ) where
 
 import Pipe
@@ -33,7 +33,7 @@ import qualified Prelude
 import Data.Array.Accelerate as Accelerate
 import Lib.Common (Transformation, Point)
 import qualified Lib.Common
-import qualified Lib.Geometry
+-- import qualified Lib.Geometry
 
 import Data.Array.Accelerate.Linear (V3(..), M33)
 import qualified Data.Array.Accelerate.Linear.Matrix as GPU.Matrix
@@ -114,21 +114,6 @@ defaultCamera :: (Float, Float, Float, Float, Float, Float) -> Camera
 defaultCamera transformation_sixtuple =
   cameraFromSixtuple transformation_sixtuple
 
-isCameraInsideTransformation :: Camera -> Transformation -> Bool
-isCameraInsideTransformation camera transformation =
-  if Matrix.det33 transformation Prelude.== 0 then False
-  else Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
-  where
-    unit_square =
-      guideFromCoords (0, 0, 1, 1)
-    camera_coords =
-      Prelude.fmap (cameraTransform (inverseCamera camera)) unit_square
-    transformation_coords =
-      Prelude.fmap (cameraTransform transformation) unit_square
-
-guideFromCoords :: (Float, Float, Float, Float) ->  [Point]
-guideFromCoords (x, y, w, h)  =
-  [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
 
 withInitialCamera :: Camera -> Camera -> Camera
 withInitialCamera initial_camera camera =
