@@ -22,6 +22,7 @@ module Lib.Camera
   , cameraFromSixtuple
   , cameraTransform
   , cameraTransformGPU
+  , inverseCamera
   , defaultCamera
   ) where
 
@@ -58,8 +59,8 @@ cameraTransformGPU' camera point = camera GPU.Matrix.!* point
 
 -- | Inverts the transformation the camera makes.
 -- useful for e.g. checking where the picure bounds (screen space) end up in world space.
--- inverseCamera :: Camera -> Camera
--- inverseCamera camera = Matrix.inv33 camera
+inverseCamera :: Camera -> Camera
+inverseCamera camera = Matrix.inv33 camera
 
 -- | Scales the camera in equal proportions using the given `scale` float.
 scaleCamera :: Float -> Camera -> Camera

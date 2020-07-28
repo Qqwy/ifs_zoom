@@ -31,6 +31,7 @@ library
     , Lib.Camera
     , Lib.ChaosGame
     , Lib.Common
+    , Lib.Guide
     , Lib.MortonCode
     , Lib.Picture
     , Lib.Random
@@ -44,6 +45,7 @@ library
       , colour-accelerate
       , linear
       , linear-accelerate
+      , gloss
       , Glob == 0.10.*
 
 executable IFSZoom-exe

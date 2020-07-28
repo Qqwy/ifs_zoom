@@ -19,6 +19,7 @@ import Lib.Common
 import qualified Lib
 import qualified Lib.ChaosGame
 import qualified Lib.Camera
+import qualified Lib.Guide
 
 import Lens.Micro.Platform
 
@@ -45,6 +46,8 @@ data Input = Input
   , _ty :: Float
   , _zooming :: Maybe Zooming
   , _save_screenshot :: Bool
+  , _show_guides :: Bool
+  , _show_points :: Bool
   }
   deriving (Eq, Ord, Show)
 
@@ -57,7 +60,8 @@ data SimState = SimState
   , _dimensions :: (Word, Word)
   , _camera :: Lib.Camera
   , _input :: Input
-  , _transformations :: [IFSConfig.TransformationWithProbability]
+  , _transformations_list :: [IFSConfig.TransformationWithProbability]
+  , _initial_camera :: Lib.Camera
   }
 
 makeLenses ''SimState
@@ -119,6 +123,12 @@ handleInput' event input =
       input{_zooming = Just ZoomOut}
     EventKey (Char 's') Down _ _ ->
       input{_save_screenshot = True}
+    EventKey (Char 'p') Down _ _ ->
+      input
+      |> over show_points not
+    EventKey (Char 'g') Down _ _ ->
+      input
+      |> over show_guides not
     _ ->
       input
 
@@ -189,17 +199,25 @@ updateSimState _time_elapsed sim_state =
 
 drawSimStateWithHelpers :: SimState -> IO Gloss.Picture
 drawSimStateWithHelpers sim_state =
-  Graphics.Gloss.Data.Picture.pictures
-  [ drawSimState sim_state,
-    drawGuides sim_state
-  ]
+  [sim_state_picture, guides_picture]
+  |> Graphics.Gloss.Data.Picture.pictures
   |> return
+  where
+    sim_state_picture =
+      if sim_state^.input.show_points
+      then drawSimState sim_state
+      else Graphics.Gloss.Data.Picture.blank
+    guides_picture =
+      if sim_state^.input.show_guides
+      then Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) transformations
+      else Graphics.Gloss.Data.Picture.blank
+    -- TODO refactor this
+    transformations =
+      sim_state^.transformations_list
+      |> map IFSConfig.transformationWithProbabilityToSixtuplePair
+      |> map Lib.Common.transformationProbabilityFromSixtuplePair
+      |> map fst
 
-drawGuides :: SimState -> Gloss.Picture
-drawGuides _sim_state = Graphics.Gloss.Data.Picture.blank
-
-drawGuide (x, y, w, h) camera =
-  Graphics.Gloss.Data.Picture.blank
 
 -- | Called every frame.
 -- When drawing, we simply return the picture we made earlier,
@@ -234,7 +252,8 @@ initialSimState ifs_config options random_matrix =
   , _dimensions = (picture_width, picture_height)
   , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   , _input = initialInput
-  , _transformations = transformations_list
+  , _transformations_list = transformations_list
+  , _initial_camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   }
   where
     seed' = options ^. seed
@@ -254,6 +273,8 @@ initialInput =
   , _tx = 0
   , _ty = 0
   , _save_screenshot = False
+  , _show_guides = False
+  , _show_points = True
   }
 
 buildTransformations :: [IFSConfig.TransformationWithProbability] -> Accelerate.Acc IFS
@@ -262,4 +283,4 @@ buildTransformations transformations_list =
   |> map IFSConfig.transformationWithProbabilityToSixtuplePair
   |> Accelerate.fromList (Z :. (length transformations_list))
   |> Accelerate.use
-  |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)
+  |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePairGPU)

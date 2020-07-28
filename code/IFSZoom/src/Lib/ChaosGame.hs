@@ -30,8 +30,8 @@ module Lib.ChaosGame
   , fillChaosGameMatrix
   , pointToHomogeneous
   , homogeneousToPoint
-  , transformationProbabilityFromSixtuplePair
-  , transformationFromSixtuple
+  , transformationProbabilityFromSixtuplePairGPU
+  , transformationFromSixtupleGPU
   , chaosTransform
   , floatPairToWord64
   , word64ToFloatPair
