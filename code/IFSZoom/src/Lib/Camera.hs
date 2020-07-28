@@ -29,6 +29,7 @@ module Lib.Camera
 import Pipe
 import qualified Prelude
 import Data.Array.Accelerate as Accelerate
+import Lib.Common (Transformation, Point)
 import qualified Lib.Common
 
 import Data.Array.Accelerate.Linear (V3(..), M33)
@@ -39,7 +40,7 @@ import qualified Linear.Matrix as Matrix
 type Camera = M33 Float
 
 -- | Transforms a point from world space to screen space.
-cameraTransform :: Camera -> Lib.Common.Point -> Lib.Common.Point
+cameraTransform :: Camera -> Point -> Point
 cameraTransform camera point =
   Lib.Common.mapPointAsHomogeneous (cameraTransform' camera) point
 
@@ -97,3 +98,20 @@ cameraFromSixtuple (a, b, c, d, e, f) =
 defaultCamera :: (Float, Float, Float, Float, Float, Float) -> Camera
 defaultCamera transformation_sixtuple =
   cameraFromSixtuple transformation_sixtuple
+
+isCameraInsideTransformation :: Camera -> Camera -> Transformation -> Bool
+isCameraInsideTransformation initial_camera camera transformation = 
+  undefined
+  where
+    unit_square =
+      (0, 0, 1, 1)
+      |> guideFromCoords initial_camera
+    camera_coords =
+      Prelude.fmap (cameraTransform camera) unit_square
+    transformation_coords =
+      Prelude.fmap (cameraTransform transformation) unit_square
+
+guideFromCoords :: Camera ->(Float, Float, Float, Float) ->  [Point]
+guideFromCoords camera (x, y, w, h)  =
+  [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
+  |> Prelude.fmap (cameraTransform (inverseCamera camera))
