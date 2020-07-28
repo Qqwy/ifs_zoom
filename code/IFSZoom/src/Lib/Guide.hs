@@ -28,16 +28,25 @@ drawGuides camera initial_camera dimensions transformations =
   where
     dims = dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
     colors = cycle [Gloss.red, Gloss.green, Gloss.blue, Gloss.cyan, Gloss.magenta, Gloss.yellow]
+    -- guides =
+    --   transformations
+    --   |> combinationsUpToDepth 6
+    --   |> map combineTransformations
+    --   |> zip colors
+    --   |> map (\(color, transform) -> drawGuide camera initial_camera dims transform color)
     guides =
       transformations
-      |> combinationsUpToDepth 6
-      |> map combineTransformations
-      |> zip colors
-      |> map (\(color, transform) -> drawGuide camera initial_camera dims transform color)
+      |> combinationsUpToDepth' 6
+      |> (zip colors)
+      |> map (\(color, transformations) -> map (\ts -> (color, combineTransformations ts)) transformations)
+      |> concat
+      |> map (\(color, transformation) -> drawGuide camera initial_camera dims transformation color)
+
+
 
 combineTransformations :: [Transformation] -> Transformation
 combineTransformations [] = Lib.Common.identityTransformation
-combineTransformations multiple = product multiple
+combineTransformations multiple = product (reverse multiple)
 
 drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Color -> Gloss.Picture
 drawGuide camera initial_camera dimensions transformation color =
@@ -75,11 +84,16 @@ guideToPicture camera (screen_width, screen_height) guide_points =
 -- [[],[1],[2],[3]]
 -- >>> take 13 $ allCombinations [1, 2, 3]
 -- [[],[1],[2],[3],[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]]
-allCombinations :: [a] -> [[a]]
+allCombinations:: [a] -> [[a]]
 allCombinations elems =
+  elems
+  |> allCombinations'
+  |> concat
+
+allCombinations' :: [a] -> [[[a]]]
+allCombinations' elems =
   [[]]
   |> iterate (Control.Applicative.liftA2 (:) elems)
-  |> concat
 
 -- | Returns all combinations of the elements in a list
 -- that are at most `depth` elements long
@@ -96,10 +110,11 @@ allCombinations elems =
 combinationsUpToDepth :: Int -> [a] -> [[a]]
 combinationsUpToDepth depth elems =
   elems
-  |> allCombinations
-  |> take (n_elems depth)
-   where
-     -- There probably is a mathematically more satisfying
-     -- way of writing this:
-     n_elems 0 = 1
-     n_elems d = (length elems) ^ d + (n_elems (d - 1))
+  |> combinationsUpToDepth' depth
+  |> concat
+
+combinationsUpToDepth' :: Int -> [a] -> [[[a]]]
+combinationsUpToDepth' depth elems =
+  elems
+  |> allCombinations'
+  |> take depth
