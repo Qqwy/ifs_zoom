@@ -8,7 +8,10 @@ module Lib.Guide
 import Pipe
 import qualified Lib
 import qualified Lib.Common
-import Lib.Common (Transformation)
+import Lib.Common (Transformation, Point)
+
+import qualified Control.Applicative
+
 import qualified Lib.Camera
 import qualified Graphics.Gloss as Gloss
 import qualified Graphics.Gloss.Data.Picture
@@ -20,25 +23,41 @@ drawGuides ::
   -> [Transformation] -- ^List of transformations of this IFS
   -> Gloss.Picture
 drawGuides camera initial_camera dimensions transformations =
-  drawGuide camera initial_camera dims []
-  |> Graphics.Gloss.Data.Picture.color (Gloss.red |> Gloss.withAlpha 0.5)
+  guides
+  |> Graphics.Gloss.Data.Picture.pictures
   where
     dims = dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
+    guides =
+      transformations
+      |> combinationsUpToDepth 1
+      |> map combineTransformations
+      |> map (drawGuide camera initial_camera dims)
 
-drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> Gloss.Picture
-drawGuide camera initial_camera dimensions transformations =
+combineTransformations :: [Transformation] -> Transformation
+combineTransformations [] = Lib.Common.identityTransformation
+combineTransformations multiple = product multiple
+
+drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Picture
+drawGuide camera initial_camera dimensions transformation =
   (0, 0, 1, 1)
   |> guideFromCoords initial_camera
+  |> transformGuide transformation
   |> guideToPicture camera dimensions
+  |> Graphics.Gloss.Data.Picture.color (Gloss.red |> Gloss.withAlpha 0.5)
 
-guideFromCoords :: Lib.Camera ->(Float, Float, Float, Float) ->  [(Float, Float)]
+guideFromCoords :: Lib.Camera ->(Float, Float, Float, Float) ->  [Point]
 guideFromCoords initial_camera (x, y, w, h)  =
   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
   |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
 
-guideToPicture :: Lib.Camera -> (Float, Float) -> [(Float, Float)] -> Gloss.Picture
-guideToPicture camera (screen_width, screen_height) guide =
-  guide
+transformGuide :: Transformation -> [Point] -> [Point]
+transformGuide transformation guide_points =
+  guide_points
+  |> fmap (Lib.Camera.cameraTransform transformation)
+
+guideToPicture :: Lib.Camera -> (Float, Float) -> [Point] -> Gloss.Picture
+guideToPicture camera (screen_width, screen_height) guide_points =
+  guide_points
   |> fmap (Lib.Camera.cameraTransform camera)
   |> fmap (\(x, y) -> (x*screen_width, y*(-screen_height)))
   |> Graphics.Gloss.Data.Picture.line
@@ -57,11 +76,8 @@ guideToPicture camera (screen_width, screen_height) guide =
 allCombinations :: [a] -> [[a]]
 allCombinations elems =
   [[]]
-  |> iterate (fun elems)
+  |> iterate (Control.Applicative.liftA2 (:) elems)
   |> concat
-  where
-    fun elems xs =
-      [elem : x | elem <- elems, x <- xs]
 
 -- | Returns all combinations of the elements in a list
 -- that are at most `depth` elements long
@@ -77,7 +93,9 @@ allCombinations elems =
 -- [[],[1],[2],[3],[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]]
 combinationsUpToDepth :: Int -> [a] -> [[a]]
 combinationsUpToDepth depth elems =
-  take (n_elems depth) (allCombinations elems)
+  elems
+  |> allCombinations
+  |> take (n_elems depth)
    where
      -- There probably is a mathematically more satisfying
      -- way of writing this:

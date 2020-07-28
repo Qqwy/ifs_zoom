@@ -28,11 +28,13 @@ module Lib.Common
   , transformationFromSixtuple
   , transformationProbabilityFromSixtuplePairGPU
   , transformationFromSixtupleGPU
+  , identityTransformation
   ) where
 
 import Pipe
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Linear (V3(..), M33)
+import qualified Linear.Matrix
 
 -- | An affine transformation is manipulated in this program as its augmented matrix.
 type Transformation = M33 Float
@@ -113,3 +115,6 @@ transformationFromSixtupleGPU sixtuple =
                  (V3 0 0 1))
   in
     lift matrix
+
+identityTransformation :: Transformation
+identityTransformation = Linear.Matrix.identity
