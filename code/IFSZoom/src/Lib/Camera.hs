@@ -24,6 +24,7 @@ module Lib.Camera
   , cameraTransformGPU
   , inverseCamera
   , defaultCamera
+  , withInitialCamera
   ) where
 
 import Pipe
@@ -31,6 +32,7 @@ import qualified Prelude
 import Data.Array.Accelerate as Accelerate
 import Lib.Common (Transformation, Point)
 import qualified Lib.Common
+import qualified Lib.Geometry
 
 import Data.Array.Accelerate.Linear (V3(..), M33)
 import qualified Data.Array.Accelerate.Linear.Matrix as GPU.Matrix
@@ -63,9 +65,17 @@ cameraTransformGPU' camera point = camera GPU.Matrix.!* point
 inverseCamera :: Camera -> Camera
 inverseCamera camera = Matrix.inv33 camera
 
--- | Scales the camera in equal proportions using the given `scale` float.
+
 scaleCamera :: Float -> Camera -> Camera
 scaleCamera scale camera =
+  camera
+  |> translateCamera (-0.5) (-0.5)
+  |> scaleCamera' scale
+  |> translateCamera (0.5) (0.5)
+
+-- | Scales the camera in equal proportions using the given `scale` float.
+scaleCamera' :: Float -> Camera -> Camera
+scaleCamera' scale camera =
   scaleMatrix Matrix.!*! camera
   where
     scaleMatrix = (V3
@@ -100,8 +110,8 @@ defaultCamera transformation_sixtuple =
   cameraFromSixtuple transformation_sixtuple
 
 isCameraInsideTransformation :: Camera -> Camera -> Transformation -> Bool
-isCameraInsideTransformation initial_camera camera transformation = 
-  undefined
+isCameraInsideTransformation initial_camera camera transformation =
+  Lib.Geometry.isPolygonInsidePolygon camera_coords transformation_coords
   where
     unit_square =
       (0, 0, 1, 1)
@@ -115,3 +125,7 @@ guideFromCoords :: Camera ->(Float, Float, Float, Float) ->  [Point]
 guideFromCoords camera (x, y, w, h)  =
   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
   |> Prelude.fmap (cameraTransform (inverseCamera camera))
+
+withInitialCamera :: Camera -> Camera -> Camera
+withInitialCamera initial_camera camera =
+  (inverseCamera initial_camera) Matrix.!*! camera

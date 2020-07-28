@@ -239,7 +239,9 @@ renderSimState sim_state =
       sim_state^.dimensions
       |> over both (\val -> val |> fromIntegral |> Accelerate.unit)
     camera' =
+      -- ((Linear.Matrix.inv33 (sim_state^.initial_camera)) Linear.Matrix.!*! (sim_state^.camera))
       sim_state^.camera
+      |> Lib.Camera.withInitialCamera (sim_state^.initial_camera)
       |> Accelerate.lift
       |> Accelerate.unit
 
@@ -250,7 +252,8 @@ initialSimState ifs_config options random_matrix =
   , _should_update = True
   , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism' (Accelerate.use random_matrix)
   , _dimensions = (picture_width, picture_height)
-  , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
+  -- , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
+  , _camera = Lib.Common.identityTransformation
   , _input = initialInput
   , _transformations_list = transformations_list
   , _initial_camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)

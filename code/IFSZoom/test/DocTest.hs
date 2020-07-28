@@ -4,4 +4,7 @@ import System.FilePath.Glob (glob)
 import Test.DocTest (doctest)
 
 main :: IO ()
-main = glob "src/**/*.hs" >>= doctest
+main = do
+  let options = ["--verbose"]
+  files <- glob "src/**/*.hs"
+  doctest (options ++ files)

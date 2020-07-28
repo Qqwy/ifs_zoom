@@ -105,7 +105,7 @@ allCombinations' elems =
 combinationsUpToDepth :: Int -> [a] -> [[a]]
 combinationsUpToDepth depth elems =
   elems
-  |> combinationsUpToDepth' depth
+  |> combinationsUpToDepth' (depth + 1)
   |> concat
 
 combinationsUpToDepth' :: Int -> [a] -> [[[a]]]
