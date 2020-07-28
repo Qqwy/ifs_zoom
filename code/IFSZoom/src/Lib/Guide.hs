@@ -27,23 +27,25 @@ drawGuides camera initial_camera dimensions transformations =
   |> Graphics.Gloss.Data.Picture.pictures
   where
     dims = dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
+    colors = cycle [Gloss.red, Gloss.green, Gloss.blue, Gloss.cyan, Gloss.magenta, Gloss.yellow]
     guides =
       transformations
-      |> combinationsUpToDepth 1
+      |> combinationsUpToDepth 6
       |> map combineTransformations
-      |> map (drawGuide camera initial_camera dims)
+      |> zip colors
+      |> map (\(color, transform) -> drawGuide camera initial_camera dims transform color)
 
 combineTransformations :: [Transformation] -> Transformation
 combineTransformations [] = Lib.Common.identityTransformation
 combineTransformations multiple = product multiple
 
-drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Picture
-drawGuide camera initial_camera dimensions transformation =
+drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Color -> Gloss.Picture
+drawGuide camera initial_camera dimensions transformation color =
   (0, 0, 1, 1)
   |> guideFromCoords initial_camera
   |> transformGuide transformation
   |> guideToPicture camera dimensions
-  |> Graphics.Gloss.Data.Picture.color (Gloss.red |> Gloss.withAlpha 0.5)
+  |> Graphics.Gloss.Data.Picture.color (color |> Gloss.withAlpha 0.5)
 
 guideFromCoords :: Lib.Camera ->(Float, Float, Float, Float) ->  [Point]
 guideFromCoords initial_camera (x, y, w, h)  =
