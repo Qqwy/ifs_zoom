@@ -15,6 +15,7 @@ import qualified Control.Applicative
 import qualified Lib.Camera
 import qualified Graphics.Gloss as Gloss
 import qualified Graphics.Gloss.Data.Picture
+import qualified Linear.Matrix
 
 drawGuides ::
   Lib.Camera          -- ^ The current camera matrix
@@ -24,19 +25,14 @@ drawGuides ::
   -> Gloss.Picture
 drawGuides camera initial_camera dimensions transformations =
   guides
+  |> reverse -- Draw shallower guides on top
   |> Graphics.Gloss.Data.Picture.pictures
   where
     dims = dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
     colors = cycle [Gloss.red, Gloss.green, Gloss.blue, Gloss.cyan, Gloss.magenta, Gloss.yellow]
-    -- guides =
-    --   transformations
-    --   |> combinationsUpToDepth 6
-    --   |> map combineTransformations
-    --   |> zip colors
-    --   |> map (\(color, transform) -> drawGuide camera initial_camera dims transform color)
     guides =
       transformations
-      |> combinationsUpToDepth' 6
+      |> combinationsUpToDepth' 8
       |> (zip colors)
       |> map (\(color, transformations) -> map (\ts -> (color, combineTransformations ts)) transformations)
       |> concat
@@ -45,8 +41,10 @@ drawGuides camera initial_camera dimensions transformations =
 
 
 combineTransformations :: [Transformation] -> Transformation
-combineTransformations [] = Lib.Common.identityTransformation
-combineTransformations multiple = product (reverse multiple)
+-- combineTransformations [] = Lib.Common.identityTransformation
+combineTransformations multiple =
+  foldr (Linear.Matrix.!*!) Lib.Common.identityTransformation multiple
+
 
 drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Color -> Gloss.Picture
 drawGuide camera initial_camera dimensions transformation color =
