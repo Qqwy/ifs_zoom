@@ -26,6 +26,8 @@ module Lib.Common
   , mapPointAsHomogeneousGPU
   , transformationProbabilityFromSixtuplePair
   , transformationFromSixtuple
+  , transformationProbabilityFromSixtuplePairGPU
+  , transformationFromSixtupleGPU
   ) where
 
 import Pipe
@@ -81,12 +83,28 @@ mapPointAsHomogeneousGPU fun point =
   |> fun
   |> homogeneousToPointGPU
 
-transformationProbabilityFromSixtuplePair :: Exp ((Float, Float, Float, Float, Float, Float), Probability) -> Exp (Transformation, Probability)
-transformationProbabilityFromSixtuplePair (unlift -> (sixtuple, p)) =
-  lift (transformationFromSixtuple sixtuple, (p :: Exp Float))
+transformationProbabilityFromSixtuplePair :: ((Float, Float, Float, Float, Float, Float), Probability) -> (Transformation, Probability)
+transformationProbabilityFromSixtuplePair ((sixtuple, p)) =
+  (transformationFromSixtuple sixtuple, (p :: Float))
 
-transformationFromSixtuple :: Exp (Float, Float, Float, Float, Float, Float) -> Exp Transformation
+transformationFromSixtuple :: (Float, Float, Float, Float, Float, Float) -> Transformation
 transformationFromSixtuple sixtuple =
+  let
+    (a, b, c, d, e, f) = sixtuple :: (Float, Float, Float, Float, Float, Float)
+    matrix :: M33 (Float)
+    matrix = (V3 (V3 a b e)
+                 (V3 c d f)
+                 (V3 0 0 1))
+  in
+    matrix
+
+
+transformationProbabilityFromSixtuplePairGPU :: Exp ((Float, Float, Float, Float, Float, Float), Probability) -> Exp (Transformation, Probability)
+transformationProbabilityFromSixtuplePairGPU (unlift -> (sixtuple, p)) =
+  lift (transformationFromSixtupleGPU sixtuple, (p :: Exp Float))
+
+transformationFromSixtupleGPU :: Exp (Float, Float, Float, Float, Float, Float) -> Exp Transformation
+transformationFromSixtupleGPU sixtuple =
   let
     (a, b, c, d, e, f) = unlift sixtuple :: (Exp Float, Exp Float, Exp Float, Exp Float, Exp Float, Exp Float)
     matrix :: M33 (Exp Float)

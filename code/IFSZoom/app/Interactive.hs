@@ -58,7 +58,7 @@ data SimState = SimState
   , _dimensions :: (Word, Word)
   , _camera :: Lib.Camera
   , _input :: Input
-  , _transformations :: [IFSConfig.TransformationWithProbability]
+  , _transformations_list :: [IFSConfig.TransformationWithProbability]
   , _initial_camera :: Lib.Camera
   }
 
@@ -193,9 +193,16 @@ drawSimStateWithHelpers :: SimState -> IO Gloss.Picture
 drawSimStateWithHelpers sim_state =
   Graphics.Gloss.Data.Picture.pictures
   [ drawSimState sim_state,
-    Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions)
+    Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) transformations
   ]
   |> return
+  where
+    -- TODO refactor this
+    transformations =
+      sim_state^.transformations_list
+      |> map IFSConfig.transformationWithProbabilityToSixtuplePair
+      |> map Lib.Common.transformationProbabilityFromSixtuplePair
+      |> map fst
 
 
 -- | Called every frame.
@@ -231,7 +238,7 @@ initialSimState ifs_config options random_matrix =
   , _dimensions = (picture_width, picture_height)
   , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   , _input = initialInput
-  , _transformations = transformations_list
+  , _transformations_list = transformations_list
   , _initial_camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   }
   where
@@ -260,4 +267,4 @@ buildTransformations transformations_list =
   |> map IFSConfig.transformationWithProbabilityToSixtuplePair
   |> Accelerate.fromList (Z :. (length transformations_list))
   |> Accelerate.use
-  |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePair)
+  |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePairGPU)

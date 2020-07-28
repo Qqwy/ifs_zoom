@@ -1,7 +1,8 @@
 module Lib.Guide
   (
     drawGuides,
-    allCombinations
+    allCombinations,
+    combinationsUpToDepth
   ) where
 
 import Pipe
@@ -12,10 +13,15 @@ import qualified Lib.Camera
 import qualified Graphics.Gloss as Gloss
 import qualified Graphics.Gloss.Data.Picture
 
-drawGuides :: Lib.Camera -> Lib.Camera -> (Word, Word) ->  Gloss.Picture
-drawGuides camera initial_camera dimensions =
+drawGuides ::
+  Lib.Camera          -- ^ The current camera matrix
+  -> Lib.Camera       -- ^ The initial camera matrix
+  -> (Word, Word)     -- ^ The screen dimensions
+  -> [Transformation] -- ^List of transformations of this IFS
+  -> Gloss.Picture
+drawGuides camera initial_camera dimensions transformations =
   drawGuide camera initial_camera dims []
-  |> Graphics.Gloss.Data.Picture.color Gloss.red
+  |> Graphics.Gloss.Data.Picture.color (Gloss.red |> Gloss.withAlpha 0.5)
   where
     dims = dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
 
@@ -41,12 +47,14 @@ guideToPicture camera (screen_width, screen_height) guide =
 -- | Returns all combinations of the elements in a list
 -- This goes on forever.
 -- Shorter combinations are first
--- e.g.:
+--
+-- ## Examples:
 --
 -- >>> take 4 $ allCombinations [1, 2, 3]
 -- [[],[1],[2],[3]]
 -- >>> take 13 $ allCombinations [1, 2, 3]
 -- [[],[1],[2],[3],[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]]
+allCombinations :: [a] -> [[a]]
 allCombinations elems =
   [[]]
   |> iterate (fun elems)
@@ -54,3 +62,24 @@ allCombinations elems =
   where
     fun elems xs =
       [elem : x | elem <- elems, x <- xs]
+
+-- | Returns all combinations of the elements in a list
+-- that are at most `depth` elements long
+-- Shorter combinations are returned first.
+--
+-- ## Examples:
+--
+-- >>> combinationsUpToDepth 0 [1, 2, 3]
+-- [[]]
+-- >>> combinationsUpToDepth 1 [1, 2, 3]
+-- [[],[1],[2],[3]]
+-- >>> combinationsUpToDepth 2 [1, 2, 3]
+-- [[],[1],[2],[3],[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]]
+combinationsUpToDepth :: Int -> [a] -> [[a]]
+combinationsUpToDepth depth elems =
+  take (n_elems depth) (allCombinations elems)
+   where
+     -- There probably is a mathematically more satisfying
+     -- way of writing this:
+     n_elems 0 = 1
+     n_elems d = (length elems) ^ d + (n_elems (d - 1))
