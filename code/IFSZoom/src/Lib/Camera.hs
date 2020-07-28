@@ -109,22 +109,20 @@ defaultCamera :: (Float, Float, Float, Float, Float, Float) -> Camera
 defaultCamera transformation_sixtuple =
   cameraFromSixtuple transformation_sixtuple
 
-isCameraInsideTransformation :: Camera -> Camera -> Transformation -> Bool
-isCameraInsideTransformation initial_camera camera transformation =
+isCameraInsideTransformation :: Camera -> Transformation -> Bool
+isCameraInsideTransformation camera transformation =
   Lib.Geometry.isPolygonInsidePolygon camera_coords transformation_coords
   where
     unit_square =
-      (0, 0, 1, 1)
-      |> guideFromCoords initial_camera
+      guideFromCoords (0, 0, 1, 1)
     camera_coords =
       Prelude.fmap (cameraTransform camera) unit_square
     transformation_coords =
       Prelude.fmap (cameraTransform transformation) unit_square
 
-guideFromCoords :: Camera ->(Float, Float, Float, Float) ->  [Point]
-guideFromCoords camera (x, y, w, h)  =
+guideFromCoords :: (Float, Float, Float, Float) ->  [Point]
+guideFromCoords (x, y, w, h)  =
   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
-  |> Prelude.fmap (cameraTransform (inverseCamera camera))
 
 withInitialCamera :: Camera -> Camera -> Camera
 withInitialCamera initial_camera camera =
