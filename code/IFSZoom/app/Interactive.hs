@@ -194,6 +194,11 @@ updateSimState _time_elapsed sim_state =
           |> set should_update False
 
       putStrLn (show (sim_state^.camera))
+      -- let cam = ((sim_state^.camera) |> Lib.Camera.withInitialCamera (sim_state^.initial_camera) )
+      let cam = sim_state^.camera
+      -- let res = map (Lib.Camera.isCameraInsideTransformation cam (sim_state^.initial_camera)) (extractTransformations (sim_state^.transformations_list))
+      let res = map (Lib.Camera.isCameraInsideTransformation cam) (extractTransformations (sim_state^.transformations_list))
+      putStrLn (show res)
 
       return new_sim_state
 
@@ -209,15 +214,15 @@ drawSimStateWithHelpers sim_state =
       else Graphics.Gloss.Data.Picture.blank
     guides_picture =
       if sim_state^.input.show_guides
-      then Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) transformations
+      then Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) (extractTransformations (sim_state^.transformations_list))
       else Graphics.Gloss.Data.Picture.blank
-    -- TODO refactor this
-    transformations =
-      sim_state^.transformations_list
-      |> map IFSConfig.transformationWithProbabilityToSixtuplePair
-      |> map Lib.Common.transformationProbabilityFromSixtuplePair
-      |> map fst
 
+-- TODO refactor this
+extractTransformations transformations_list =
+  transformations_list
+  |> map IFSConfig.transformationWithProbabilityToSixtuplePair
+  |> map Lib.Common.transformationProbabilityFromSixtuplePair
+  |> map fst
 
 -- | Called every frame.
 -- When drawing, we simply return the picture we made earlier,

@@ -47,15 +47,16 @@ drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Glo
 drawGuide camera initial_camera dimensions transformation color =
   (0, 0, 1, 1)
   |> guideFromCoords initial_camera
+  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
   |> transformGuide transformation
-  |> fmap (Lib.Camera.cameraTransform (initial_camera))
+  |> fmap (Lib.Camera.cameraTransform initial_camera)
+  |> fmap (Lib.Camera.cameraTransform camera)
   |> guideToPicture camera dimensions
   |> Graphics.Gloss.Data.Picture.color (color |> Gloss.withAlpha 0.5)
 
 guideFromCoords :: Lib.Camera ->(Float, Float, Float, Float) ->  [Point]
-guideFromCoords initial_camera (x, y, w, h)  =
+guideFromCoords initial_camera (x, y, w, h) =
   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
-  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
 
 transformGuide :: Transformation -> [Point] -> [Point]
 transformGuide transformation guide_points =
@@ -65,7 +66,6 @@ transformGuide transformation guide_points =
 guideToPicture :: Lib.Camera -> (Float, Float) -> [Point] -> Gloss.Picture
 guideToPicture camera (screen_width, screen_height) guide_points =
   guide_points
-  |> fmap (Lib.Camera.cameraTransform camera)
   |> fmap (\(x, y) -> (x*screen_width, y*(-screen_height)))
   |> Graphics.Gloss.Data.Picture.line
   |> Graphics.Gloss.Data.Picture.translate (-screen_width/2) (screen_height/2)

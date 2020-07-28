@@ -25,6 +25,7 @@ module Lib.Camera
   , inverseCamera
   , defaultCamera
   , withInitialCamera
+  , isCameraInsideTransformation
   ) where
 
 import Pipe
@@ -115,12 +116,13 @@ defaultCamera transformation_sixtuple =
 
 isCameraInsideTransformation :: Camera -> Transformation -> Bool
 isCameraInsideTransformation camera transformation =
-  Lib.Geometry.isPolygonInsidePolygon camera_coords transformation_coords
+  if Matrix.det33 transformation Prelude.== 0 then False
+  else Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
   where
     unit_square =
       guideFromCoords (0, 0, 1, 1)
     camera_coords =
-      Prelude.fmap (cameraTransform camera) unit_square
+      Prelude.fmap (cameraTransform (inverseCamera camera)) unit_square
     transformation_coords =
       Prelude.fmap (cameraTransform transformation) unit_square
 
