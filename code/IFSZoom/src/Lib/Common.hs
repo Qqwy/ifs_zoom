@@ -29,6 +29,7 @@ module Lib.Common
   , transformationProbabilityFromSixtuplePairGPU
   , transformationFromSixtupleGPU
   , identityTransformation
+  , isTransformationInvertible
   ) where
 
 import Pipe
@@ -118,3 +119,7 @@ transformationFromSixtupleGPU sixtuple =
 
 identityTransformation :: Transformation
 identityTransformation = Linear.Matrix.identity
+
+isTransformationInvertible :: Transformation -> Bool
+isTransformationInvertible t = Linear.Matrix.det33 t Prelude./= 0
+
