@@ -38,10 +38,7 @@ drawGuides camera initial_camera dimensions transformations =
       |> concat
       |> map (\(color, transformation) -> drawGuide camera initial_camera dims transformation color)
 
-
-
 combineTransformations :: [Transformation] -> Transformation
--- combineTransformations [] = Lib.Common.identityTransformation
 combineTransformations multiple =
   foldr (Linear.Matrix.!*!) Lib.Common.identityTransformation multiple
 

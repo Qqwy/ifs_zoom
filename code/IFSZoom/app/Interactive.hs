@@ -46,6 +46,8 @@ data Input = Input
   , _ty :: Float
   , _zooming :: Maybe Zooming
   , _save_screenshot :: Bool
+  , _show_guides :: Bool
+  , _show_points :: Bool
   }
   deriving (Eq, Ord, Show)
 
@@ -121,6 +123,12 @@ handleInput' event input =
       input{_zooming = Just ZoomOut}
     EventKey (Char 's') Down _ _ ->
       input{_save_screenshot = True}
+    EventKey (Char 'p') Down _ _ ->
+      input
+      |> over show_points not
+    EventKey (Char 'g') Down _ _ ->
+      input
+      |> over show_guides not
     _ ->
       input
 
@@ -191,12 +199,18 @@ updateSimState _time_elapsed sim_state =
 
 drawSimStateWithHelpers :: SimState -> IO Gloss.Picture
 drawSimStateWithHelpers sim_state =
-  Graphics.Gloss.Data.Picture.pictures
-  [ drawSimState sim_state,
-    Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) transformations
-  ]
+  [sim_state_picture, guides_picture]
+  |> Graphics.Gloss.Data.Picture.pictures
   |> return
   where
+    sim_state_picture =
+      if sim_state^.input.show_points
+      then drawSimState sim_state
+      else Graphics.Gloss.Data.Picture.blank
+    guides_picture =
+      if sim_state^.input.show_guides
+      then Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) transformations
+      else Graphics.Gloss.Data.Picture.blank
     -- TODO refactor this
     transformations =
       sim_state^.transformations_list
@@ -259,6 +273,8 @@ initialInput =
   , _tx = 0
   , _ty = 0
   , _save_screenshot = False
+  , _show_guides = False
+  , _show_points = True
   }
 
 buildTransformations :: [IFSConfig.TransformationWithProbability] -> Accelerate.Acc IFS
