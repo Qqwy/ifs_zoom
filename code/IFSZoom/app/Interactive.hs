@@ -209,11 +209,8 @@ drawSimStateWithHelpers sim_state =
       else Graphics.Gloss.Data.Picture.blank
     guides_picture =
       if sim_state^.input.show_guides
-      then Lib.Guide.drawGuides camera' (sim_state^.dimensions) transformations
+      then Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) transformations
       else Graphics.Gloss.Data.Picture.blank
-    camera' =
-      sim_state^.camera
-      |> Lib.Camera.withInitialCamera (sim_state^.initial_camera)
     -- TODO refactor this
     transformations =
       sim_state^.transformations_list

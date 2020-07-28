@@ -66,6 +66,9 @@ inverseCamera :: Camera -> Camera
 inverseCamera camera = Matrix.inv33 camera
 
 
+-- | Scales the camera in equal proportions using the given `scale` float.
+--
+-- Scales to the middle of the screen.
 scaleCamera :: Float -> Camera -> Camera
 scaleCamera scale camera =
   camera
@@ -73,26 +76,27 @@ scaleCamera scale camera =
   |> scaleCamera' scale
   |> translateCamera (0.5) (0.5)
 
--- | Scales the camera in equal proportions using the given `scale` float.
+-- Performs the actual scaling
 scaleCamera' :: Float -> Camera -> Camera
 scaleCamera' scale camera =
   scaleMatrix Matrix.!*! camera
   where
-    scaleMatrix = (V3
-                    (V3 scale 0     0)
-                    (V3 0     scale 0)
-                    (V3 0     0     1)
-                  )
+    scaleMatrix =
+      (V3
+        (V3 1 0 0)
+        (V3 0 1 0)
+        (V3 0 0 (recip scale))
+      )
 
 -- | Translates the camera position using the given `horizontal` and `vertical` offsets.
 translateCamera :: Float -> Float -> Camera -> Camera
 translateCamera horizontal vertical camera =
-  translationMatrix Matrix.!+! camera
+  translationMatrix Matrix.!*! camera
   where
     translationMatrix = (V3
-                          (V3 0 0 horizontal)
-                          (V3 0 0 vertical)
-                          (V3 0 0 0)
+                          (V3 1 0 horizontal)
+                          (V3 0 1 vertical)
+                          (V3 0 0 1)
                         )
 
 cameraFromSixtuple :: (Float, Float, Float, Float, Float, Float) -> Camera
@@ -126,4 +130,5 @@ guideFromCoords (x, y, w, h)  =
 
 withInitialCamera :: Camera -> Camera -> Camera
 withInitialCamera initial_camera camera =
-  (inverseCamera initial_camera) Matrix.!*! camera
+  -- (inverseCamera initial_camera) Matrix.!*! camera
+  camera Matrix.!*! initial_camera

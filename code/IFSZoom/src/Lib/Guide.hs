@@ -19,10 +19,11 @@ import qualified Linear.Matrix
 
 drawGuides ::
   Lib.Camera          -- ^ The current camera matrix
+  -> Lib.Camera       -- ^ The initial camera matrix
   -> (Word, Word)     -- ^ The screen dimensions
   -> [Transformation] -- ^List of transformations of this IFS
   -> Gloss.Picture
-drawGuides camera dimensions transformations =
+drawGuides camera initial_camera dimensions transformations =
   guides
   |> reverse -- Draw shallower guides on top
   |> Graphics.Gloss.Data.Picture.pictures
@@ -35,24 +36,26 @@ drawGuides camera dimensions transformations =
       |> (zip colors)
       |> map (\(color, transformations) -> map (\ts -> (color, combineTransformations ts)) transformations)
       |> concat
-      |> map (\(color, transformation) -> drawGuide camera dims transformation color)
+      |> map (\(color, transformation) -> drawGuide camera initial_camera dims transformation color)
 
 combineTransformations :: [Transformation] -> Transformation
 combineTransformations multiple =
   foldr (Linear.Matrix.!*!) Lib.Common.identityTransformation multiple
 
 
-drawGuide :: Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Color -> Gloss.Picture
-drawGuide camera dimensions transformation color =
+drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> Transformation -> Gloss.Color -> Gloss.Picture
+drawGuide camera initial_camera dimensions transformation color =
   (0, 0, 1, 1)
-  |> guideFromCoords
+  |> guideFromCoords initial_camera
   |> transformGuide transformation
+  |> fmap (Lib.Camera.cameraTransform (initial_camera))
   |> guideToPicture camera dimensions
   |> Graphics.Gloss.Data.Picture.color (color |> Gloss.withAlpha 0.5)
 
-guideFromCoords :: (Float, Float, Float, Float) ->  [Point]
-guideFromCoords (x, y, w, h)  =
+guideFromCoords :: Lib.Camera ->(Float, Float, Float, Float) ->  [Point]
+guideFromCoords initial_camera (x, y, w, h)  =
   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
+  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
 
 transformGuide :: Transformation -> [Point] -> [Point]
 transformGuide transformation guide_points =

@@ -62,12 +62,14 @@ pointToHomogeneousGPU :: Exp Point -> Exp HomogeneousPoint
 pointToHomogeneousGPU (unlift -> (x, y)) = lift ((V3 x y 1) :: V3 (Exp Float))
 
 -- | Inverse of `pointToHomogeneous`
+--
+-- Note that `s` is not always `1`; it is altered by scaling transformations.
 homogeneousToPoint :: HomogeneousPoint -> Point
-homogeneousToPoint (V3 x y _) = (x, y)
+homogeneousToPoint (V3 x y s) = (x / s, y / s)
 
 -- | Identical to `homogeneousToPoint` but runs on the GPU
 homogeneousToPointGPU :: Exp HomogeneousPoint -> Exp Point
-homogeneousToPointGPU (unlift -> V3 x y _) = lift ((x, y) :: (Exp Float, Exp Float))
+homogeneousToPointGPU (unlift -> V3 x y s) = lift ((x / s, y / s) :: (Exp Float, Exp Float))
 
 -- | Runs a function working on a point in homogeneous form on a 'normal' 2D point.
 -- by wrapping it in a conversion to and from homogeneous notation
