@@ -137,12 +137,13 @@ isCameraInsideTransformation camera initial_camera transformation =
       -- buildGuide camera initial_camera (800, 800) []
       guideFromCoords (Lib.Common.identityTransformation) (0, 0, 1, 1)
       |> Prelude.fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera camera))
-      |> Prelude.fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
+      -- |> Prelude.fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
       |> traceShowId
     transformation_coords =
       -- buildGuide camera initial_camera (800, 800) [transformation]
       guideFromCoords initial_camera (0, 0, 1, 1)
       |> Prelude.fmap (Lib.Camera.cameraTransform transformation)
+      |> Prelude.fmap (Lib.Camera.cameraTransform (initial_camera))
       |> traceShowId
   -- where
   --   unit_square =
