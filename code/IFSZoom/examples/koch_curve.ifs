@@ -1,0 +1,31 @@
+let one_third = 0.3333333333333333
+let two_third = 0.6666666666666666
+let one_sixth = 0.16666666666666666
+let sqrt3_div6 = 0.28867513459481287
+let m_sqrt3_div6 = -0.28867513459481287
+
+in
+
+{ initialCamera =
+  { a = 1.0
+  , b = 0.0
+  , c = 0.0
+  , d = 1.0
+  , e = 0.0
+  , f = 0.0
+  }
+, transformations =
+  [ { transformation = { a = one_third, b = 0.0, c = 0.0, d = one_third, e = 0.0, f = 0.0 }
+    , probability = 0.25
+    }
+  , { transformation = { a = one_sixth, b = m_sqrt3_div6, c = sqrt3_div6, d = one_sixth, e = one_third, f = 0.0 }
+    , probability = 0.25
+    }
+  , { transformation = { a = one_sixth, b = sqrt3_div6, c = m_sqrt3_div6, d = one_sixth, e = 0.5, f = sqrt3_div6 }
+    , probability = 0.25
+    }
+  , { transformation = { a = one_third, b = 0.0, c = 0.0, d = one_third, e = two_third, f = 0.0 }
+    , probability = 0.25
+    }
+  ]
+}
