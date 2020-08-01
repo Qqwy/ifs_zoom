@@ -18,6 +18,8 @@ import qualified Graphics.Gloss as Gloss
 import qualified Graphics.Gloss.Data.Picture
 import qualified Linear.Matrix
 
+import Debug.Trace
+
 drawGuides ::
   Lib.Camera          -- ^ The current camera matrix
   -> Lib.Camera       -- ^ The initial camera matrix
@@ -33,7 +35,7 @@ drawGuides camera initial_camera dimensions transformations =
     colors = cycle [Gloss.red, Gloss.green, Gloss.blue, Gloss.cyan, Gloss.magenta, Gloss.yellow]
     guides =
       transformations
-      |> combinationsUpToDepth' 8
+      |> combinationsUpToDepth' 2
       |> (zip colors)
       |> map (\(color, transformations) -> map (\ts -> (color, ts)) transformations)
       |> concat
@@ -131,8 +133,17 @@ isCameraInsideTransformation camera initial_camera transformation =
   if Linear.Matrix.det33 transformation == 0 then False
   else Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
   where
-    camera_coords = buildGuide camera initial_camera (1, 1) []
-    transformation_coords = buildGuide camera initial_camera (1, 1) [transformation]
+    camera_coords =
+      -- buildGuide camera initial_camera (800, 800) []
+      guideFromCoords (Lib.Common.identityTransformation) (0, 0, 1, 1)
+      |> Prelude.fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera camera))
+      |> Prelude.fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
+      |> traceShowId
+    transformation_coords =
+      -- buildGuide camera initial_camera (800, 800) [transformation]
+      guideFromCoords initial_camera (0, 0, 1, 1)
+      |> Prelude.fmap (Lib.Camera.cameraTransform transformation)
+      |> traceShowId
   -- where
   --   unit_square =
   --     guideFromCoords initial_camera (0, 0, 1, 1)
