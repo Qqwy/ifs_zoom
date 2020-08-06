@@ -37,6 +37,7 @@ library
     , Lib.Picture
     , Lib.Random
     , Lib.Sort
+    , Lib.Transformation
     , Helper
 
   build-depends:

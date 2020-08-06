@@ -12,10 +12,7 @@ Contains common types, type aliases and functions
 that are used throughout the application
 -}
 module Lib.Common
-  ( Transformation
-  , Probability
-  , IFS
-  , Point
+  ( Point
   , HomogeneousPoint
   , RNGVal
   , pointToHomogeneous
@@ -24,26 +21,12 @@ module Lib.Common
   , homogeneousToPointGPU
   , mapPointAsHomogeneous
   , mapPointAsHomogeneousGPU
-  , transformationProbabilityFromSixtuplePair
-  , transformationFromSixtuple
-  , transformationProbabilityFromSixtuplePairGPU
-  , transformationFromSixtupleGPU
-  , identityTransformation
-  , isTransformationInvertible
   ) where
 
 import Pipe
 import Data.Array.Accelerate
-import Data.Array.Accelerate.Linear (V3(..), M33)
-import qualified Linear.Matrix
+import Data.Array.Accelerate.Linear (V3(..))
 
--- | An affine transformation is manipulated in this program as its augmented matrix.
-type Transformation = M33 Float
--- | Type that indicates that we are expecting a float in the [0..1) range.
-type Probability = Float
--- | An Iterated Function System is described by a collection of transformations
--- with, for the Chaos Game, associated probabilities
-type IFS = Vector (Transformation, Probability)
 -- | Since we are working in 2D, a point contaisn two coordinates.
 type Point = (Float, Float)
 
@@ -87,41 +70,3 @@ mapPointAsHomogeneousGPU fun point =
   |> pointToHomogeneousGPU
   |> fun
   |> homogeneousToPointGPU
-
-transformationProbabilityFromSixtuplePair :: ((Float, Float, Float, Float, Float, Float), Probability) -> (Transformation, Probability)
-transformationProbabilityFromSixtuplePair ((sixtuple, p)) =
-  (transformationFromSixtuple sixtuple, (p :: Float))
-
-transformationFromSixtuple :: (Float, Float, Float, Float, Float, Float) -> Transformation
-transformationFromSixtuple sixtuple =
-  let
-    (a, b, c, d, e, f) = sixtuple :: (Float, Float, Float, Float, Float, Float)
-    matrix :: M33 (Float)
-    matrix = (V3 (V3 a b e)
-                 (V3 c d f)
-                 (V3 0 0 1))
-  in
-    matrix
-
-
-transformationProbabilityFromSixtuplePairGPU :: Exp ((Float, Float, Float, Float, Float, Float), Probability) -> Exp (Transformation, Probability)
-transformationProbabilityFromSixtuplePairGPU (unlift -> (sixtuple, p)) =
-  lift (transformationFromSixtupleGPU sixtuple, (p :: Exp Float))
-
-transformationFromSixtupleGPU :: Exp (Float, Float, Float, Float, Float, Float) -> Exp Transformation
-transformationFromSixtupleGPU sixtuple =
-  let
-    (a, b, c, d, e, f) = unlift sixtuple :: (Exp Float, Exp Float, Exp Float, Exp Float, Exp Float, Exp Float)
-    matrix :: M33 (Exp Float)
-    matrix = (V3 (V3 a b e)
-                 (V3 c d f)
-                 (V3 0 0 1))
-  in
-    lift matrix
-
-identityTransformation :: Transformation
-identityTransformation = Linear.Matrix.identity
-
-isTransformationInvertible :: Transformation -> Bool
-isTransformationInvertible t = Linear.Matrix.det33 t Prelude./= 0
-
