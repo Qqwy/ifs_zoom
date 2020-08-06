@@ -1,7 +1,6 @@
 module Lib.CameraSpec (spec) where
 
 import qualified Lib.Camera
-import qualified Lib.Common
 
 import Pipe
 import Test.Hspec
@@ -19,10 +18,10 @@ spec = do
         let
           camera =
            (camera_tuple :: (Float, Float, Float, Float, Float, Float))
-           |> Lib.Camera.cameraFromSixtuple
+           |> Lib.Camera.fromSixtuple
           res =
             camera
-            |> Lib.Camera.scaleCamera 1
+            |> Lib.Camera.scale 1
         in
           -- Check for 'subjective' floating-point 'equality'.
           Linear.Epsilon.nearZero ((res) Prelude.- (camera))
@@ -31,11 +30,11 @@ spec = do
         let
           camera =
            (camera_tuple :: (Float, Float, Float, Float, Float, Float))
-           |> Lib.Camera.cameraFromSixtuple
+           |> Lib.Camera.fromSixtuple
           res =
             camera
-            |> Lib.Camera.scaleCamera zoom_scale
-            |> Lib.Camera.scaleCamera (recip zoom_scale)
+            |> Lib.Camera.scale zoom_scale
+            |> Lib.Camera.scale (recip zoom_scale)
         in
           zoom_scale Prelude./= 0
           ==>
@@ -48,8 +47,8 @@ spec = do
         let
           camera =
             ((1,0,0,1,0,0) :: (Float, Float, Float, Float, Float, Float))
-            |> Lib.Camera.cameraFromSixtuple
-            |> Lib.Camera.translateCamera horizontal vertical
+            |> Lib.Camera.fromSixtuple
+            |> Lib.Camera.translate horizontal vertical
           res =
             ((0, 0) :: (Float, Float))
             |> lift

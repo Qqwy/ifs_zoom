@@ -17,16 +17,14 @@ The resulting transformation is then given to the GPU to map over all (visible) 
 
 module Lib.Camera
   ( Camera
-  , scaleCamera
-  , translateCamera
-  , cameraFromSixtuple
+  , scale
+  , translate
+  , fromSixtuple
   , cameraTransform
   , cameraTransformGPU
   , inverseCamera
-  , defaultCamera
-  , withInitialCamera
+  , withInitial
   , identity
-  -- , isCameraInsideTransformation
   ) where
 
 import Pipe
@@ -66,28 +64,28 @@ inverseCamera camera =
 -- | Scales the camera in equal proportions using the given `scale` float.
 --
 -- Scales to the middle of the screen.
-scaleCamera :: Float -> Camera -> Camera
-scaleCamera scale camera =
+scale :: Float -> Camera -> Camera
+scale amount camera =
   camera
-  |> translateCamera (-0.5) (-0.5)
-  |> scaleCamera' scale
-  |> translateCamera (0.5) (0.5)
+  |> translate(-0.5) (-0.5)
+  |> scale' amount
+  |> translate(0.5) (0.5)
 
 -- Performs the actual scaling
-scaleCamera' :: Float -> Camera -> Camera
-scaleCamera' scale camera =
+scale' :: Float -> Camera -> Camera
+scale' amount camera =
   scaleMatrix Matrix.!*! camera
   where
     scaleMatrix =
       (V3
         (V3 1 0 0)
         (V3 0 1 0)
-        (V3 0 0 (recip scale))
+        (V3 0 0 (recip amount))
       )
 
 -- | Translates the camera position using the given `horizontal` and `vertical` offsets.
-translateCamera :: Float -> Float -> Camera -> Camera
-translateCamera horizontal vertical camera =
+translate :: Float -> Float -> Camera -> Camera
+translate horizontal vertical camera =
   translationMatrix Matrix.!*! camera
   where
     translationMatrix = (V3
@@ -96,8 +94,8 @@ translateCamera horizontal vertical camera =
                           (V3 0 0 1)
                         )
 
-cameraFromSixtuple :: (Float, Float, Float, Float, Float, Float) -> Camera
-cameraFromSixtuple (a, b, c, d, e, f) =
+fromSixtuple :: (Float, Float, Float, Float, Float, Float) -> Camera
+fromSixtuple (a, b, c, d, e, f) =
   let
     matrix :: M33 Float
     matrix = (V3 (V3 a b e)
@@ -106,13 +104,8 @@ cameraFromSixtuple (a, b, c, d, e, f) =
   in
     matrix
 
-defaultCamera :: (Float, Float, Float, Float, Float, Float) -> Camera
-defaultCamera transformation_sixtuple =
-  cameraFromSixtuple transformation_sixtuple
-
-
-withInitialCamera :: Camera -> Camera -> Camera
-withInitialCamera initial_camera camera =
+withInitial :: Camera -> Camera -> Camera
+withInitial initial_camera camera =
   camera Matrix.!*! initial_camera
 
 identity = Lib.Transformation.identity

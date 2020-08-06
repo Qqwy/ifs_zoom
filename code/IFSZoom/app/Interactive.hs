@@ -150,7 +150,7 @@ applyInput input sim_state = do
 applyDragging :: SimState -> SimState
 applyDragging sim_state@SimState{_input = input@Input{_tx, _ty}, _camera, _dimensions = (screen_width, screen_height)} =
     sim_state
-    { _camera = Lib.Camera.translateCamera unit_x unit_y _camera
+    { _camera = Lib.Camera.translate unit_x unit_y _camera
     , _input = input{ _tx = 0, _ty = 0}
     }
   where
@@ -164,11 +164,11 @@ applyZooming sim_state =
       sim_state
     Just ZoomIn ->
       sim_state
-      |> over camera (Lib.Camera.scaleCamera 1.025)
+      |> over camera (Lib.Camera.scale 1.025)
       |> set (input.zooming) Nothing
     Just ZoomOut ->
       sim_state
-      |> over camera (Lib.Camera.scaleCamera 0.975)
+      |> over camera (Lib.Camera.scale 0.975)
       |> set (input.zooming) Nothing
 
 maybeScreenshot :: SimState -> IO SimState
@@ -249,7 +249,7 @@ renderSimState sim_state =
     camera' =
       -- ((Linear.Matrix.inv33 (sim_state^.initial_camera)) Linear.Matrix.!*! (sim_state^.camera))
       sim_state^.camera
-      |> Lib.Camera.withInitialCamera (sim_state^.initial_camera)
+      |> Lib.Camera.withInitial (sim_state^.initial_camera)
       |> Accelerate.lift
       |> Accelerate.unit
 
@@ -264,7 +264,7 @@ initialSimState ifs_config options random_matrix =
   , _camera = Lib.Camera.identity
   , _input = initialInput
   , _transformations_list = transformations_list
-  , _initial_camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
+  , _initial_camera = Lib.Camera.fromSixtuple (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   }
   where
     seed' = options ^. seed
