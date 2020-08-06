@@ -28,11 +28,6 @@ to make testing the various components easier.
 module Lib.ChaosGame
   ( chaosGame
   , fillChaosGameMatrix
-  , pointToHomogeneous
-  , homogeneousToPoint
-  , transformationProbabilityFromSixtuplePairGPU
-  , transformationFromSixtupleGPU
-  , chaosTransform
   , floatPairToWord64
   , word64ToFloatPair
   ) where
@@ -41,9 +36,10 @@ import Pipe
 
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Data.Bits ((.|.), shiftL, shiftR)
-import Data.Array.Accelerate.Linear.Matrix ((!*))
 
-import Lib.Common
+import Lib.Common (Point)
+import Lib.Transformation (Transformation, Probability, IFS)
+import qualified Lib.Transformation
 import qualified Lib.Random
 
 
@@ -83,9 +79,9 @@ fillChaosGameMatrix transformations random_points =
     starting_point = (0, 0) |> lift
 
 
--- | Transforms a single point using one of the IFS's transformations.
-chaosTransform :: Exp Transformation -> Exp HomogeneousPoint -> Exp HomogeneousPoint
-chaosTransform matrix point = matrix !* point
+-- -- | Transforms a single point using one of the IFS's transformations.
+-- chaosTransform :: Exp Transformation -> Exp HomogeneousPoint -> Exp HomogeneousPoint
+-- chaosTransform matrix point = matrix !* point
 
 -- | Picks a transformation from an array of transformations
 -- based on the value of `current_point`
@@ -105,7 +101,7 @@ pointBasedTransform transformations prev_point current_point =
       |> toFloating
       |> pickTransformation transformations
   in
-    mapPointAsHomogeneousGPU (chaosTransform transformation) prev_point
+    Lib.Transformation.transformGPU transformation prev_point
 
 -- | Picks the correct transformation
 -- based on the `rngval` passed in.

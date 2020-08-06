@@ -14,11 +14,14 @@ module Lib
   ( naivePointCloudToPicture
   , Lib.Camera.Camera
   , Lib.Picture.RasterPicture
+  , Lib.Transformation.Transformation
+  , Lib.Transformation.IFS
 ) where
 
 import Lib.Common
 import qualified Lib.Camera
 import qualified Lib.Picture
+import qualified Lib.Transformation
 
 import Data.Array.Accelerate
 

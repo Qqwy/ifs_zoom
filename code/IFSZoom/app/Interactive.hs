@@ -15,11 +15,14 @@ import qualified IFSConfig
 import IFSConfig(transformations)
 
 
-import Lib.Common
+import Lib.Common (Point)
+import qualified Lib.Common
 import qualified Lib
-import qualified Lib.ChaosGame
 import qualified Lib.Camera
+import qualified Lib.ChaosGame
 import qualified Lib.Guide
+import Lib.Transformation (Transformation, IFS)
+import qualified Lib.Transformation
 
 import Lens.Micro.Platform
 
@@ -221,7 +224,7 @@ drawSimStateWithHelpers sim_state =
 extractTransformations transformations_list =
   transformations_list
   |> map IFSConfig.transformationWithProbabilityToSixtuplePair
-  |> map Lib.Common.transformationProbabilityFromSixtuplePair
+  |> map Lib.Transformation.fromSixtuplePair
   |> map fst
 
 -- | Called every frame.
@@ -258,7 +261,7 @@ initialSimState ifs_config options random_matrix =
   , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism' (Accelerate.use random_matrix)
   , _dimensions = (picture_width, picture_height)
   -- , _camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
-  , _camera = Lib.Common.identityTransformation
+  , _camera = Lib.Camera.identity
   , _input = initialInput
   , _transformations_list = transformations_list
   , _initial_camera = Lib.Camera.defaultCamera (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
@@ -291,4 +294,4 @@ buildTransformations transformations_list =
   |> map IFSConfig.transformationWithProbabilityToSixtuplePair
   |> Accelerate.fromList (Z :. (length transformations_list))
   |> Accelerate.use
-  |> Accelerate.map (Lib.ChaosGame.transformationProbabilityFromSixtuplePairGPU)
+  |> Accelerate.map Lib.Transformation.fromSixtuplePairGPU

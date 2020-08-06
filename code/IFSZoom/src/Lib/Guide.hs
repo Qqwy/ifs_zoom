@@ -1,6 +1,6 @@
 module Lib.Guide
   ( drawGuides
-  ,  allCombinations
+  , allCombinations
   , combinationsUpToDepth
   , isCameraInsideTransformation
   ) where
@@ -8,7 +8,9 @@ module Lib.Guide
 import Pipe
 import qualified Lib
 import qualified Lib.Common
-import Lib.Common (Transformation, Point)
+import Lib.Common (Point)
+import Lib.Transformation (Transformation)
+import qualified Lib.Transformation
 import qualified Lib.Geometry
 
 import qualified Control.Applicative
@@ -41,15 +43,15 @@ drawGuides camera initial_camera dimensions transformations =
       |> concat
       |> map (\(color, transformations) -> drawGuide camera initial_camera dims transformations color)
 
-combineTransformations :: [Transformation] -> Transformation
-combineTransformations multiple =
-  foldr (Linear.Matrix.!*!) Lib.Common.identityTransformation multiple
+-- combineTransformations :: [Transformation] -> Transformation
+-- combineTransformations multiple =
+--   foldr (Linear.Matrix.!*!) Lib.Common.identityTransformation multiple
 
 buildGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> [Point]
 buildGuide camera initial_camera dimensions transformations =
   (0, 0, 1, 1)
   |> guideFromCoords initial_camera
-  |> transformGuide (combineTransformations transformations)
+  |> transformGuide (Lib.Transformation.combine transformations)
   |> fmap (Lib.Camera.cameraTransform initial_camera)
   |> guideToScreen camera dimensions
 
@@ -141,7 +143,7 @@ isCameraInsideTransformation camera initial_camera transformation =
   else Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
   where
     camera_coords =
-      guideFromCoords (Lib.Common.identityTransformation) (0, 0, 1, 1)
+      guideFromCoords (Lib.Transformation.identity) (0, 0, 1, 1)
       |> Prelude.fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera camera))
       |> traceShowId
     transformation_coords =

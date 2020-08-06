@@ -1,5 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
-module Transformation
+module Lib.Transformation
   ( Transformation
   , Probability
   , IFS
@@ -12,6 +12,7 @@ module Transformation
   , transform
   , transformGPU
   , invert
+  , combine
   ) where
 
 import Data.Array.Accelerate
@@ -91,3 +92,7 @@ invert t =
     Just (Matrix.inv33 t)
   else
     Nothing
+
+combine :: [Transformation] -> Transformation
+combine multiple =
+  foldr (Matrix.!*!) identity multiple

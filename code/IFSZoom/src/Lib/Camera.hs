@@ -25,19 +25,18 @@ module Lib.Camera
   , inverseCamera
   , defaultCamera
   , withInitialCamera
+  , identity
   -- , isCameraInsideTransformation
   ) where
 
 import Pipe
-import qualified Prelude
 import Data.Array.Accelerate as Accelerate
-import Lib.Common (Transformation, Point)
-import qualified Lib.Common
+import Lib.Common (Point)
 import Lib.Transformation (Transformation)
 import qualified Lib.Transformation
 
+import Data.Maybe
 import Data.Array.Accelerate.Linear (V3(..), M33)
-import qualified Data.Array.Accelerate.Linear.Matrix as GPU.Matrix
 import qualified Linear.Matrix as Matrix
 
 -- | A camera is 'just' another transformation
@@ -47,20 +46,21 @@ type Camera = Transformation
 cameraTransform :: Camera -> Point -> Point
 cameraTransform =
   -- Lib.Common.mapPointAsHomogeneous (cameraTransform' camera) point
-  Transformation.transform
+  Lib.Transformation.transform
 
 
 -- | Transforms a point from world space to screen space.
 -- (Runs on the GPU!)
 cameraTransformGPU :: Exp Camera -> Exp Lib.Common.Point -> Exp Lib.Common.Point
-cameraTransformGPU = Transformation.transformGPU
+cameraTransformGPU = Lib.Transformation.transformGPU
 
 -- | Inverts the transformation the camera makes.
 -- useful for e.g. checking where the picure bounds (screen space) end up in world space.
 inverseCamera :: Camera -> Camera
-inverseCamera camera = camera
-|> Transformation.invert
-|> Data.Maybe.fromJust
+inverseCamera camera =
+  camera
+  |> Lib.Transformation.invert
+  |> Data.Maybe.fromJust
 
 
 -- | Scales the camera in equal proportions using the given `scale` float.
@@ -114,3 +114,5 @@ defaultCamera transformation_sixtuple =
 withInitialCamera :: Camera -> Camera -> Camera
 withInitialCamera initial_camera camera =
   camera Matrix.!*! initial_camera
+
+identity = Lib.Transformation.identity
