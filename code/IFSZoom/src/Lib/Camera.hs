@@ -22,7 +22,7 @@ module Lib.Camera
   , fromSixtuple
   , cameraTransform
   , cameraTransformGPU
-  , inverseCamera
+  , inverse
   , withInitial
   , identity
   ) where
@@ -54,8 +54,8 @@ cameraTransformGPU = Lib.Transformation.transformGPU
 
 -- | Inverts the transformation the camera makes.
 -- useful for e.g. checking where the picure bounds (screen space) end up in world space.
-inverseCamera :: Camera -> Camera
-inverseCamera camera =
+inverse :: Camera -> Camera
+inverse camera =
   camera
   |> Lib.Transformation.invert
   |> Data.Maybe.fromJust

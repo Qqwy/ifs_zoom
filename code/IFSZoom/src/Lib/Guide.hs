@@ -20,7 +20,7 @@ import qualified Graphics.Gloss as Gloss
 import qualified Graphics.Gloss.Data.Picture
 import qualified Linear.Matrix
 
-import Debug.Trace
+type Guide = [Point]
 
 drawGuides ::
   Lib.Camera          -- ^ The current camera matrix
@@ -34,7 +34,7 @@ drawGuides camera initial_camera dimensions transformations =
   |> Graphics.Gloss.Data.Picture.pictures
   where
     dims = dimensions |> (\(x, y) -> (fromIntegral x, fromIntegral y))
-    colors = cycle [Gloss.red, Gloss.green, Gloss.blue, Gloss.cyan, Gloss.magenta, Gloss.yellow]
+    colors = cycle guide_colors
     guides =
       transformations
       |> combinationsUpToDepth' 8
@@ -43,14 +43,13 @@ drawGuides camera initial_camera dimensions transformations =
       |> concat
       |> map (\(color, transformations) -> drawGuide camera initial_camera dims transformations color)
 
--- combineTransformations :: [Transformation] -> Transformation
--- combineTransformations multiple =
---   foldr (Linear.Matrix.!*!) Lib.Common.identityTransformation multiple
+guide_colors :: [Gloss.Color]
+guide_colors = [Gloss.red, Gloss.green, Gloss.blue, Gloss.cyan, Gloss.magenta, Gloss.yellow]
 
-buildGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> [Point]
+buildGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> Guide
 buildGuide camera initial_camera dimensions transformations =
-  (0, 0, 1, 1)
-  |> guideFromCoords initial_camera
+  unitGuide
+  |> transformGuide (Lib.Camera.inverse initial_camera)
   |> transformGuide (Lib.Transformation.combine transformations)
   |> fmap (Lib.Camera.cameraTransform initial_camera)
   |> guideToScreen camera dimensions
@@ -62,23 +61,26 @@ drawGuide camera initial_camera dimensions transformations color =
   |> guideToPicture dimensions
   |> Graphics.Gloss.Data.Picture.color (color |> Gloss.withAlpha 0.5)
 
-guideFromCoords :: Lib.Camera ->(Float, Float, Float, Float) ->  [Point]
-guideFromCoords initial_camera (x, y, w, h) =
-  [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
-  |> fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera initial_camera))
+unitGuide :: Guide
+unitGuide =
+  guideFromCoords (0, 0, 1, 1)
 
-transformGuide :: Transformation -> [Point] -> [Point]
+guideFromCoords :: (Float, Float, Float, Float) ->  Guide
+guideFromCoords (x, y, w, h) =
+  [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
+
+transformGuide :: Transformation -> Guide -> Guide
 transformGuide transformation guide_points =
   guide_points
   |> fmap (Lib.Camera.cameraTransform transformation)
 
-guideToScreen :: Lib.Camera -> (Float, Float) -> [Point] -> [Point]
+guideToScreen :: Lib.Camera -> (Float, Float) -> Guide -> Guide
 guideToScreen camera (screen_width, screen_height) guide_points =
   guide_points
   |> fmap (Lib.Camera.cameraTransform camera)
   |> fmap (\(x, y) -> (x*screen_width, y*(-screen_height)))
 
-guideToPicture :: (Float, Float) -> [Point] -> Gloss.Picture
+guideToPicture :: (Float, Float) -> Guide -> Gloss.Picture
 guideToPicture (screen_width, screen_height) guide_points =
   guide_points
   |> Graphics.Gloss.Data.Picture.line
@@ -136,18 +138,18 @@ combinationsUpToDepth' depth elems =
 --
 -- `initial_camera` is used to move between 'normalized screen coordinates'
 -- (which `camera` uses)
--- and 'world coordinates' (which `transformation` uses).
+-- and 'world coordinates'
+-- (which `transformation` uses).
 isCameraInsideTransformation :: Lib.Camera -> Lib.Camera -> Transformation -> Bool
 isCameraInsideTransformation camera initial_camera transformation =
   if Linear.Matrix.det33 transformation == 0 then False
   else Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
   where
     camera_coords =
-      guideFromCoords (Lib.Transformation.identity) (0, 0, 1, 1)
-      |> Prelude.fmap (Lib.Camera.cameraTransform (Lib.Camera.inverseCamera camera))
-      |> traceShowId
+      unitGuide
+      |> transformGuide (Lib.Camera.inverse camera)
+      |> transformGuide (Lib.Camera.inverse initial_camera)
     transformation_coords =
-      guideFromCoords initial_camera (0, 0, 1, 1)
-      |> Prelude.fmap (Lib.Camera.cameraTransform transformation)
-      |> Prelude.fmap (Lib.Camera.cameraTransform (initial_camera))
-      |> traceShowId
+      unitGuide
+      |> transformGuide (Lib.Camera.inverse initial_camera)
+      |> transformGuide transformation
