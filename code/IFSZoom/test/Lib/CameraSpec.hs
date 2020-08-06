@@ -24,7 +24,8 @@ spec = do
             camera
             |> Lib.Camera.scaleCamera 1
         in
-          (res) Prelude.== camera
+          -- Check for 'subjective' floating-point 'equality'.
+          Linear.Epsilon.nearZero ((res) Prelude.- (camera))
     it "can zoom in and then back out" $ do
       property $ \camera_tuple zoom_scale ->
         let
