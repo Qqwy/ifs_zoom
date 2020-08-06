@@ -38,7 +38,8 @@ maybeSeedRNG :: CLIOptions -> IO CLIOptions
 maybeSeedRNG options = do
   seed_val <- maybeSeedRNG' options
   putStrLn ("Using seed " ++ (show seed_val))
-  return (set seed (Just seed_val) options)
+  let options' = (set seed (Just seed_val) options)
+  return options'
   where
     maybeSeedRNG' options =
       case options^.seed of

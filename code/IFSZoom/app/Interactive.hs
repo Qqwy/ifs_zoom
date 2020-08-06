@@ -44,8 +44,7 @@ data Input = Input
   { _dragging :: Maybe (Float, Float)
     -- ^ Nothing if not dragging, Just (x, y) when we are dragging,
     -- where (x, y) is the position we started to drag from
-  , _tx :: Float
-  , _ty :: Float
+  , _translation :: (Float, Float)
   , _zooming :: Maybe Zooming
   , _save_screenshot :: Bool
   , _show_guides :: Bool
@@ -110,7 +109,7 @@ parseInput event input =
     EventKey (MouseButton LeftButton) Up _ _ ->
       input{_dragging = Nothing}
     EventKey (MouseButton LeftButton) Down _ pos ->
-      input{_dragging = Just pos, _tx = 0, _ty = 0}
+      input{_dragging = Just pos, _translation = (0, 0)}
     EventMotion (x, y) ->
       case input^.dragging of
         Nothing ->
@@ -118,8 +117,8 @@ parseInput event input =
         Just (x0, y0) ->
           input
           |> set dragging (Just (x, y))
-          |> tx +~ (x - x0)
-          |> ty +~ (y - y0)
+          |> (translation._1) +~ (x - x0)
+          |> (translation._2) +~ (y - y0)
     EventKey (MouseButton WheelUp) _ _ _ ->
       input{_zooming = Just ZoomIn}
     EventKey (MouseButton WheelDown) _ _ _ ->
@@ -152,28 +151,32 @@ applyInput input sim_state = do
     shouldUpdate sim_state = sim_state{_should_update = True}
 
 applyDragging :: SimState -> SimState
-applyDragging sim_state@SimState{_input = input@Input{_tx, _ty}, _camera, _dimensions = (screen_width, screen_height)} =
+applyDragging sim_state =
+  let
+    (screen_x, screen_y) = sim_state^.dimensions |> over both fromIntegral
+    (tx, ty) = sim_state^.input.translation
+    (unit_x, unit_y) = (tx / screen_x, ty / screen_y)
+  in
     sim_state
-    { _camera = Lib.Camera.translate unit_x unit_y _camera
-    , _input = input{ _tx = 0, _ty = 0}
-    }
-  where
-    unit_x = _tx / (fromIntegral screen_width)
-    unit_y = -_ty / (fromIntegral screen_height)
+    |> over camera (Lib.Camera.translate unit_x (-unit_y))
+    |> set (input.translation) (0, 0)
 
 applyZooming :: SimState -> SimState
 applyZooming sim_state =
-  case sim_state^.input.zooming of
-    Nothing ->
-      sim_state
-    Just ZoomIn ->
-      sim_state
-      |> over camera (Lib.Camera.scale 1.025)
-      |> set (input.zooming) Nothing
-    Just ZoomOut ->
-      sim_state
-      |> over camera (Lib.Camera.scale 0.975)
-      |> set (input.zooming) Nothing
+  let
+    speed = 0.025
+  in
+    case sim_state^.input.zooming of
+      Nothing ->
+        sim_state
+      Just ZoomIn ->
+        sim_state
+        |> over camera (Lib.Camera.scale (1 + speed))
+        |> set (input.zooming) Nothing
+      Just ZoomOut ->
+        sim_state
+        |> over camera (Lib.Camera.scale (1 - speed))
+        |> set (input.zooming) Nothing
 
 maybeScreenshot :: SimState -> IO SimState
 maybeScreenshot sim_state =
@@ -285,8 +288,7 @@ initialInput =
   Input
   { _dragging = Nothing
   , _zooming = Nothing
-  , _tx = 0
-  , _ty = 0
+  , _translation = (0, 0)
   , _save_screenshot = False
   , _show_guides = False
   , _show_points = True

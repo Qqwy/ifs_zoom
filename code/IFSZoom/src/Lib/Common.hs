@@ -14,7 +14,6 @@ that are used throughout the application
 module Lib.Common
   ( Point
   , HomogeneousPoint
-  , RNGVal
   , pointToHomogeneous
   , pointToHomogeneousGPU
   , homogeneousToPoint
@@ -32,9 +31,6 @@ type Point = (Float, Float)
 
 -- | A point that we can easily transform using our `Transformation` type.
 type HomogeneousPoint = V3 Float
-
--- | A seed or randomly chosen value.
-type RNGVal = Word64
 
 -- | Turns a 2D (x, y) point into a 3D vector ('homogeneous notation') where the 'z' component is 1
 pointToHomogeneous :: Point -> HomogeneousPoint
