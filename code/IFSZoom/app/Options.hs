@@ -11,14 +11,13 @@ module Options
 import Options.Applicative
 import Data.Semigroup ((<>))
 import Data.Word
-import Data.Text (Text)
 
 import Lens.Micro.Platform
 
 data CLIOptions = CLIOptions
   { _samples :: Word64
   , _paralellism :: Word64
-  , _seed :: Word64
+  , _seed :: Maybe Word64
   , _render_width :: Word
   , _render_height :: Word
   -- , _ifs_filename :: Text
@@ -46,7 +45,7 @@ commandLineOptions = CLIOptions
     <> metavar "N_SAMPLES"
     <> help "The number of samples or points to generate using the 'chaos game' rendering method."
     <> showDefault
-    <> value 1000000
+    <> value 100000000
   )
 
   <*> option auto
@@ -58,12 +57,11 @@ commandLineOptions = CLIOptions
     <> value 2048
   )
 
-  <*> option auto
+  <*> optional (option auto
   ( long "seed"
     <> metavar "SEED"
     <> help "The random number seed to use. When not supplied, will seed with an arbitrary value instead."
-    <> value 0
-  )
+  ))
 
   <*> option auto
   (
@@ -84,10 +82,3 @@ commandLineOptions = CLIOptions
     <> showDefault
     <> value 800
   )
-
-  -- <*> option auto
-  -- (
-  --   long "ifs_settings_file"
-  --   <> metavar "IFS_FILENAME"
-  --   <> help "The path to the file containing the transformations + initial camera transform of the IFS to render."
-  -- )

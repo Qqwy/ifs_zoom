@@ -7,8 +7,8 @@ module Interactive
   ) where
 
 import Pipe
+import qualified Data.Maybe
 
-import qualified Options
 import Options(CLIOptions, HasCLIOptions(..))
 
 import qualified IFSConfig
@@ -16,12 +16,11 @@ import IFSConfig(transformations)
 
 
 import Lib.Common (Point)
-import qualified Lib.Common
 import qualified Lib
 import qualified Lib.Camera
 import qualified Lib.ChaosGame
 import qualified Lib.Guide
-import Lib.Transformation (Transformation, IFS)
+import Lib.Transformation (IFS)
 import qualified Lib.Transformation
 
 import Lens.Micro.Platform
@@ -272,7 +271,7 @@ initialSimState ifs_config options random_matrix =
   , _initial_camera = Lib.Camera.fromSixtuple (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
   }
   where
-    seed' = options ^. seed
+    seed' = options ^. seed |> Data.Maybe.fromMaybe 0
     samples' = options ^. samples |> fromIntegral
     paralellism' = options ^. paralellism |> fromIntegral
     n_points_per_thread = samples' `div` paralellism'

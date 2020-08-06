@@ -11,11 +11,6 @@
 
 module Main where
 
-import Pipe
-import qualified Lib.ChaosGame
-import qualified Lib.Picture
-import qualified Lib.Camera
-
 import qualified Options
 import Options(CLIOptions, HasCLIOptions(..))
 
@@ -23,46 +18,36 @@ import qualified IFSConfig
 
 import qualified Interactive
 
-import Prelude                                                      as P
+import Control.Monad
+import qualified System.Exit
 import qualified Data.Text.IO
 import qualified System.Random
 import Lens.Micro.Platform
-
-import Data.Array.Accelerate                                        as A
-import Data.Array.Accelerate.Interpreter                            as Interpreter
-#ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-import Data.Array.Accelerate.LLVM.Native                            as CPU
-#endif
-#ifdef ACCELERATE_LLVM_PTX_BACKEND
-import Data.Array.Accelerate.LLVM.PTX                               as PTX
-#endif
-
-import qualified Graphics.Gloss
-import qualified Graphics.Gloss.Data.Picture
-import qualified Graphics.Gloss.Accelerate.Data.Picture
-import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
-
 
 main :: IO ()
 main = do
   options <- Options.parseCommandLineOptions
 
-  if ((options^.samples) P.< (options^.paralellism)) then do
-    putStrLn "Error. `samples` should be larger than `paralellism`."
-  else
-    options
-    |> maybeSeedRNG
-    >>= runProgram
+  when ((options^.samples) < (options^.paralellism))
+    (System.Exit.die "Error. `samples` should be larger than `paralellism`.")
 
-maybeSeedRNG :: Options.CLIOptions -> IO Options.CLIOptions
-maybeSeedRNG options@(Options.CLIOptions {Options._seed = 0}) = do
-  auto_seed <- System.Random.getStdRandom System.Random.random
-  putStrLn ("Using seed " P.++ (show auto_seed))
-  return (options {Options._seed = auto_seed})
+  options' <- maybeSeedRNG options
+  runProgram options'
 
-maybeSeedRNG options = return options
+maybeSeedRNG :: CLIOptions -> IO CLIOptions
+maybeSeedRNG options = do
+  seed_val <- maybeSeedRNG' options
+  putStrLn ("Using seed " ++ (show seed_val))
+  return (set seed (Just seed_val) options)
+  where
+    maybeSeedRNG' options =
+      case options^.seed of
+        Nothing ->
+          System.Random.getStdRandom System.Random.random
+        Just val ->
+          return val
 
-runProgram :: Options.CLIOptions -> IO ()
+runProgram :: CLIOptions -> IO ()
 runProgram options = do
   stdin <- Data.Text.IO.getContents
   ifsdata <- IFSConfig.read stdin

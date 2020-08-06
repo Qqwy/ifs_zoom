@@ -142,14 +142,15 @@ combinationsUpToDepth' depth elems =
 -- (which `transformation` uses).
 isCameraInsideTransformation :: Lib.Camera -> Lib.Camera -> Transformation -> Bool
 isCameraInsideTransformation camera initial_camera transformation =
-  if Linear.Matrix.det33 transformation == 0 then False
-  else Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
-  where
-    camera_coords =
-      unitGuide
-      |> transformGuide (Lib.Camera.inverse camera)
-      |> transformGuide (Lib.Camera.inverse initial_camera)
-    transformation_coords =
-      unitGuide
-      |> transformGuide (Lib.Camera.inverse initial_camera)
-      |> transformGuide transformation
+  Lib.Transformation.isInvertible transformation
+  &&
+  Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
+    where
+      camera_coords =
+        unitGuide
+        |> transformGuide (Lib.Camera.inverse camera)
+        |> transformGuide (Lib.Camera.inverse initial_camera)
+      transformation_coords =
+        unitGuide
+        |> transformGuide (Lib.Camera.inverse initial_camera)
+        |> transformGuide transformation
