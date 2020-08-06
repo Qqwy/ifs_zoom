@@ -69,9 +69,6 @@ data SimState = SimState
 
 makeLenses ''SimState
 
-type IFSTransformation =
-  ((Float, Float, Float, Float, Float, Float), Float)
-
 run :: IFSConfig.IFS -> CLIOptions -> IO ()
 run ifs_config options = do
   let
@@ -97,15 +94,19 @@ run ifs_config options = do
 handleInput :: Event -> SimState -> IO SimState
 handleInput event sim_state = do
   let
-    input' = handleInput' event (sim_state^.input)
+    input' = parseInput event (sim_state^.input)
 
   if input' == (sim_state^.input) then
     return sim_state
   else do
     applyInput input' sim_state
 
-handleInput' :: Event -> Input -> Input
-handleInput' event input =
+-- | Transforms user actions on the keyboard + mouse
+-- to a more abstract 'input' format
+-- that makes sense across frames.
+-- (i.e. abstracting individual events into things like dragging and toggling.)
+parseInput :: Event -> Input -> Input
+parseInput event input =
   case event of
     EventKey (MouseButton LeftButton) Up _ _ ->
       input{_dragging = Nothing}
@@ -128,13 +129,17 @@ handleInput' event input =
       input{_save_screenshot = True}
     EventKey (Char 'p') Down _ _ ->
       input
-      |> over show_points not
+      |> toggle show_points
     EventKey (Char 'g') Down _ _ ->
       input
-      |> over show_guides not
+      |> toggle show_guides
     _ ->
       input
+  where
+    toggle attribute = over attribute not
 
+-- | Applies the effect of the abstracted input events
+-- to the current SimState, effectfully
 applyInput :: Input -> SimState -> IO SimState
 applyInput input sim_state = do
   sim_state
