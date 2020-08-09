@@ -175,9 +175,12 @@ applyJumping sim_state =
     Nothing ->
       sim_state
     Just Input.JumpUp ->
-      jumpUp sim_state
+      sim_state
+      |> jumpUp
+      |> set (input.jump) Nothing
     Just Input.JumpDown ->
       jumpDown sim_state
+      |> set (input.jump) Nothing
 
 
 jumpUp :: SimState -> SimState
@@ -187,7 +190,7 @@ jumpUp sim_state =
       sim_state
     (target : _) ->
       sim_state
-      |> set camera (Lib.Transformation.combine [Lib.Camera.inverse target, sim_state^.camera])
+      |> set camera (Lib.Transformation.combine [sim_state^.camera, Lib.Camera.inverse target])
       |> over jumps (target:)
 
 jumpTargets :: SimState -> [Lib.Transformation]
@@ -195,6 +198,7 @@ jumpTargets sim_state =
   (sim_state^.transformations_list)
   |> IFSConfig.extractTransformations
   |> filter (Lib.Guide.isCameraInsideTransformation (sim_state^.camera) (sim_state^.initial_camera))
+  |> map (\val -> Lib.Transformation.combine (reverse [Lib.Camera.inverse (sim_state^.initial_camera), Lib.Camera.inverse val, sim_state^.initial_camera]))
 
 jumpDown :: SimState -> SimState
 jumpDown sim_state =
@@ -203,5 +207,5 @@ jumpDown sim_state =
           sim_state
         (target:targets) ->
           sim_state
-          |> set camera (Lib.Transformation.combine [target, sim_state^.camera])
+          |> set camera (Lib.Transformation.combine [sim_state^.camera, target])
           |> set jumps targets
