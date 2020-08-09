@@ -13,6 +13,9 @@ import Graphics.Gloss.Interface.IO.Game(Event(..), Key(..), MouseButton(..), Key
 data Zooming = ZoomOut | ZoomIn
   deriving (Eq, Ord, Show)
 
+data Jump = JumpUp | JumpDown
+  deriving (Eq, Ord, Show)
+
 
 data Input = Input
   { _dragging :: Maybe (Float, Float)
@@ -23,6 +26,7 @@ data Input = Input
   , _save_screenshot :: Bool
   , _show_guides :: Bool
   , _show_points :: Bool
+  , _jump :: Maybe Jump
   }
   deriving (Eq, Ord, Show)
 
@@ -37,6 +41,7 @@ initial =
   , _save_screenshot = False
   , _show_guides = False
   , _show_points = True
+  , _jump = Nothing
   }
 
 
@@ -73,6 +78,12 @@ handleEvent event input =
     EventKey (Char 'g') Down _ _ ->
       input
       |> toggle show_guides
+    EventKey (Char '=') Down _ _ ->
+      input
+      |> set jump (Just JumpUp)
+    EventKey (Char '-') Down _ _ ->
+      input
+      |> set jump (Just JumpDown)
     _ ->
       input
   where

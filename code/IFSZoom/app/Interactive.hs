@@ -7,15 +7,12 @@ module Interactive
   ) where
 
 import Pipe
-import qualified Data.Maybe
-
 import Options(CLIOptions, HasCLIOptions(..))
-
 import qualified IFSConfig
-import IFSConfig(transformations)
-
-
-import qualified Lib.Camera
+import Input (Input, save_screenshot)
+import qualified Input
+import SimState(SimState(..), input, picture, should_update)
+import qualified SimState
 
 import Lens.Micro.Platform
 
@@ -26,11 +23,6 @@ import Graphics.Gloss.Interface.IO.Game(Event)
 import qualified Data.Array.Accelerate.IO.Codec.BMP as IOBMP
 import qualified Data.Array.Accelerate.System.Random.MWC
 
-import Input (Input, zooming, translation, save_screenshot)
-import qualified Input
-
-import SimState(SimState(..), dimensions, input, camera, picture, should_update)
-import qualified SimState
 
 
 
@@ -72,6 +64,7 @@ applyInput input' sim_state =
   |> set should_update True
   |> SimState.applyDragging
   |> SimState.applyZooming
+  |> SimState.applyJumping
   |> maybeScreenshot
 
 maybeScreenshot :: SimState -> IO SimState

@@ -30,7 +30,7 @@ import qualified Graphics.Gloss.Accelerate.Data.Picture
 import qualified Data.Array.Accelerate.LLVM.PTX
 
 
-import Input (Input, show_points, show_guides, zooming, translation)
+import Input (Input, show_points, show_guides, zooming, translation, jump)
 import qualified Input
 
 data SimState = SimState
@@ -42,6 +42,7 @@ data SimState = SimState
   , _input :: Input
   , _transformations_list :: [IFSConfig.TransformationWithProbability]
   , _initial_camera :: Lib.Camera
+  , _jumps :: [Lib.Transformation]
   }
 
 makeLenses ''SimState
@@ -57,6 +58,7 @@ initial ifs_config options random_matrix =
   , _input = Input.initial
   , _transformations_list = transformations_list
   , _initial_camera = Lib.Camera.fromSixtuple (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
+  , _jumps = []
   }
   where
     seed' = options ^. seed |> Data.Maybe.fromMaybe 0
@@ -126,7 +128,6 @@ render sim_state =
       sim_state^.dimensions
       |> over both (\val -> val |> fromIntegral |> Accelerate.unit)
     camera' =
-      -- ((Linear.Matrix.inv33 (sim_state^.initial_camera)) Linear.Matrix.!*! (sim_state^.camera))
       sim_state^.camera
       |> Lib.Camera.withInitial (sim_state^.initial_camera)
       |> Accelerate.lift
@@ -167,3 +168,40 @@ applyZooming sim_state =
         sim_state
         |> over camera (Lib.Camera.scale (1 - speed))
         |> set (input.zooming) Nothing
+
+applyJumping :: SimState -> SimState
+applyJumping sim_state =
+  case sim_state^.input.jump of
+    Nothing ->
+      sim_state
+    Just Input.JumpUp ->
+      jumpUp sim_state
+    Just Input.JumpDown ->
+      jumpDown sim_state
+
+
+jumpUp :: SimState -> SimState
+jumpUp sim_state =
+  case jumpTargets sim_state of
+    [] ->
+      sim_state
+    (target : _) ->
+      sim_state
+      |> set camera (Lib.Transformation.combine [Lib.Camera.inverse target, sim_state^.camera])
+      |> over jumps (target:)
+
+jumpTargets :: SimState -> [Lib.Transformation]
+jumpTargets sim_state =
+  (sim_state^.transformations_list)
+  |> IFSConfig.extractTransformations
+  |> filter (Lib.Guide.isCameraInsideTransformation (sim_state^.camera) (sim_state^.initial_camera))
+
+jumpDown :: SimState -> SimState
+jumpDown sim_state =
+      case sim_state^.jumps of
+        [] ->
+          sim_state
+        (target:targets) ->
+          sim_state
+          |> set camera (Lib.Transformation.combine [target, sim_state^.camera])
+          |> set jumps targets
