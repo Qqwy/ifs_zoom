@@ -58,7 +58,9 @@ executable IFSZoom-exe
   other-modules:
       Options
     , Interactive
+    , Input
     , IFSConfig
+    , SimState
 
   build-depends:
         base

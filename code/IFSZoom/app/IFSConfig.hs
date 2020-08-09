@@ -2,11 +2,22 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module IFSConfig (main, read, IFS(..), Transformation(..), TransformationWithProbability(..), transformationWithProbabilityToSixtuplePair, transformationToSixtuple) where
+module IFSConfig
+  ( main
+  , read
+  , IFS(..)
+  , Transformation(..)
+  , TransformationWithProbability(..)
+  , transformationWithProbabilityToSixtuplePair
+  , transformationToSixtuple
+  , extractTransformations
+  ) where
 
 import Prelude hiding (read)
+import Pipe
+import qualified Lib.Transformation
+
 import Dhall
-import Lens.Micro.Platform
 import qualified GHC.Float
 
 data Transformation = Transformation
@@ -18,7 +29,7 @@ data Transformation = Transformation
    f :: Double
   }
   deriving (Generic, Show)
--- makeLenses ''Transformation
+
 instance FromDhall Transformation
 
 data TransformationWithProbability = TransformationWithProbability
@@ -60,3 +71,10 @@ transformationToSixtuple (Transformation a b c d e f) =
   (d2f a, d2f b, d2f c, d2f d, d2f e, d2f f)
   where
     d2f = GHC.Float.double2Float
+
+extractTransformations :: [TransformationWithProbability] -> [Lib.Transformation.Transformation]
+extractTransformations transformations_list =
+  transformations_list
+  |> fmap transformationWithProbabilityToSixtuplePair
+  |> fmap Lib.Transformation.fromSixtuplePair
+  |> fmap fst
