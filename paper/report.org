@@ -34,7 +34,10 @@
 #+LATEX_HEADER: \usepackage{todonotes}
 
 
-#+LATEX_HEADER: \usepackage{rugscriptie/rugscriptie.sty}
+#+LATEX_HEADER: \usepackage{rugscriptie}
+#+LATEX_HEADER:\supervisor{dr. J. Kosinka}
+#+LATEX_HEADER:\supervisor{G. J. Hettinga}
+#+LATEX_HEADER:\date{August 2020}
 
 #+OPTIONS: toc:nil
 \pagebreak
