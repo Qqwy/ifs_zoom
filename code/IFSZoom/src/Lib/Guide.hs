@@ -37,7 +37,7 @@ drawGuides camera initial_camera dimensions transformations =
     colors = cycle guide_colors
     guides =
       transformations
-      |> combinationsUpToDepth' 8
+      |> combinationsUpToDepth' 3
       |> (zip colors)
       |> map (\(color, transformations) -> map (\ts -> (color, ts)) transformations)
       |> concat

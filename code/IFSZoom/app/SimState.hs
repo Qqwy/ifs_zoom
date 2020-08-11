@@ -115,7 +115,7 @@ drawWithGuides sim_state =
 draw :: SimState -> Gloss.Picture
 draw sim_state =
   sim_state^.picture
-  |> (\picture -> Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture True)
+  |> (\picture -> Graphics.Gloss.Accelerate.Data.Picture.bitmapOfArray picture False)
   |> Graphics.Gloss.Data.Picture.scale 1 (-1) -- Gloss renders pictures upside-down https://github.com/tmcdonell/gloss-accelerate/issues/2
 
 render :: SimState -> Lib.RasterPicture

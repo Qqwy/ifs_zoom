@@ -109,19 +109,19 @@ pointBasedTransform transformations prev_point current_point =
 -- Assumes the probabilities that are the second elements of each of the `transformations`'s pairs
 -- together sum to one.
 --
--- `rngval` should be in the unit range [0..1)
--- (since we are comparing it with probabilities probability)
+-- `rngval` should be in the half-open unit interval [0..1)
+-- (since we are comparing it with probabilities)
 pickTransformation :: Acc IFS -> Exp Probability -> Exp Transformation
 pickTransformation transformations rngval =
   transformations !! matching_transformation_index
   |> fst
   where
     matching_transformation_index =
-      while checkLarger goToNext (lift (0, fraction))
+      while largerThanProbability goToNext (lift (0, fraction))
       |> fst
     fraction = rngval
-    checkLarger :: Exp (Int, Float) -> Exp Bool
-    checkLarger (unlift -> (index, probability)) =
+    largerThanProbability :: Exp (Int, Float) -> Exp Bool
+    largerThanProbability (unlift -> (index, probability)) =
       probability > snd (transformations !! index)
     goToNext :: Exp (Int, Float) -> Exp (Int, Float)
     goToNext (unlift -> (index, probability)) =

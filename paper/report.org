@@ -1,0 +1,83 @@
+#+TITLE: \Huge In by Out again
+#+SUBTITLE: Faking arbitrarily-deep zooming on Iterated Function Systems
+
+#+BIND: org-latex-prefer-user-labels t
+
+#+LATEX_HEADER: \setlength{\parindent}{1em}
+#+LATEX_HEADER: \setlength{\parskip}{0.5em}
+#+LATEX_HEADER: \usepackage[citestyle=alphabetic,bibstyle=alphabetic, hyperref=true, backref=true,maxcitenames=3,url=true,backend=biber,natbib=true] {biblatex}
+#+LATEX_HEADER: \addbibresource{bibliography.bib}
+
+#+LATEX_HEADER: \usepackage[a4paper, total={7in, 9in}]{geometry}
+
+# not emph
+
+#+LATEX_HEADER: \usepackage[dvipsnames]{xcolor}
+#+LATEX_HEADER: \usepackage{amssymb}
+#+LATEX_HEADER: \usepackage{pifont}
+#+LATEX_HEADER: \newcommand{\cmark}{\color{ForestGreen}\ding{52}}%
+#+LATEX_HEADER: \newcommand{\xmark}{\color{Maroon}\ding{55}}%
+
+#+LATEX_HEADER: \renewcommand{\sectionautorefname}{{\color{Black}\S}}
+#+LATEX_HEADER: \renewcommand{\subsectionautorefname}{{\color{Black}\S\S}}
+#+LATEX_HEADER: \renewcommand{\subsubsectionautorefname}{{\color{Black}\S\S\S}}
+
+#+LATEX_HEADER: \hypersetup{colorlinks=true}
+
+#+LATEX_HEADER: \usepackage{subcaption}
+#+LATEX_HEADER: \usepackage[shortlabels]{enumitem}
+
+#+LATEX_HEADER: \usepackage{newfloat}
+#+LATEX_HEADER: \DeclareFloatingEnvironment[fileext=lol, listname={List of L-system definitions}, name=L-system, placement=tbhp, within=section]{lsystem}
+
+#+LATEX_HEADER: \usepackage{wrapfig}
+#+LATEX_HEADER: \usepackage{todonotes}
+
+
+#+LATEX_HEADER: \usepackage{rugscriptie/rugscriptie.sty}
+
+#+OPTIONS: toc:nil
+\pagebreak
+#+TOC: headlines 3
+
+* Abstract
+
+* Introduction
+
+Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
+by repeatedly applying simple mathematical functions (usually affine transformations) to all points in a metric space (usually but not always $\mathcal{R}^2$) until a fixed point is reached. [CITE]
+IFSs see use in rendering/modeling of physical phenomena[CITE], image compression [CITE] and DNA sequencing [CITE].
+Sometimes they also see use simply for the aesthetically appealing nature of the fractals that certain IFSs produce [CITE].
+
+Various computer algorithms to visualize IFSs exist [CITE], [CITE].
+However, these all take either a still image as final result, or, if they want to render an animation,
+view this as a sequence of separate still images to generate.
+
+This leaves a door open for potential optimization: if there is information that remains the same between animation frames, 
+then we could compute it only once and re-use this information for all frames.
+
+For instance, many kinds of animations (transformations of the camera viewport w.r.t the viewed fractal over time) like translation, rotation and scaling (zooming) do not require alterations to the fractal itself.
+This means that (an approximation of) the fractal might be computed as a /point cloud/ rather than as pixels, which could then be re-used for all frames.
+
+Furthermore, because of the self-similar nature of the rendered fractals, 
+might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow viewport 
+that shares the same self-similarity as the original one?
+This is the core
+
+* Overview
+
+
+* Background
+
+Formally, an Iterated Function System consists of a set of 
+
+* Problem Description
+
+* Findings
+
+* Discussion
+
+* Conclusion
+
+* Further Work
+

@@ -96,7 +96,7 @@ xorShift64Star a =
 -- This uses the notes at http://prng.di.unimi.it/. Specifically:
 -- A double has a significant binary digits 53.
 -- We extract thus the top 53 bits of the number (which are better quality than the lower 11)
--- We multiply this by `0x1.0p-53` (that is: 1.0 * 2^-53) to obtain a number in the range [0, 1)
+-- We multiply this by `0x1.0p-53` (that is: 1.0 * 2^-53) to obtain a number in the half-open interval [0, 1)
 extractRandomUnitIntervalDouble :: Exp Word64 -> Exp Double
 extractRandomUnitIntervalDouble word =
   word

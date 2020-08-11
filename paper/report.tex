@@ -1,0 +1,108 @@
+% Created 2020-08-11 Tue 13:48
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0.5em}
+\usepackage[citestyle=alphabetic,bibstyle=alphabetic, hyperref=true, backref=true,maxcitenames=3,url=true,backend=biber,natbib=true] {biblatex}
+\addbibresource{bibliography.bib}
+\usepackage[a4paper, total={7in, 9in}]{geometry}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{amssymb}
+\usepackage{pifont}
+\newcommand{\cmark}{\color{ForestGreen}\ding{52}}%
+\newcommand{\xmark}{\color{Maroon}\ding{55}}%
+\renewcommand{\sectionautorefname}{{\color{Black}\S}}
+\renewcommand{\subsectionautorefname}{{\color{Black}\S\S}}
+\renewcommand{\subsubsectionautorefname}{{\color{Black}\S\S\S}}
+\hypersetup{colorlinks=true}
+\usepackage{subcaption}
+\usepackage[shortlabels]{enumitem}
+\usepackage{newfloat}
+\DeclareFloatingEnvironment[fileext=lol, listname={List of L-system definitions}, name=L-system, placement=tbhp, within=section]{lsystem}
+\usepackage{wrapfig}
+\usepackage{todonotes}
+\usepackage{rugscriptie/rugscriptie.sty}
+\author{Wiebe-Marten Wijnja}
+\date{\today}
+\title{\Huge In by Out again\\\medskip
+\large Faking arbitrarily-deep zooming on Iterated Function Systems}
+\hypersetup{
+ pdfauthor={Wiebe-Marten Wijnja},
+ pdftitle={\Huge In by Out again},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.3 (Org mode 9.3.6)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\pagebreak
+\setcounter{tocdepth}{3}
+\tableofcontents
+
+\section{Abstract}
+\label{sec:org9a2c21b}
+
+\section{Introduction}
+\label{sec:orgd6db77a}
+
+Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
+by repeatedly applying simple mathematical functions (usually affine transformations) to all points in a metric space (usually but not always \(\mathcal{R}^2\)) until a fixed point is reached. [CITE]
+IFSs see use in rendering/modeling of physical phenomena[CITE], image compression [CITE] and DNA sequencing [CITE].
+Sometimes they also see use simply for the aesthetically appealing nature of the fractals that certain IFSs produce [CITE].
+
+Various computer algorithms to visualize IFSs exist [CITE], [CITE].
+However, these all take either a still image as final result, or, if they want to render an animation,
+view this as a sequence of separate still images to generate.
+
+This leaves a door open for potential optimization: if there is information that remains the same between animation frames, 
+then we could compute it only once and re-use this information for all frames.
+
+For instance, many kinds of animations (transformations of the camera viewport w.r.t the viewed fractal over time) like translation, rotation and scaling (zooming) do not require alterations to the fractal itself.
+This means that (an approximation of) the fractal might be computed as a \emph{point cloud} rather than as pixels, which could then be re-used for all frames.
+
+Furthermore, because of the self-similar nature of the rendered fractals, 
+might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow viewport 
+that shares the same self-similarity as the original one?
+This is the core
+
+\section{Overview}
+\label{sec:org6b595ce}
+
+
+\section{Background}
+\label{sec:orgd4fe10a}
+
+Formally, an Iterated Function System consists of a set of 
+
+\section{Problem Description}
+\label{sec:orgb2ab338}
+
+\section{Findings}
+\label{sec:org08a0eac}
+
+\section{Discussion}
+\label{sec:org914fb67}
+
+\section{Conclusion}
+\label{sec:org58f533e}
+
+\section{Further Work}
+\label{sec:org52978d3}
+\end{document}
