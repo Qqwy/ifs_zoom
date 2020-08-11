@@ -1,4 +1,4 @@
-% Created 2020-08-11 Tue 14:01
+% Created 2020-08-11 Tue 15:34
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -41,6 +41,8 @@
 \supervisor{dr. J. Kosinka}
 \supervisor{G. J. Hettinga}
 \date{August 2020}
+\faculty{fwn} % Or feb, fgg, fgmw, fl, frg, frw, fw, umcg
+\thesistype{Bachelors's thesis} % Will be printed unmodified
 \author{Wiebe-Marten Wijnja}
 \date{\today}
 \title{\Huge In by Out again\\\medskip
@@ -60,15 +62,15 @@
 \tableofcontents
 
 \section{Abstract}
-\label{sec:org853776f}
+\label{sec:org765d11f}
 
 \section{Introduction}
-\label{sec:orgb0cdd90}
+\label{sec:org9d7bd27}
 
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
-by repeatedly applying simple mathematical functions (usually affine transformations) to all points in a metric space (usually but not always \(\mathcal{R}^2\)) until a fixed point is reached. [CITE]
-IFSs see use in rendering/modeling of physical phenomena[CITE], image compression [CITE] and DNA sequencing [CITE].
-Sometimes they also see use simply for the aesthetically appealing nature of the fractals that certain IFSs produce [CITE].
+by repeatedly applying simple mathematical functions until a fixed point is reached. [CITE]
+IFSs see use in rendering/modeling of physical phenomena[CITE], image compression [CITE] and representing gene structures [CITE].
+Sometimes they also see use simply for the aesthetic beauty of their graphical representations[CITE].
 
 Various computer algorithms to visualize IFSs exist [CITE], [CITE].
 However, these all take either a still image as final result, or, if they want to render an animation,
@@ -77,35 +79,99 @@ view this as a sequence of separate still images to generate.
 This leaves a door open for potential optimization: if there is information that remains the same between animation frames, 
 then we could compute it only once and re-use this information for all frames.
 
-For instance, many kinds of animations (transformations of the camera viewport w.r.t the viewed fractal over time) like translation, rotation and scaling (zooming) do not require alterations to the fractal itself.
-This means that (an approximation of) the fractal might be computed as a \emph{point cloud} rather than as pixels, which could then be re-used for all frames.
+For instance, many kinds of animations consist of transformations of the camera viewport w.r.t the viewed fractal over time like translation, rotation and scaling do not require alterations to the fractal itself.
+This means that (an approximation of) the fractal might be computed once and then be used for all frames.
 
-Furthermore, because of the self-similar nature of the rendered fractals, 
-might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow viewport 
-that shares the same self-similarity as the original one?
-This is the core
+Furthermore, because of the self-similar nature of the rendered fractals,
+it might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow viewport
+that shares the same self-similarity as the original one. 
 
-\section{Overview}
-\label{sec:org5c6eeb8}
+Investigating this claim in detail is the essence of this thesis.
+
+\subsection{Overview}
+\label{sec:orgeff9e70}
 
 
 \section{Background}
-\label{sec:orgc91d23c}
+\label{sec:org0ba37d5}
 
-Formally, an Iterated Function System consists of a set of 
+Informally, an Iterated Function System is a set of transformations that, given any input image, can create a new image by
+
+\begin{enumerate}
+\item transforming the input image with each of the transformations
+\item combining all transformed images together. This is the new image.
+\end{enumerate}
+
+This process is then repeated an arbitrary number of times, until changes between the input image and output image are no longer visible to the human eye.
+
+What you end up with is a visual representation of the IFS's attractor.
+
+\todo[inline]{reference picture}
+
+
+\subsection{Formal definition of an Iterated Function System}
+\label{sec:org552e065}
+
+Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space \((\mathcal{M}, d)\) to itself:
+
+$$ = \{ f_i : \mathcal{M} \rightarrow \mathcal{M} | i = 1, 2, \ldots, N \}, N \in \mathbb{N}$$
+
+That each mapping needs to be contractive means that for each mapping \(f_i\), the distance between every two arbitrary points \(a\) and \(b\) in \((\mathcal{M}, d)\) needs to be larger than the distance of the points after transforming them:
+
+$$d(f_i(a), f_i(b)) < d(a, b)$$
+
+
+We can then take the union of performing all of these mappings on any compact set of points \(\mathcal{S}_0 \subset \mathcal{M}\), 
+and iterate this procedure as often as we'd like:
+
+$$ S_{n + 1} = \bigcup_{i=1}^{N} f_i(S_n) $$
+
+If we perform this operation an arbitrary number of times, we approach the Fixed-Point, or Attractor, \(\mathcal{A}\) of the Iterated Function System:
+
+$$\mathcal{A} = \lim_{n \rightarrow \infty} S_n$$
+
+Curiously, which set of points \(\mathcal{S}_0\) we started with makes no difference (even if it is a single point) [CITE].
+
+
+Most research of IFSs restricts itself to using \(\mathbb{R}^2\) as metric space\footnote{More formally, the two-dimensional Euclidean space: \(\left(\mathbb{R}^2, d(p, q) = \sqrt{p - q)^2}\right)\).} which can easily be rendered to screen or paper,
+and furthermore most commonly-used IFSs are restricted to use \emph{affine transformations} as mappings.
+
+Because of their prevalence, these are also the restrictions that will be used in this thesis.
+
+\subsection{Rendering an Iterated Function System}
+\label{sec:orge005f52}
+
+A couple of algoritms exist to render (visualize) the attarctor of an Iterated Function System. 
+While it is impossible to render the attractor exactly, as this would require an infinite number of transformation steps,
+we can approximate it until we are certain that the difference between our approximation and the attractor is smaller than
+the smallest thing we can visually represent (e.g. smaller than the size of a pixel).
+
+More in-depth information about the rendering of Iterated Function Systems can be found [CITE]. 
+Short summaries of the two most common techniques will now follow.
+
+All of the rendering techniques have in common that the main sequence of 
+
+
+\subsubsection{The deterministic method}
+\label{sec:org12e162b}
+
+\subsubsection{The chaos game}
+\label{sec:org3aac92d}
+
+
 
 \section{Problem Description}
-\label{sec:org60f7c03}
+\label{sec:org7074f3f}
 
 \section{Findings}
-\label{sec:org767e78c}
+\label{sec:orgcc42799}
 
 \section{Discussion}
-\label{sec:orgb94cebb}
+\label{sec:org9938963}
 
 \section{Conclusion}
-\label{sec:orgfc1a3a4}
+\label{sec:orgae0c01f}
 
 \section{Further Work}
-\label{sec:org2d3b322}
+\label{sec:org5698720}
 \end{document}
