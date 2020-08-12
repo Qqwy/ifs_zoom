@@ -1,0 +1,20 @@
+{ initialCamera =
+  { a = 1.0
+  , b = 0.0
+  , c = 0.0
+  , d = 1.0
+  , e = 0.0
+  , f = 0.0
+  }
+, transformations =
+  [ { transformation = { a = 0.25, b = -0.25, c = 0.25, d = 0.25, e = 0.0, f = 0.0 }
+    , probability = 0.25
+    }
+  , { transformation = { a = 0.5, b = 0.5, c = -0.5, d = 0.5, e = 0.25, f = 0.25 }
+    , probability = 0.5
+    }
+  , { transformation = { a = 0.25, b = -0.25, c = 0.25, d = 0.25, e = 0.75, f = -0.25 }
+    , probability = 0.25
+    }
+  ]
+}

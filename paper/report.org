@@ -10,7 +10,10 @@
 
 #+LATEX_HEADER: \usepackage[a4paper, total={7in, 9in}]{geometry}
 
+#+LATEX_HEADER: \usepackage[ruled, procnumbered]{algorithm2e}
+
 # not emph
+#+LATEX_HEADER: \SetArgSty{}
 
 #+LATEX_HEADER: \usepackage[dvipsnames]{xcolor}
 #+LATEX_HEADER: \usepackage{amssymb}
@@ -18,11 +21,14 @@
 #+LATEX_HEADER: \newcommand{\cmark}{\color{ForestGreen}\ding{52}}%
 #+LATEX_HEADER: \newcommand{\xmark}{\color{Maroon}\ding{55}}%
 
+#+LATEX_HEADER: \hypersetup{colorlinks=true}
+
 #+LATEX_HEADER: \renewcommand{\sectionautorefname}{{\color{Black}\S}}
 #+LATEX_HEADER: \renewcommand{\subsectionautorefname}{{\color{Black}\S\S}}
 #+LATEX_HEADER: \renewcommand{\subsubsectionautorefname}{{\color{Black}\S\S\S}}
+#+LATEX_HEADER: \renewcommand{\functionautorefname}{{\color{Black}\textbf{Function}}\color{Magenta}}
+#+LATEX_HEADER: \renewcommand{\algorithmautorefname}{{\color{Black}\textbf{Algorithm}}\color{Magenta}}
 
-#+LATEX_HEADER: \hypersetup{colorlinks=true}
 
 #+LATEX_HEADER: \usepackage{subcaption}
 #+LATEX_HEADER: \usepackage[shortlabels]{enumitem}
@@ -32,6 +38,10 @@
 
 #+LATEX_HEADER: \usepackage{wrapfig}
 #+LATEX_HEADER: \usepackage{todonotes}
+
+#+LATEX_HEADER: \usepackage{pifont,kantlipsum}
+#+LATEX_HEADER: \newcommand*{\altasterism}{\vspace*{1em plus .5em minus .5em}\noindent\hspace*{\fill}\ding{104}\hspace*{\fill}}
+
 
 
 #+LATEX_HEADER: \usepackage{rugscriptie}
@@ -97,18 +107,18 @@ That each mapping needs to be contractive means that for each mapping $f_i$, the
 
 $$d(f_i(a), f_i(b)) < d(a, b)$$
 
+We can then take the union of performing all of these mappings on any compact set of points $\mathcal{S}_0 \subset \mathcal{M}$. This procedure is called the /Hutchkinson Operator/ ($H$). 
+We can iterate it as often as we'd like:
 
-We can then take the union of performing all of these mappings on any compact set of points $\mathcal{S}_0 \subset \mathcal{M}$, 
-and iterate this procedure as often as we'd like:
+$$ \mathcal{S}_{n + 1} = H(\mathcal{S}_n) = \bigcup_{i=1}^{N} f_i(\mathcal{S}_n) $$
 
-$$ S_{n + 1} = \bigcup_{i=1}^{N} f_i(S_n) $$
+If we perform this operation an arbitrary number of times, we approach the fixed-point or attractor, $\mathcal{A}$, of the Iterated Function System:
 
-If we perform this operation an arbitrary number of times, we approach the Fixed-Point, or Attractor, $\mathcal{A}$ of the Iterated Function System:
+$$\mathcal{A} = \lim_{n \rightarrow \infty} \mathcal{S}_n$$
 
-$$\mathcal{A} = \lim_{n \rightarrow \infty} S_n$$
+Curiously, which set of points $\mathcal{S}_0$ we started with makes no difference (we might even start with a single point) [CITE].
 
-Curiously, which set of points $\mathcal{S}_0$ we started with makes no difference (even if it is a single point) [CITE].
-
+\altasterism
 
 Most research of IFSs restricts itself to using $\mathbb{R}^2$ as metric space[fn:euclidean] which can easily be rendered to screen or paper,
 and furthermore most commonly-used IFSs are restricted to use /affine transformations/ as mappings.
@@ -124,15 +134,82 @@ While it is impossible to render the attractor exactly, as this would require an
 we can approximate it until we are certain that the difference between our approximation and the attractor is smaller than
 the smallest thing we can visually represent (e.g. smaller than the size of a pixel).
 
+Because we apply $H$ many times and each time consists of taking the union of $N$ different transformations,
+the result can be seen as traversing an (infinitely deep) tree of transformations, 
+where each sub-tree is self-similar to the tree as a whole.
+
+Different algorithms take different approaches to evaluating this tree (up to a chosen finite depth).
+
 More in-depth information about the rendering of Iterated Function Systems can be found [CITE]. 
 Short summaries of the two most common techniques will now follow.
 
-All of the rendering techniques have in common that the main sequence of 
+# All of the rendering techniques have in common that the iteration of the Hutchkinson operator is seen as an (infinitely deep) tree with branching factor $N$.
+# We traverse this tree up to a certain depth.
+
+\todo[inline]{PICTURE OF THIS TREE}
 
 
 *** The deterministic method
 
+In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
+
+1. Pick a starting point $z_0$;
+2. Traverse the tree down to the chosen depth $k$, building up a sequence of transformations [fn:function_composition]
+   $f_{i_k} \circ \ldots \circ f_{i_1}$;
+3. For each node at this depth, evaluate and render $z_k = (f_{i_k} \circ \ldots \circ f_{i_1})(z_0) = f_{i_k-1}(z_{k-1})$;
+
+Since $z_{k} = f_{i_k-1}(z_{k-1})$ this procedure takes, for an approximation that consists of $N$ points, depending on the tree traversal chosen:
+
+- a linear amount ( $\mathcal{O}(N)$ ) of memory  for a breadth-first tree-traversal.
+- a logarithmic amount ( $\mathcal{O}(\log{N})$ ) of memory for a depth-first tree-traversal.
+
+The advantage of the breadth-first traversal is that generation could be stopped interactively,
+while the depth-first traversal requires the stopping criterion to be known beforehand. [CITE]
+
+[fn:function_composition] $\circ$ stands for function composition: $(f \circ g)(x) = f(g(x))$. 
+Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), matrix multiplication is in the opposite order ($f \circ g \equiv G \cdot F$)
+
 *** The chaos game
+
+The stochastic method, more frequently called the /chaos game/, works as seen in autoref:chaosGame
+
+\begin{algorithm}[H]
+\caption{the chaos game}
+\label{chaosGame}
+  $n$: the number of transformations the IFS consists of. \\
+  $z$: a random point on the screen  \\
+  \While{less than $N$ points plotted}{ 
+    $i$: a random integer between $0$ and $n$.  \\
+    $z = f_i(z)$  \\
+    render($z$) except during the first $x$ iterations \\
+  }
+
+\end{algorithm}
+
+\todo[inline]{REF ALG}
+
+This method converges to a correct result because of the following two facts:
+
+- at each depth in the tree the subtree remains the same.
+- because the precision of the canvas we render on is finite, and because all transformations are contracting,
+  only the latest $x$ transformations determine at what location on the canvas a point will end up.[fn:contraction]
+
+Therefore, because we render all intermediate points, and these points correspond to different '$x$-long sequences of transformations', we end up covering the whole attractor.
+
+The nice thing about the chaos game is that it does not require any extra memory (besides the point $z$.
+Also, because it is so simple, it can be optimized very well by modern CPU architecture.
+
+One disadvantage the chaos game has, is that in its simplest form, all transformations have an equally likely chance to be used.
+However, because some transformations might be (much) more contracting than others, this means that coverage of the attractor is not even,
+which means that we need to use much more iterations than would be the case if we balance it out.
+
+Therefore, most implementations of the chaos game allow (or require) the user to specify a /probability/ for each transformation.
+All these probabilities together ought to sum up to 1.[fn:probabilities], 
+
+[fn:contraction] Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of $x$) exist [CITE], 
+but are not relevant for this thesis.
+
+[fn:probabilities] These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well [CITE] section 2.4.
 
 *** GPU
 

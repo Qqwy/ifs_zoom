@@ -1,4 +1,4 @@
-% Created 2020-08-11 Tue 15:34
+% Created 2020-08-12 Wed 17:29
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -22,21 +22,27 @@
 \usepackage[citestyle=alphabetic,bibstyle=alphabetic, hyperref=true, backref=true,maxcitenames=3,url=true,backend=biber,natbib=true] {biblatex}
 \addbibresource{bibliography.bib}
 \usepackage[a4paper, total={7in, 9in}]{geometry}
+\usepackage[ruled, procnumbered]{algorithm2e}
+\SetArgSty{}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{amssymb}
 \usepackage{pifont}
 \newcommand{\cmark}{\color{ForestGreen}\ding{52}}%
 \newcommand{\xmark}{\color{Maroon}\ding{55}}%
+\hypersetup{colorlinks=true}
 \renewcommand{\sectionautorefname}{{\color{Black}\S}}
 \renewcommand{\subsectionautorefname}{{\color{Black}\S\S}}
 \renewcommand{\subsubsectionautorefname}{{\color{Black}\S\S\S}}
-\hypersetup{colorlinks=true}
+\renewcommand{\functionautorefname}{{\color{Black}\textbf{Function}}\color{Magenta}}
+\renewcommand{\algorithmautorefname}{{\color{Black}\textbf{Algorithm}}\color{Magenta}}
 \usepackage{subcaption}
 \usepackage[shortlabels]{enumitem}
 \usepackage{newfloat}
 \DeclareFloatingEnvironment[fileext=lol, listname={List of L-system definitions}, name=L-system, placement=tbhp, within=section]{lsystem}
 \usepackage{wrapfig}
 \usepackage{todonotes}
+\usepackage{pifont,kantlipsum}
+\newcommand*{\altasterism}{\vspace*{1em plus .5em minus .5em}\noindent\hspace*{\fill}\ding{104}\hspace*{\fill}}
 \usepackage{rugscriptie}
 \supervisor{dr. J. Kosinka}
 \supervisor{G. J. Hettinga}
@@ -62,10 +68,10 @@
 \tableofcontents
 
 \section{Abstract}
-\label{sec:org765d11f}
+\label{sec:org8eea98e}
 
 \section{Introduction}
-\label{sec:org9d7bd27}
+\label{sec:org73d7cf8}
 
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
 by repeatedly applying simple mathematical functions until a fixed point is reached. [CITE]
@@ -89,11 +95,11 @@ that shares the same self-similarity as the original one.
 Investigating this claim in detail is the essence of this thesis.
 
 \subsection{Overview}
-\label{sec:orgeff9e70}
+\label{sec:org588bade}
 
 
 \section{Background}
-\label{sec:org0ba37d5}
+\label{sec:orgcfb86e1}
 
 Informally, an Iterated Function System is a set of transformations that, given any input image, can create a new image by
 
@@ -110,7 +116,7 @@ What you end up with is a visual representation of the IFS's attractor.
 
 
 \subsection{Formal definition of an Iterated Function System}
-\label{sec:org552e065}
+\label{sec:org17278a9}
 
 Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space \((\mathcal{M}, d)\) to itself:
 
@@ -120,18 +126,18 @@ That each mapping needs to be contractive means that for each mapping \(f_i\), t
 
 $$d(f_i(a), f_i(b)) < d(a, b)$$
 
+We can then take the union of performing all of these mappings on any compact set of points \(\mathcal{S}_0 \subset \mathcal{M}\). This procedure is called the \emph{Hutchkinson Operator} (\(H\)). 
+We can iterate it as often as we'd like:
 
-We can then take the union of performing all of these mappings on any compact set of points \(\mathcal{S}_0 \subset \mathcal{M}\), 
-and iterate this procedure as often as we'd like:
+$$ \mathcal{S}_{n + 1} = H(\mathcal{S}_n) = \bigcup_{i=1}^{N} f_i(\mathcal{S}_n) $$
 
-$$ S_{n + 1} = \bigcup_{i=1}^{N} f_i(S_n) $$
+If we perform this operation an arbitrary number of times, we approach the fixed-point or attractor, \(\mathcal{A}\), of the Iterated Function System:
 
-If we perform this operation an arbitrary number of times, we approach the Fixed-Point, or Attractor, \(\mathcal{A}\) of the Iterated Function System:
+$$\mathcal{A} = \lim_{n \rightarrow \infty} \mathcal{S}_n$$
 
-$$\mathcal{A} = \lim_{n \rightarrow \infty} S_n$$
+Curiously, which set of points \(\mathcal{S}_0\) we started with makes no difference (we might even start with a single point) [CITE].
 
-Curiously, which set of points \(\mathcal{S}_0\) we started with makes no difference (even if it is a single point) [CITE].
-
+\altasterism
 
 Most research of IFSs restricts itself to using \(\mathbb{R}^2\) as metric space\footnote{More formally, the two-dimensional Euclidean space: \(\left(\mathbb{R}^2, d(p, q) = \sqrt{p - q)^2}\right)\).} which can easily be rendered to screen or paper,
 and furthermore most commonly-used IFSs are restricted to use \emph{affine transformations} as mappings.
@@ -139,39 +145,110 @@ and furthermore most commonly-used IFSs are restricted to use \emph{affine trans
 Because of their prevalence, these are also the restrictions that will be used in this thesis.
 
 \subsection{Rendering an Iterated Function System}
-\label{sec:orge005f52}
+\label{sec:org7074d15}
 
 A couple of algoritms exist to render (visualize) the attarctor of an Iterated Function System. 
 While it is impossible to render the attractor exactly, as this would require an infinite number of transformation steps,
 we can approximate it until we are certain that the difference between our approximation and the attractor is smaller than
 the smallest thing we can visually represent (e.g. smaller than the size of a pixel).
 
+Because we apply \(H\) many times and each time consists of taking the union of \(N\) different transformations,
+the result can be seen as traversing an (infinitely deep) tree of transformations, 
+where each sub-tree is self-similar to the tree as a whole.
+
+Different algorithms take different approaches to evaluating this tree (up to a chosen finite depth).
+
 More in-depth information about the rendering of Iterated Function Systems can be found [CITE]. 
 Short summaries of the two most common techniques will now follow.
 
-All of the rendering techniques have in common that the main sequence of 
+\todo[inline]{PICTURE OF THIS TREE}
 
 
 \subsubsection{The deterministic method}
-\label{sec:org12e162b}
+\label{sec:orgc8a9298}
+
+In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
+
+\begin{enumerate}
+\item Pick a starting point \(z_0\);
+\item Traverse the tree down to the chosen depth \(k\), building up a sequence of transformations \footnote{\(\circ\) stands for function composition: \((f \circ g)(x) = f(g(x))\). 
+Be aware that when affine transformation functions are represented as matrices (e.g. \(F\) and \(G\)), matrix multiplication is in the opposite order (\(f \circ g \equiv G \cdot F\))}
+\(f_{i_k} \circ \ldots \circ f_{i_1}\);
+\item For each node at this depth, evaluate and render \(z_k = (f_{i_k} \circ \ldots \circ f_{i_1})(z_0) = f_{i_k-1}(z_{k-1})\);
+\end{enumerate}
+
+Since \(z_{k} = f_{i_k-1}(z_{k-1})\) this procedure takes, for an approximation that consists of \(N\) points, depending on the tree traversal chosen:
+
+\begin{itemize}
+\item a linear amount ( \(\mathcal{O}(N)\) ) of memory  for a breadth-first tree-traversal.
+\item a logarithmic amount ( \(\mathcal{O}(\log{N})\) ) of memory for a depth-first tree-traversal.
+\end{itemize}
+
+The advantage of the breadth-first traversal is that generation could be stopped interactively,
+while the depth-first traversal requires the stopping criterion to be known beforehand. [CITE]
 
 \subsubsection{The chaos game}
-\label{sec:org3aac92d}
+\label{sec:org12f5657}
 
+The stochastic method, more frequently called the \emph{chaos game}, works as seen in \autoref{chaosGame}
+
+\begin{algorithm}[H]
+\caption{the chaos game}
+\label{chaosGame}
+  $n$: the number of transformations the IFS consists of. \\
+  $z$: a random point on the screen  \\
+  \While{less than $N$ points plotted}{ 
+    $i$: a random integer between $0$ and $n$.  \\
+    $z = f_i(z)$  \\
+    render($z$) except during the first $x$ iterations \\
+  }
+
+\end{algorithm}
+
+\todo[inline]{REF ALG}
+
+This method converges to a correct result because of the following two facts:
+
+\begin{itemize}
+\item at each depth in the tree the subtree remains the same.
+\item because the precision of the canvas we render on is finite, and because all transformations are contracting,
+only the latest \(x\) transformations determine at what location on the canvas a point will end up.\footnote{Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of \(x\)) exist [CITE], 
+but are not relevant for this thesis.}
+\end{itemize}
+
+Therefore, because we render all intermediate points, and these points correspond to different '\$x\$-long sequences of transformations', we end up covering the whole attractor.
+
+The nice thing about the chaos game is that it does not require any extra memory (besides the point \(z\).
+Also, because it is so simple, it can be optimized very well by modern CPU architecture.
+
+One disadvantage the chaos game has, is that in its simplest form, all transformations have an equally likely chance to be used.
+However, because some transformations might be (much) more contracting than others, this means that coverage of the attractor is not even,
+which means that we need to use much more iterations than would be the case if we balance it out.
+
+Therefore, most implementations of the chaos game allow (or require) the user to specify a \emph{probability} for each transformation.
+All these probabilities together ought to sum up to 1.\footnote{These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well [CITE] section 2.4.}, 
+
+\subsubsection{GPU}
+\label{sec:org6bd243f}
 
 
 \section{Problem Description}
-\label{sec:org7074f3f}
+\label{sec:orgbb3a13b}
+
+\section{Implementation}
+\label{sec:orge67e4b2}
+
 
 \section{Findings}
-\label{sec:orgcc42799}
+\label{sec:org33e5105}
+
 
 \section{Discussion}
-\label{sec:org9938963}
+\label{sec:org11568aa}
 
 \section{Conclusion}
-\label{sec:orgae0c01f}
+\label{sec:orgc17b009}
 
 \section{Further Work}
-\label{sec:org5698720}
+\label{sec:orgb952e9d}
 \end{document}
