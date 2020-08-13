@@ -55,7 +55,11 @@
 \pagebreak
 #+TOC: headlines 3
 
+\listoftodos
+
 * Abstract
+
+\todo[inline]{Write}
 
 * Introduction
 
@@ -82,6 +86,7 @@ Investigating this claim in detail is the essence of this thesis.
 
 ** Overview
 
+\todo[inline]{Write Overview}
 
 * Background
 \label{section:background}
@@ -96,6 +101,8 @@ This process is then repeated an arbitrary number of times, until changes betwee
 What you end up with is a visual representation of the IFS's attractor.
 
 \todo[inline]{reference picture}
+
+\todo[inline]{Some examples of IFSs? (that are used later on in the thesis)}
 
 
 ** Formal definition of an Iterated Function System
@@ -207,6 +214,8 @@ Also, because it is so simple and little auxiliary memory is needed, it runs ver
 A disadvantage of the chaos game is that the result is by its very nature /non-deterministic/.
 If not enough points are used, the result might end up 'grainy' and it is not predictable what part of the attractor will be covered.
 
+\todo[inline]{Picture outlining the importance of the number of points?}
+
 One further disadvantage the chaos game has, is that in its simplest form, all transformations have an equally likely chance to be used.
 However, because some transformations might be (much) more contracting than others, this means that coverage of the attractor is not even,
 which means that we need to use much more iterations than would be the case if we balance it out.
@@ -254,8 +263,6 @@ by using the fast inverse square root operation, even unbounded (noncontracting)
 evaluated using the deterministic method, programmed in normal GPU shaders that manipulate a couple of GPU textures.
 
 
-
-
 * Problem Description
 
 In the last section, the construction of an IFS's attractor was formally defined, 
@@ -268,12 +275,25 @@ This leads us to the research question of this thesis:
 
 **Is it possible, by re-using information between animation frames, to render animations of an Iterated Function System's attractor in which the camera zooms in, in real-time?**
 
+\todo[inline]{Maybe rephrase question?}
+
 * Approach
 
 To put this to the test, a simple software program was created which calculates the IFS' attractor only once,
 and then allows a user to interactively zoom and pan the camera around to investigate different parts of the attractor.
 
 ** Design
+
+The inspiration of the design is two-fold:
+
+First, we use the insight that the (parallel) chaos game can be used to generate a /point cloud/, allowing us to re-use parts of the computation between animation frames
+and thus render each frames faster.
+
+Second, while a point cloud only allows /zooming in/ up to a particular depth before losing considerable detail, 
+it is possible to detect when we are looking at a self-similar part of the attractor.
+This allows us, in many situations, to replace the current camera viewport with a more /shallow/ one, keeping the amount of detail high.
+
+*** Point clouds
 
 The main inspiration for the re-usability approach is that we can modify the GPU-variant of the chaos game algorithm outlined in autoref:subsection:chaos_game_gpu
 to render to a /point cloud/ instead of immediately to a canvas.
@@ -298,7 +318,7 @@ This is what gives rise to the factor $2$.
 [fn:definitions] Using the definitions of autoref:subsection:chaos_game: $N$ is the total number of points we want to render in our attractor approximation, 
 and $x$ is the minimum number of transformations we need to apply to any arbitrary point to make it visually indistinguishable from a point exactly on the attractor.
 
-*** Potential point cloud-based optimizations
+**** Potential point cloud-based optimizations
 
 The generation and rendering of point clouds is a quite well-understood problem[CITE]. point clouds see widespread use,
 most commonly in 3D-graphics that originates from a '3D scanner' .
@@ -313,21 +333,100 @@ As such, the program developed for this thesis does not implement these techniqu
 Instead, the choice was made for simplicity, 
 and the use of a bounded volume hierarchy is treated as a potential future optimization.
 
-*** Simplicity
+\todo[inline]{mention this in the 'Implementation' section instead?}
 
-As already mentioned in the previous subsection, the decision was made to keep the program as simple as possible. 
+**** Simplicity
+
+\todo[inline]{remove this section/move to 'Implementation'?}
+
+As mentioned in the previous subsection, the decision was made to keep the program as simple as possible. 
 This allows a qualitative (human) measurement
 of whether the technique of using point clouds as intermediate re-usable information is at all feasible.
 
 It can thus be considered a first step in answering the research question.
 
-*** 'Zooming In by Zooming Out'
+*** Detecting self-similarity: 'Zooming In by Zooming Out'
+\label{subsection:self_similarity}
 
+When using a point-cloud, we retain detail when zooming in up to a certain depth. In this way, a point cloud is more flexible than a 
+static pixel canvas, which will already show rendering artefacts when zooming in slightly beyond its intended size.
+\todo[inline]{More info}
 
+Nonetheless, beyond a certain depth, the number of points of the point cloud that fall outside of the current camera viewport
+(and thus are 'useless' for the quality of the rendered attractor) grows larger and larger.
+
+However, it follows from the self-similar nature of the IFS 
+\todo[inline]{Collage theorem?}
+that we might, in certain situations,
+'secretly' zoom out to a more shallow camera viewport of the point-cloud that shows the same information of the attractor.
+
+\todo[inline]{Example picture}
 
 ** Implementation
 
+The program was implemented using the general-purpose programming language Haskell, 
+in combination with the GPGPU library Accelerate [CITE].
+This programming stack was chosen because Accelerate 
+offers a statically-typed EDSL[fn:EDSL] to array-based GPGPU programming,
+which is more high-level and less error-prone than writing shader code in e.g. CUDA or OpenCL directly.[fn:debugging]
+
+The usage of Haskell as implementation language also allowed the easy construction of different subcomponents making up the program,
+and testing each of these independently, being a pure functional language.
+
+*** Rendering
+
+*** Command-line options
+
+*** IFS file format
+
+*** Rendering 'guides'
+
+*** Manually going to a more shallow view
+
+
+[fn:EDSL] Embedded Domain-Specific Language.
+[fn:debugging] Instead of being presented with a black screen when a programming mistake is made,
+Accelerate presents errors at compile-time in many cases.
+
 * Findings
+
+** Restrictions on replacing the view with a more shallow view
+
+From experimentation with the program it turns out that there are two common situations
+in which the technique of replacing the camera viewport with a more shallow camera viewport that is outlined in autoref:subsection:self_similarity cannot be used.
+
+**** Borders between transformations
+
+It is rather common to zoom in on the borders between transformations, as this is often
+where interesting visual details of the IFS might appear.
+
+However, the algortihm as outlined in [REF EARLIER ALGORITHM] is not able to handle borders between transformations,
+thus making it useless in these scenarios.
+
+**** Overlapping subtransformations
+
+A more shallow view of the attractor only shows the same as a deeper view when
+there are no points transformed by another mapping that end up in the deeper view.
+
+When there are points from another mapping in the current view, 
+going to a more shallow view will make points 'disappear' from the perspective of the user.
+In practice, this means that for many IFSs there are large regions in which the technique cannot be used at all.
+
+Simple IFSs like the Sierpinský Triangle[REF], in which transformations
+do not overlap, do not exhibit this problem. 
+Slightly more complicated IFSs like the Dragon Curve[REF] or the Barnsly Fern[REF] however do.
+See [PICTURE OF DRAGON CURVE] for an graphical explanation.
+
+This case is annoyingly common and there is no clear solution to alleviate this restriction.
+What is more, it is not simple to check whether we are currently in a region that exhibits the problem,
+as this would require evaluating the IFS itself.
+
+It is possible to take a rough 'upper bound' estimate of the disallowed regions by keeping track, 
+per mapping, where the unit square would end up after a couple of mappings with this mapping as last (i.e. most significant) one.
+
+\todo[inline]{pseudocode}
+
+
 
 # Zooming out is possible iff
 # - The camera is fully contained inside the transformation
@@ -336,6 +435,17 @@ It can thus be considered a first step in answering the research question.
 # Further restriction: when viewport overlaps multiple transformations there is a problem, 
 # even if this would theoretically be a possibility. Maybe there are smarter ways of recognizing self-similarity?
 
+** Difficulty of embellishing the rendering
+
+The simplest way of rendering an IFS attractor simply renders points that are on the attractor a different colour
+than the points that are not.
+
+However, more visually pleasing methods use a /color map/ to e.g. indicate the density (the number of points ending up at a particular canvas location) of the attractor.
+Yet more advanced methods [CITE fractal flame] keep track of a per-point colour, based on the sequence of transformations it has undergone.
+
+These techniques are difficult, if not impossible, to combine with the concept of 'secretly zooming out' because this would create a noticeable jump in colours.
+While techniques to 'smooth out' the jump exist (such as overlaying mulltiple cameras at different zoom-levels at once and gradually fading between them),
+they are more akin a 'treatment of the symptoms' rather than a full solution of the cause.
 
 * Discussion
 
@@ -346,6 +456,8 @@ It can thus be considered a first step in answering the research question.
 * Conclusion
 
 * Further Work
+
+# Possibility of a more enhanced method to detect self-similariy?
 
 # List of things that could be improved on in the implementation
 # - optimizing rendering of the point cloud

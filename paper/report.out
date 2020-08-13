@@ -1,0 +1,28 @@
+\BOOKMARK [1][-]{section.1}{Abstract}{}% 1
+\BOOKMARK [1][-]{section.2}{Introduction}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Overview}{section.2}% 3
+\BOOKMARK [1][-]{section.3}{Background}{}% 4
+\BOOKMARK [2][-]{subsection.3.1}{Formal definition of an Iterated Function System}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.2}{Rendering an Iterated Function System}{section.3}% 6
+\BOOKMARK [3][-]{subsubsection.3.2.1}{The deterministic method}{subsection.3.2}% 7
+\BOOKMARK [3][-]{subsubsection.3.2.2}{The chaos game}{subsection.3.2}% 8
+\BOOKMARK [2][-]{subsection.3.3}{IFS rendering on a GPU}{section.3}% 9
+\BOOKMARK [3][-]{subsubsection.3.3.1}{the chaos game on the GPU}{subsection.3.3}% 10
+\BOOKMARK [3][-]{subsubsection.3.3.2}{the deterministic method on the GPU}{subsection.3.3}% 11
+\BOOKMARK [1][-]{section.4}{Problem Description}{}% 12
+\BOOKMARK [1][-]{section.5}{Approach}{}% 13
+\BOOKMARK [2][-]{subsection.5.1}{Design}{section.5}% 14
+\BOOKMARK [3][-]{subsubsection.5.1.1}{Point clouds}{subsection.5.1}% 15
+\BOOKMARK [3][-]{subsubsection.5.1.2}{Detecting self-similarity: 'Zooming In by Zooming Out'}{subsection.5.1}% 16
+\BOOKMARK [2][-]{subsection.5.2}{Implementation}{section.5}% 17
+\BOOKMARK [3][-]{subsubsection.5.2.1}{Rendering}{subsection.5.2}% 18
+\BOOKMARK [3][-]{subsubsection.5.2.2}{Command-line options}{subsection.5.2}% 19
+\BOOKMARK [3][-]{subsubsection.5.2.3}{IFS file format}{subsection.5.2}% 20
+\BOOKMARK [3][-]{subsubsection.5.2.4}{Rendering 'guides'}{subsection.5.2}% 21
+\BOOKMARK [3][-]{subsubsection.5.2.5}{Manually going to a more shallow view}{subsection.5.2}% 22
+\BOOKMARK [1][-]{section.6}{Findings}{}% 23
+\BOOKMARK [2][-]{subsection.6.1}{Restrictions on replacing the view with a more shallow view}{section.6}% 24
+\BOOKMARK [2][-]{subsection.6.2}{Difficulty of embellishing the rendering}{section.6}% 25
+\BOOKMARK [1][-]{section.7}{Discussion}{}% 26
+\BOOKMARK [1][-]{section.8}{Conclusion}{}% 27
+\BOOKMARK [1][-]{section.9}{Further Work}{}% 28
