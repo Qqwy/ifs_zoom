@@ -174,6 +174,7 @@ it is usually less efficient and more complex to implement on a computer than th
 Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), matrix multiplication is in the opposite order ($f \circ g \equiv G \cdot F$)
 
 *** The chaos game
+\label{subsection:chaos_game}
 
 The /stochastic method/[CITE], also known as the /random iteration algorithm/[CITE] or more frequently the /chaos game/, works as seen in autoref:chaosGame
 
@@ -238,6 +239,7 @@ Attempts to go the other way fall flat, for instance because this would require 
 Instead, General-Purpose GPU-techniques are used that are able to use the top-down approach.
 
 *** the chaos game on the GPU
+\label{subsection:chaos_game_gpu}
 
 The deterministic method is difficult to paralellize on the GPU because of the extra memory that is required to keep track of the current position in the tree.
 Coordinating which GPU thread would calculate which part of the tree and sharing results would be a hassle.
@@ -264,19 +266,66 @@ none of them re-uses information from rendering one image of the IFS for renderi
 
 This leads us to the research question of this thesis:
 
-**Is it possible to render animations in which a camera zooms in on an Iterated Function System's attractor in real-time?**
+**Is it possible, by re-using information between animation frames, to render animations of an Iterated Function System's attractor in which the camera zooms in, in real-time?**
 
 * Approach
 
-** Design
-# Focus on simplicity
+To put this to the test, a simple software program was created which calculates the IFS' attractor only once,
+and then allows a user to interactively zoom and pan the camera around to investigate different parts of the attractor.
 
-*** Point Cloud
+** Design
+
+The main inspiration for the re-usability approach is that we can modify the GPU-variant of the chaos game algorithm outlined in autoref:subsection:chaos_game_gpu
+to render to a /point cloud/ instead of immediately to a canvas.
+When we then move around the camera, we are able to re-use the points in the point cloud;
+only where the points in the point cloud end up on screen exactly needs to be re-calculated, 
+by transforming all of the points exactly once with the 'view transformation' 
+(and culling all points outside of the viewport).
+
+This is faster than re-evaluating the whole attractor using the chaos game at every frame which would require transforming all points /many/ times.
+
+Formally, to render an attractor approximation consisting of $N$ points, 
+running the whole chaos game each frame takes $(2(N+x))$ transformations per frame. [fn:definitions]
+
+Unoptimized, it takes $N$ transformations to render a precomputed point cloud to screen each frame.
+This does not seem very impressive since $\mathcal{O}(2(N+x)) \approx \mathcal{O}(2N) \approx \mathcal{O}(N)$,
+placing the two approaches in the same order of efficiency. However, it is possible to optimize point cloud-based rendering using the techniques outlined in the next section
+to run in $\mathcal{O}(\log{N})$ instead, which is a big improvement.
+
+[fn:transformation_composition] We transform each point twice: Once with the view transformation to render the current point to the canvas in relation to the camera,
+and once with the randomly chosen mapping to transform the current point to the next point.
+This is what gives rise to the factor $2$.
+[fn:definitions] Using the definitions of autoref:subsection:chaos_game: $N$ is the total number of points we want to render in our attractor approximation, 
+and $x$ is the minimum number of transformations we need to apply to any arbitrary point to make it visually indistinguishable from a point exactly on the attractor.
+
+*** Potential point cloud-based optimizations
+
+The generation and rendering of point clouds is a quite well-understood problem[CITE]. point clouds see widespread use,
+most commonly in 3D-graphics that originates from a '3D scanner' .
+
+point clouds can be rendered in a reasonably efficient manner by storing them in a 'Bounding Volume Hierarchy',
+for instance in a binary search tree that is ordered using the Morton space filling curve. [CITE]
+Storing the points of a point cloud in this way allows us to efficiently cull most uninteresting points (i.e. points that would end up outside of the current camera viewport),
+which speeds up the rendering procedure tremendously.
+
+However, while this problem is well-understood, the implementation is not trivial at all [CITE].
+As such, the program developed for this thesis does not implement these techniques.
+Instead, the choice was made for simplicity, 
+and the use of a bounded volume hierarchy is treated as a potential future optimization.
+
+*** Simplicity
+
+As already mentioned in the previous subsection, the decision was made to keep the program as simple as possible. 
+This allows a qualitative (human) measurement
+of whether the technique of using point clouds as intermediate re-usable information is at all feasible.
+
+It can thus be considered a first step in answering the research question.
+
+*** 'Zooming In by Zooming Out'
+
+
 
 ** Implementation
-
-
-
 
 * Findings
 

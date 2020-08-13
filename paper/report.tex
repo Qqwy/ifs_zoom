@@ -1,4 +1,4 @@
-% Created 2020-08-13 Thu 16:44
+% Created 2020-08-13 Thu 23:02
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -68,10 +68,10 @@
 \tableofcontents
 
 \section{Abstract}
-\label{sec:orgab5053f}
+\label{sec:org62e804a}
 
 \section{Introduction}
-\label{sec:org8a9df12}
+\label{sec:org0f916c5}
 
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
 by repeatedly applying simple mathematical functions until a fixed point is reached. [CITE]
@@ -95,11 +95,11 @@ that shares the same self-similarity as the original one.
 Investigating this claim in detail is the essence of this thesis.
 
 \subsection{Overview}
-\label{sec:org53d8be8}
+\label{sec:orgbcbd99d}
 
 
 \section{Background}
-\label{sec:orgb7e7a6b}
+\label{sec:orgca3ba16}
 \label{section:background}
 
 Informally, an Iterated Function System is a set of transformations that, given any input image, can create a new image by
@@ -117,7 +117,7 @@ What you end up with is a visual representation of the IFS's attractor.
 
 
 \subsection{Formal definition of an Iterated Function System}
-\label{sec:orga95c86e}
+\label{sec:orgc57e3e1}
 
 Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space \((\mathcal{M}, d)\) to itself:
 
@@ -146,7 +146,7 @@ and furthermore most commonly-used IFSs are restricted to use \emph{affine trans
 Because of their prevalence, these are also the restrictions that will be used in this thesis.
 
 \subsection{Rendering an Iterated Function System}
-\label{sec:org1c97ec1}
+\label{sec:org42f9761}
 
 A couple of algoritms exist to render (visualize) the attarctor of an Iterated Function System. 
 While it is impossible to render the attractor exactly, as this would require an infinite number of transformation steps,
@@ -166,7 +166,7 @@ Short summaries of the two most common techniques will now follow.
 
 
 \subsubsection{The deterministic method}
-\label{sec:org50f9633}
+\label{sec:org98711ed}
 
 In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
 
@@ -192,7 +192,8 @@ While the deterministic method is easy to understand (and indeed is a direct tra
 it is usually less efficient and more complex to implement on a computer than the algorithm that will be described next.
 
 \subsubsection{The chaos game}
-\label{sec:org0e8620d}
+\label{sec:org558725b}
+\label{subsection:chaos_game}
 
 The \emph{stochastic method}[CITE], also known as the \emph{random iteration algorithm}[CITE] or more frequently the \emph{chaos game}, works as seen in \autoref{chaosGame}
 
@@ -241,7 +242,7 @@ Because of its simplicity and efficiency, the chaos game is used more frequently
 The chaos game is also easier to paralellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
 
 \subsection{IFS rendering on a GPU}
-\label{sec:orge634b9c}
+\label{sec:orgbdd27a1}
 
 It is enticing to port IFS rendering to run on GPU-architecture because to produce a smooth image, often hundreds of millions of points are needed.
 
@@ -256,7 +257,8 @@ Attempts to go the other way fall flat, for instance because this would require 
 Instead, General-Purpose GPU-techniques are used that are able to use the top-down approach.
 
 \subsubsection{the chaos game on the GPU}
-\label{sec:orgfd71571}
+\label{sec:org7fd41b9}
+\label{subsection:chaos_game_gpu}
 
 The deterministic method is difficult to paralellize on the GPU because of the extra memory that is required to keep track of the current position in the tree.
 Coordinating which GPU thread would calculate which part of the tree and sharing results would be a hassle.
@@ -265,7 +267,7 @@ Instead, the chaos game is more frequently used because of its simplicity. It is
 and then combine the final results of all of these on a single canvas. [CITE]
 
 \subsubsection{the deterministic method on the GPU}
-\label{sec:orgb5d5129}
+\label{sec:org86a92c4}
 
 An exciting approach taken in [CITE] uses the deterministic method instead:
 by using the fast inverse square root operation, even unbounded (noncontracting) and nonlinear IFSs can be efficiently
@@ -275,7 +277,7 @@ evaluated using the deterministic method, programmed in normal GPU shaders that 
 
 
 \section{Problem Description}
-\label{sec:org605f2c7}
+\label{sec:org45f035b}
 
 In the last section, the construction of an IFS's attractor was formally defined, 
 and different approaches of rendering it were outlined.
@@ -285,32 +287,75 @@ none of them re-uses information from rendering one image of the IFS for renderi
 
 This leads us to the research question of this thesis:
 
-\textbf{\textbf{Is it possible to render animations in which a camera zooms in on an Iterated Function System's attractor in real-time?}}
+\textbf{\textbf{Is it possible, by re-using information between animation frames, to render animations of an Iterated Function System's attractor in which the camera zooms in, in real-time?}}
 
 \section{Approach}
-\label{sec:org50a5b6d}
+\label{sec:orgb622a54}
+
+To put this to the test, a simple software program was created which calculates the IFS' attractor only once,
+and then allows a user to interactively zoom and pan the camera around to investigate different parts of the attractor.
 
 \subsection{Design}
-\label{sec:org2a0146c}
-\subsubsection{Point Cloud}
-\label{sec:orgb293164}
+\label{sec:org5277319}
+
+The main inspiration for the re-usability approach is that we can modify the GPU-variant of the chaos game algorithm outlined in \autoref{subsection:chaos_game_gpu}
+to render to a \emph{point cloud} instead of immediately to a canvas.
+When we then move around the camera, we are able to re-use the points in the point cloud;
+only where the points in the point cloud end up on screen exactly needs to be re-calculated, 
+by transforming all of the points exactly once with the 'view transformation' 
+(and culling all points outside of the viewport).
+
+This is faster than re-evaluating the whole attractor using the chaos game at every frame which would require transforming all points \emph{many} times.
+
+Formally, running the whole chaos game takes \((2(N+x))\) transformations to render \(N\) points. \footnote{Using the definitions of \autoref{subsection:chaos_game}: \(N\) is the total number of points we want to render in our attractor approximation, 
+and \(x\) is the minimum number of transformations we need to apply to any arbitrary point to make it visually indistinguishable from a point exactly on the attractor.}
+
+Unoptimized, it takes \(N\) transformations to render a precomputed point cloud to screen. 
+This does not seem very impressive since \(\mathcal{O}(2(N+x)) \approx \mathcal{O}(2N) \approx \mathcal{O}(N)\),
+placing the two approaches in the same order of efficiency.
+
+However, it is possible to optimize point cloud-based rendering using the techniques outlined in the next section
+to run in \(\mathcal{O}(\log{N})\) instead, which is a big improvement.
+
+
+\subsubsection{Potential point cloud-based optimizations}
+\label{sec:org1f1a548}
+
+The generation and rendering of point clouds is a quite well-understood problem[CITE]. point clouds see widespread use,
+most commonly in 3D-graphics that originates from a '3D scanner' .
+
+point clouds can be rendered in a reasonably efficient manner by storing them in a 'Bounding Volume Hierarchy',
+for instance in a binary search tree that is ordered using the Morton space filling curve. [CITE]
+Storing the points of a point cloud in this way allows us to efficiently cull most uninteresting points (i.e. points that would end up outside of the current camera viewport),
+which speeds up the rendering procedure tremendously.
+
+However, while this problem is well-understood, the implementation is not trivial at all [CITE].
+As such, the program developed for this thesis does not implement these techniques.
+Instead, the choice was made for simplicity, 
+and the use of a bounded volume hierarchy is treated as a potential future optimization.
+
+\subsubsection{Simplicity}
+\label{sec:org3924fb2}
+
+As already mentioned in the previous subsection, the decision was made to keep the program as simple as possible. 
+This allows a qualitative (human) measurement
+of whether the technique of using point clouds as intermediate re-usable information is at all feasible.
+
+It can thus be considered a first step in answering the research question.
 
 \subsection{Implementation}
-\label{sec:org358638a}
-
-
-
+\label{sec:orge256af4}
 
 \section{Findings}
-\label{sec:org47497e6}
+\label{sec:org365db71}
 
 
 \section{Discussion}
-\label{sec:org43070aa}
+\label{sec:org41d4fed}
 
 \section{Conclusion}
-\label{sec:org3d22e34}
+\label{sec:orgafa8544}
 
 \section{Further Work}
-\label{sec:org9e0f3bb}
+\label{sec:org646e738}
 \end{document}
