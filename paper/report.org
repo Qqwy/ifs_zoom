@@ -51,11 +51,10 @@
 #+LATEX_HEADER: \faculty{fwn} % Or feb, fgg, fgmw, fl, frg, frw, fw, umcg
 #+LATEX_HEADER: \thesistype{Bachelors's thesis} % Will be printed unmodified
 
-#+OPTIONS: toc:nil
-\pagebreak
-#+TOC: headlines 3
+#+OPTIONS: toc:4
 
 \listoftodos
+
 
 * Abstract
 
@@ -132,6 +131,8 @@ Most research of IFSs restricts itself to using $\mathbb{R}^2$ as metric space[f
 and furthermore most commonly-used IFSs are restricted to use /affine transformations/ as mappings.
 
 Because of their prevalence, these are also the restrictions that will be used in this thesis.
+
+\todo[inline]{Mention transformations and viewports w.r.t the unit square.}
 
 [fn:euclidean] More formally, the two-dimensional Euclidean space: $\left(\mathbb{R}^2, d(p, q) = \sqrt{p - q)^2}\right)$.
 
@@ -233,7 +234,7 @@ but are not relevant for this thesis.
 
 [fn:probabilities] These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well [CITE] section 2.4.
 
-** IFS rendering on a GPU
+** Paralellizing IFS rendering by using a Graphical Processor Unit
 
 It is enticing to port IFS rendering to run on GPU-architecture because to produce a smooth image, often hundreds of millions of points are needed.
 
@@ -247,7 +248,7 @@ Attempts to go the other way fall flat, for instance because this would require 
 
 Instead, General-Purpose GPU-techniques are used that are able to use the top-down approach.
 
-*** the chaos game on the GPU
+*** The chaos game on the GPU
 \label{subsection:chaos_game_gpu}
 
 The deterministic method is difficult to paralellize on the GPU because of the extra memory that is required to keep track of the current position in the tree.
@@ -256,7 +257,8 @@ Coordinating which GPU thread would calculate which part of the tree and sharing
 Instead, the chaos game is more frequently used because of its simplicity. It is paralellized in a straightforward way, by running the iteration process many times side-by-side (one per GPU thread),
 and then combine the final results of all of these on a single canvas. [CITE]
 
-*** the deterministic method on the GPU
+*** The deterministic method on the GPU
+\label{subsection:deterministic_gpu}
 
 An exciting approach taken in [CITE] uses the deterministic method instead:
 by using the fast inverse square root operation, even unbounded (noncontracting) and nonlinear IFSs can be efficiently
@@ -318,7 +320,8 @@ This is what gives rise to the factor $2$.
 [fn:definitions] Using the definitions of autoref:subsection:chaos_game: $N$ is the total number of points we want to render in our attractor approximation, 
 and $x$ is the minimum number of transformations we need to apply to any arbitrary point to make it visually indistinguishable from a point exactly on the attractor.
 
-**** Potential point cloud-based optimizations
+*** Potential point cloud-based optimizations
+\label{subsection:point_cloud_optimizations}
 
 The generation and rendering of point clouds is a quite well-understood problem[CITE]. point clouds see widespread use,
 most commonly in 3D-graphics that originates from a '3D scanner' .
@@ -334,16 +337,6 @@ Instead, the choice was made for simplicity,
 and the use of a bounded volume hierarchy is treated as a potential future optimization.
 
 \todo[inline]{mention this in the 'Implementation' section instead?}
-
-**** Simplicity
-
-\todo[inline]{remove this section/move to 'Implementation'?}
-
-As mentioned in the previous subsection, the decision was made to keep the program as simple as possible. 
-This allows a qualitative (human) measurement
-of whether the technique of using point clouds as intermediate re-usable information is at all feasible.
-
-It can thus be considered a first step in answering the research question.
 
 *** Detecting self-similarity: 'Zooming In by Zooming Out'
 \label{subsection:self_similarity}
@@ -364,14 +357,26 @@ that we might, in certain situations,
 
 ** Implementation
 
+\todo[inline]{Picture of program running as state diagram}
+
 The program was implemented using the general-purpose programming language Haskell, 
 in combination with the GPGPU library Accelerate [CITE].
 This programming stack was chosen because Accelerate 
 offers a statically-typed EDSL[fn:EDSL] to array-based GPGPU programming,
 which is more high-level and less error-prone than writing shader code in e.g. CUDA or OpenCL directly.[fn:debugging]
 
-The usage of Haskell as implementation language also allowed the easy construction of different subcomponents making up the program,
+The usage of Haskell as implementation language also allowed 
+the easy construction of different subcomponents making up the program,
 and testing each of these independently, being a pure functional language.
+
+*** Simplicity
+
+To be able to complete the implementation within the time allotted for the thesis project,
+the decision was made to keep the implementation as simple as possible.
+
+This mainly means that the optimizations mentioned in autoref:subsection:point_cloud_optimizations were /not/ implemented.
+
+\todo[inline]{Mention how this still allows us to (dis)prove hypothesis}
 
 *** Rendering
 
@@ -379,14 +384,44 @@ and testing each of these independently, being a pure functional language.
 
 *** IFS file format
 
+The configuration language 'Dhall'[CITE] was used to 
+easily faciltate the specification of different IFSs.
+
+The file structure allows one to indicate a list of affine transformations with associated chaos game probabilities,
+as well as an 'initial camera viewport transformation'.
+
+Dhall allows the definition and re-use of variables, which can be useful
+for numerical constants that are used in multiple transformations.[fn:floating_point]
+
+\todo[inline]{refer to (to-be created) earlier definition of the initial camera viewport transformation}
+
+[fn:floating_point] Unfortunately, Dhall explicitly does not allow floating-point arithmetic.[CITE]
+As such, one still needs to write e.g. $1/3$ as $0.3333333333333333$.
+
+*** Manually performing 'self-similarity jumping'
+
+While the program is running, a user can go back to a more shallow view by pressing `+`, and then when inside one or multiple shallower views,
+`-` can be pressed to undo the last jump.
+
+Care is taken to only allow the jump up if the current camera viewport is fully contained within one mapping's region.
+
+That this process is kept manual was intentional, because it allows the user to more easily compare how
+the representation looks with and without the jumping.
+
 *** Rendering 'guides'
 
-*** Manually going to a more shallow view
+To make it easier to see how an IFS is constructed, as well as easier for a user to orient themselves when
+testing the 'self-similarity jumping', it is possible to toggle the rendering of 'guides' by pressing the `g` key.
 
+These 'guides' are the unit squre, after undergoing a sequence of zero, one, two etc. mappings of the IFS.
+Different colours are used for guides at different sequence-depths.
+
+\todo[inline]{picture}
 
 [fn:EDSL] Embedded Domain-Specific Language.
-[fn:debugging] Instead of being presented with a black screen when a programming mistake is made,
-Accelerate presents errors at compile-time in many cases.
+[fn:debugging] Instead of being presented with a black screen when a programming mistake is made, 
+Accelerate presents errors at compile-time in many cases. Furthermore, Accelerate features a
+single-threaded reference implementation that runs on the CPU that can be used to sanity-check the behaviour of code.
 
 * Findings
 
@@ -427,7 +462,6 @@ per mapping, where the unit square would end up after a couple of mappings with 
 \todo[inline]{pseudocode}
 
 
-
 # Zooming out is possible iff
 # - The camera is fully contained inside the transformation
 # - The camera is not overlapping any of the other transformations' 'immediate child-transforms'
@@ -455,11 +489,27 @@ they are more akin a 'treatment of the symptoms' rather than a full solution of 
 
 * Conclusion
 
+A program was implemented which has shown that there is /some/ merit to rendering an IFS' attractor using a point-cloud as re-usable intermediate structure.
+However, the self-similarity detection method that was proposed turns out to be unusable in common cases.
+Furthermore, self-similarity 'jumps' make more sophisticated rendering techniques difficult if not impossible to use.
+
+As long as these two problems remain unsolved, the proposed technique can only be considered impractical.
+
 * Further Work
 
-# Possibility of a more enhanced method to detect self-similariy?
+It is our hope that a more sophisticated way of detecting self-similarity might be found,
+which would make 'self-similarity jumping' more practical.
 
-# List of things that could be improved on in the implementation
-# - optimizing rendering of the point cloud
-# - optimizing creation of the point cloud
-# - investigate different ideas of recognizing self-similarity
+The same is true for if a technique for coloring the result that is usable even when jumping between zoom-levels on a point cloud.
+This would also make the proposed technique more practical to use.
+
+Besides this, while we have shown in a proof-of-concept program that it is possible to render an IFS using a point cloud
+with a reasonable speed, there are many optimizations that could be made to make the program run faster (potentially even in real-time),
+most notably the rendering optimizations listed in autoref:subsection:point_cloud_optimizations
+
+Another venue that could be explored is the rendering of an IFS' attractor at multiple 'levels of detail':
+It might be possible to create more detailed local versions of the point cloud (based on the points of the less detailed point cloud) when the user
+zooms in on a particular region, on demand.
+
+Finally it is worth noting that as mentioned in autoref:subsection:deterministic_gpu, [CITE] already presents an efficient way to render a large set of IFSs using a very different approach, 
+which might be worthwhile to explore further.
