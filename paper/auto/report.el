@@ -46,22 +46,28 @@
     "xmark"
     "altasterism")
    (LaTeX-add-labels
-    "sec:org8eea98e"
-    "sec:org73d7cf8"
-    "sec:org588bade"
-    "sec:orgcfb86e1"
-    "sec:org17278a9"
-    "sec:org7074d15"
-    "sec:orgc8a9298"
-    "sec:org12f5657"
+    "sec:orgab5053f"
+    "sec:org8a9df12"
+    "sec:org53d8be8"
+    "sec:orgb7e7a6b"
+    "section:background"
+    "sec:orga95c86e"
+    "sec:org1c97ec1"
+    "sec:org50f9633"
+    "sec:org0e8620d"
     "chaosGame"
-    "sec:org6bd243f"
-    "sec:orgbb3a13b"
-    "sec:orge67e4b2"
-    "sec:org33e5105"
-    "sec:org11568aa"
-    "sec:orgc17b009"
-    "sec:orgb952e9d")
+    "sec:orge634b9c"
+    "sec:orgfd71571"
+    "sec:orgb5d5129"
+    "sec:org605f2c7"
+    "sec:org50a5b6d"
+    "sec:org2a0146c"
+    "sec:orgb293164"
+    "sec:org358638a"
+    "sec:org47497e6"
+    "sec:org43070aa"
+    "sec:org3d22e34"
+    "sec:org9e0f3bb")
    (LaTeX-add-bibliographies
     "bibliography")
    (LaTeX-add-newfloat-DeclareFloatingEnvironments

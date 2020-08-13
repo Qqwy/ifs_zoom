@@ -1,4 +1,4 @@
-% Created 2020-08-12 Wed 17:29
+% Created 2020-08-13 Thu 16:44
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -68,10 +68,10 @@
 \tableofcontents
 
 \section{Abstract}
-\label{sec:org8eea98e}
+\label{sec:orgab5053f}
 
 \section{Introduction}
-\label{sec:org73d7cf8}
+\label{sec:org8a9df12}
 
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
 by repeatedly applying simple mathematical functions until a fixed point is reached. [CITE]
@@ -95,11 +95,12 @@ that shares the same self-similarity as the original one.
 Investigating this claim in detail is the essence of this thesis.
 
 \subsection{Overview}
-\label{sec:org588bade}
+\label{sec:org53d8be8}
 
 
 \section{Background}
-\label{sec:orgcfb86e1}
+\label{sec:orgb7e7a6b}
+\label{section:background}
 
 Informally, an Iterated Function System is a set of transformations that, given any input image, can create a new image by
 
@@ -116,7 +117,7 @@ What you end up with is a visual representation of the IFS's attractor.
 
 
 \subsection{Formal definition of an Iterated Function System}
-\label{sec:org17278a9}
+\label{sec:orga95c86e}
 
 Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space \((\mathcal{M}, d)\) to itself:
 
@@ -145,7 +146,7 @@ and furthermore most commonly-used IFSs are restricted to use \emph{affine trans
 Because of their prevalence, these are also the restrictions that will be used in this thesis.
 
 \subsection{Rendering an Iterated Function System}
-\label{sec:org7074d15}
+\label{sec:org1c97ec1}
 
 A couple of algoritms exist to render (visualize) the attarctor of an Iterated Function System. 
 While it is impossible to render the attractor exactly, as this would require an infinite number of transformation steps,
@@ -165,7 +166,7 @@ Short summaries of the two most common techniques will now follow.
 
 
 \subsubsection{The deterministic method}
-\label{sec:orgc8a9298}
+\label{sec:org50f9633}
 
 In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
 
@@ -187,10 +188,13 @@ Since \(z_{k} = f_{i_k-1}(z_{k-1})\) this procedure takes, for an approximation 
 The advantage of the breadth-first traversal is that generation could be stopped interactively,
 while the depth-first traversal requires the stopping criterion to be known beforehand. [CITE]
 
-\subsubsection{The chaos game}
-\label{sec:org12f5657}
+While the deterministic method is easy to understand (and indeed is a direct translation of the informal process described at the start of \autoref{section:background}),
+it is usually less efficient and more complex to implement on a computer than the algorithm that will be described next.
 
-The stochastic method, more frequently called the \emph{chaos game}, works as seen in \autoref{chaosGame}
+\subsubsection{The chaos game}
+\label{sec:org0e8620d}
+
+The \emph{stochastic method}[CITE], also known as the \emph{random iteration algorithm}[CITE] or more frequently the \emph{chaos game}, works as seen in \autoref{chaosGame}
 
 \begin{algorithm}[H]
 \caption{the chaos game}
@@ -205,50 +209,108 @@ The stochastic method, more frequently called the \emph{chaos game}, works as se
 
 \end{algorithm}
 
-\todo[inline]{REF ALG}
-
 This method converges to a correct result because of the following two facts:
 
 \begin{itemize}
-\item at each depth in the tree the subtree remains the same.
 \item because the precision of the canvas we render on is finite, and because all transformations are contracting,
-only the latest \(x\) transformations determine at what location on the canvas a point will end up.\footnote{Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of \(x\)) exist [CITE], 
+two points \(a\) and \(b\) are indistinguishable after only \(x\) transformations.
+ In other words, only the latest \(x\) transformations determine at what location on the canvas a point will end up (with the latest transformation having the largest effect on the point's final location).\footnote{Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of \(x\)) exist [CITE], 
 but are not relevant for this thesis.}
+\item at each depth in the tree the subtree remains the same, so every sequence of transformations approaches the attractor.
 \end{itemize}
 
-Therefore, because we render all intermediate points, and these points correspond to different '\$x\$-long sequences of transformations', we end up covering the whole attractor.
+Therefore, all intermediate points after the first \(x\) iterations are visually indistinguishable from the a point that is part of the attractor.
+By running this non-deterministic approach for enough iterations we approach a diverse enough set of 'transformation sequences of length \(x\)' that we end up covering the whole attractor.
 
-The nice thing about the chaos game is that it does not require any extra memory (besides the point \(z\).
-Also, because it is so simple, it can be optimized very well by modern CPU architecture.
+The nice thing about the chaos game is that it does not require any extra memory (besides the point \(z\)).
+Also, because it is so simple and little auxiliary memory is needed, it runs very efficiently on modern CPU architectures.
 
-One disadvantage the chaos game has, is that in its simplest form, all transformations have an equally likely chance to be used.
+A disadvantage of the chaos game is that the result is by its very nature \emph{non-deterministic}.
+If not enough points are used, the result might end up 'grainy' and it is not predictable what part of the attractor will be covered.
+
+One further disadvantage the chaos game has, is that in its simplest form, all transformations have an equally likely chance to be used.
 However, because some transformations might be (much) more contracting than others, this means that coverage of the attractor is not even,
 which means that we need to use much more iterations than would be the case if we balance it out.
 
 Therefore, most implementations of the chaos game allow (or require) the user to specify a \emph{probability} for each transformation.
-All these probabilities together ought to sum up to 1.\footnote{These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well [CITE] section 2.4.}, 
+All these probabilities together ought to sum up to 1.\footnote{These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well [CITE] section 2.4.}
 
-\subsubsection{GPU}
-\label{sec:org6bd243f}
+\altasterism
+
+Because of its simplicity and efficiency, the chaos game is used more frequently than the deterministic method for practical implementations.
+The chaos game is also easier to paralellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
+
+\subsection{IFS rendering on a GPU}
+\label{sec:orge634b9c}
+
+It is enticing to port IFS rendering to run on GPU-architecture because to produce a smooth image, often hundreds of millions of points are needed.
+
+However, optimizing IFS rendering to run well on GPU-architectures is a bit of a challenge.
+
+GPU shaders usually operate by running a check for every pixel on the final canvas, to determine its color.
+For other fractals like the Mandelbrot- and Julia-sets, this is a natural fit since the construction of those fractals works exactly in that way.
+
+For an IFS this does not work, as an IFS is created in the other direction. Points end up at some location on the canvas \emph{only after transforming} many times.
+Attempts to go the other way fall flat, for instance because this would require to invert the IFS' mappings, but they are not guaranteed to be invertible.
+
+Instead, General-Purpose GPU-techniques are used that are able to use the top-down approach.
+
+\subsubsection{the chaos game on the GPU}
+\label{sec:orgfd71571}
+
+The deterministic method is difficult to paralellize on the GPU because of the extra memory that is required to keep track of the current position in the tree.
+Coordinating which GPU thread would calculate which part of the tree and sharing results would be a hassle.
+
+Instead, the chaos game is more frequently used because of its simplicity. It is paralellized in a straightforward way, by running the iteration process many times side-by-side (one per GPU thread),
+and then combine the final results of all of these on a single canvas. [CITE]
+
+\subsubsection{the deterministic method on the GPU}
+\label{sec:orgb5d5129}
+
+An exciting approach taken in [CITE] uses the deterministic method instead:
+by using the fast inverse square root operation, even unbounded (noncontracting) and nonlinear IFSs can be efficiently
+evaluated using the deterministic method, programmed in normal GPU shaders that manipulate a couple of GPU textures.
+
+
 
 
 \section{Problem Description}
-\label{sec:orgbb3a13b}
+\label{sec:org605f2c7}
 
-\section{Implementation}
-\label{sec:orge67e4b2}
+In the last section, the construction of an IFS's attractor was formally defined, 
+and different approaches of rendering it were outlined.
+
+While many different approaches to IFS rendering exist, some of them quite efficient,
+none of them re-uses information from rendering one image of the IFS for rendering another.
+
+This leads us to the research question of this thesis:
+
+\textbf{\textbf{Is it possible to render animations in which a camera zooms in on an Iterated Function System's attractor in real-time?}}
+
+\section{Approach}
+\label{sec:org50a5b6d}
+
+\subsection{Design}
+\label{sec:org2a0146c}
+\subsubsection{Point Cloud}
+\label{sec:orgb293164}
+
+\subsection{Implementation}
+\label{sec:org358638a}
+
+
 
 
 \section{Findings}
-\label{sec:org33e5105}
+\label{sec:org47497e6}
 
 
 \section{Discussion}
-\label{sec:org11568aa}
+\label{sec:org43070aa}
 
 \section{Conclusion}
-\label{sec:orgc17b009}
+\label{sec:org3d22e34}
 
 \section{Further Work}
-\label{sec:orgb952e9d}
+\label{sec:org9e0f3bb}
 \end{document}
