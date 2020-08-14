@@ -107,7 +107,20 @@ This section will describe the different building blocks necessary to formalate 
 First, IFSs are formalized, followed by a description of the different ways in which an IFS' attractor can be rendered, 
 and how these techniques might be paralellized.
 
+\pagebreak
+
 ** Informal description of an Iterated Function System
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{figures/sierpinsky_iterations}
+\caption{The first six iterations of the Sierpi\'nsky triangle IFS (\autoref{ifs:sierpinsky}). 
+The initial image is just the unit square. We then iteratively combine the results of transforming the current image using one of the three transformations. 
+The letters indicate which (sequence of) transformation(s) resulted in this part of the image.
+Dashed red lines are used for the first four iterations to indicate the self-similarity between the previous iteration and the current one extra clearly.
+Even after a couple of iterations it can be seen that the shape of the original image does not matter for the shape of the attractor.}
+\label{figure:sierpinsky_iterations}
+\end{figure}
+
 
 Informally, an Iterated Function System is a set of transformations that, given any input image, can create a new image by
 
@@ -117,8 +130,7 @@ Informally, an Iterated Function System is a set of transformations that, given 
 This process is then repeated an arbitrary number of times, until changes between the input image and output image are no longer visible to the human eye.
 
 What you end up with is a visual representation of the IFS's attractor.
-
-\todo[inline]{reference picture}
+A simple example of this process can be seen in autoref:figure:sierpinsky_iterations
 
 \todo[inline]{Some examples of IFSs? (that are used later on in the thesis)}
 
@@ -628,3 +640,15 @@ zooms in on a particular region, on demand.
 
 Finally it is worth noting that as mentioned in autoref:subsection:deterministic_gpu, [CITE] already presents an efficient way to render a large set of IFSs using a very different approach, 
 which might be worthwhile to explore further.
+
+\appendix
+
+* IFSs used
+
+This appendix lists the transformation matrices of the IFSs that were used throughout this thesis.
+
+\todo[inline]{Sierpi\'nsky}
+\todo[inline]{Dragon Curve}
+\todo[inline]{Barnsley Fern|
+
+\label{ifs:sierpinsky}

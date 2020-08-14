@@ -1,4 +1,4 @@
-% Created 2020-08-14 Fri 22:22
+% Created 2020-08-14 Fri 23:02
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -70,7 +70,7 @@
 
 
 \section{Abstract}
-\label{sec:org782f9d6}
+\label{sec:org4ce1f34}
 
 Iterated Function Systems are a mathematical approach to rendering fractals that sees wide usage in the modeling of physical phenomena, 
 image compression, and the creation of abstract art.
@@ -84,7 +84,7 @@ A proof-of-concept computer program was implemented which shows that the usefull
 is hampered by the fact that self-similarity jumping cannot be used in a couple of common situations.
 
 \section{Introduction}
-\label{sec:org16646db}
+\label{sec:org4fac3a5}
 
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
 by repeatedly applying simple mathematical functions until a fixed point is reached. [CITE]
@@ -108,7 +108,7 @@ that shares the same self-similarity as the original one.
 In this thesis, these two ideas are investigated in detail.
 
 \subsection{Overview}
-\label{sec:org48b19dd}
+\label{sec:orgd1c0691}
 
 In the next section, \autoref{section:background}, Iterated Function Systems will be introduced and pre-existing methods to render their attractors in single-threaded and heavily parallel environments described.
 This then leads to a clear definition of the research question in \autoref{section:research_question}.
@@ -117,15 +117,28 @@ We conclude in \autoref{section:conclusion} and finally hint at some approaches 
 
 
 \section{Background}
-\label{sec:org154a729}
+\label{sec:org00bff84}
 \label{section:background}
 
 This section will describe the different building blocks necessary to formalate the research question.
 First, IFSs are formalized, followed by a description of the different ways in which an IFS' attractor can be rendered, 
 and how these techniques might be paralellized.
 
+\pagebreak
+
 \subsection{Informal description of an Iterated Function System}
-\label{sec:orgbe4e2fc}
+\label{sec:org3c3c85b}
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{figures/sierpinsky_iterations}
+\caption{The first six iterations of the Sierpi\'nsky triangle IFS (\autoref{ifs:sierpinsky}). 
+The initial image is just the unit square. We then iteratively combine the results of transforming the current image using one of the three transformations. 
+The letters indicate which (sequence of) transformation(s) resulted in this part of the image.
+Dashed red lines are used for the first couple of iterations to indicate the self-similarity between the previous iteration and the current one extra clearly.
+Even after a couple of iterations it can be seen that the shape of the original image does not matter for the shape of the attractor.}
+\label{figure:sierpinsky_iterations}
+\end{figure}
+
 
 Informally, an Iterated Function System is a set of transformations that, given any input image, can create a new image by
 
@@ -137,14 +150,13 @@ Informally, an Iterated Function System is a set of transformations that, given 
 This process is then repeated an arbitrary number of times, until changes between the input image and output image are no longer visible to the human eye.
 
 What you end up with is a visual representation of the IFS's attractor.
-
-\todo[inline]{reference picture}
+A simple example of this process can be seen in \autoref{figure:sierpinsky_iterations}
 
 \todo[inline]{Some examples of IFSs? (that are used later on in the thesis)}
 
 
 \subsection{Formal definition of an Iterated Function System}
-\label{sec:orgaab5fd9}
+\label{sec:org2b0b9d9}
 
 Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space \((\mathcal{M}, d)\) to itself:
 
@@ -166,7 +178,7 @@ $$\mathcal{A} = \lim_{n \rightarrow \infty} \mathcal{S}_n$$
 Curiously, which set of points \(\mathcal{S}_0\) we started with makes no difference (we might even start with a single point) [CITE].
 
 \subsubsection{Restriction to affine transformations on the two-dimensional euclidean plane}
-\label{sec:org03f2397}
+\label{sec:orge0e3ca2}
 
 Most research of IFSs restricts itself to using \(\mathbb{R}^2\) as metric space\footnote{More formally, the two-dimensional Euclidean space: \(\left(\mathbb{R}^2, d(p, q) = \sqrt{p - q)^2}\right)\).} which can easily be rendered to screen or paper,
 and furthermore most commonly-used IFSs are restricted to use \emph{affine transformations} as mappings.
@@ -174,7 +186,7 @@ and furthermore most commonly-used IFSs are restricted to use \emph{affine trans
 Because of their prevalence, these are also the restrictions that will be used in this thesis.
 
 \subsubsection{The viewport transformation}
-\label{sec:org56ea640}
+\label{sec:org72d009b}
 \label{subsection:viewport_transformation}
 
 For any IFS with mappings we can transform its attractor by any invertible function \(t\) by adjusting each of the mappings according to the
@@ -183,7 +195,7 @@ This allows us to give users freedom to choose any desired mappings and 'initial
 while still allowing all calculations to happen with regard to the unit square (which keeps them simpler).
 
 \subsection{Rendering an Iterated Function System}
-\label{sec:org1ff68b9}
+\label{sec:org8fd1462}
 
 A couple of algoritms exist to render (visualize) the attarctor of an Iterated Function System. 
 While it is impossible to render the attractor exactly, as this would require an infinite number of transformation steps,
@@ -203,7 +215,7 @@ Short summaries of the two most common techniques will now follow.
 
 
 \subsubsection{The deterministic method}
-\label{sec:orgbe18a8c}
+\label{sec:org99d4759}
 
 In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
 
@@ -229,7 +241,7 @@ While the deterministic method is easy to understand (and indeed is a direct tra
 it is usually less efficient and more complex to implement on a computer than the algorithm that will be described next.
 
 \subsubsection{The chaos game}
-\label{sec:org6e66bad}
+\label{sec:orgade29b6}
 \label{subsection:chaos_game}
 
 The \emph{stochastic method}[CITE], also known as the \emph{random iteration algorithm}[CITE] or more frequently the \emph{chaos game}, works as seen in \autoref{chaosGame}
@@ -281,7 +293,7 @@ Because of its simplicity and efficiency, the chaos game is used more frequently
 The chaos game is also easier to paralellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
 
 \subsection{Paralellizing IFS rendering by using a Graphical Processor Unit}
-\label{sec:orgeceb933}
+\label{sec:org5827968}
 
 It is enticing to port IFS rendering to run on GPU-architecture because to produce a smooth image, often hundreds of millions of points are needed.
 
@@ -296,7 +308,7 @@ Attempts to go the other way fall flat, for instance because this would require 
 Instead, General-Purpose GPU-techniques are used that are able to use the top-down approach.
 
 \subsubsection{The chaos game on the GPU}
-\label{sec:org536623b}
+\label{sec:orge7c52a3}
 \label{subsection:chaos_game_gpu}
 
 The deterministic method is difficult to paralellize on the GPU because of the extra memory that is required to keep track of the current position in the tree.
@@ -306,7 +318,7 @@ Instead, the chaos game is more frequently used because of its simplicity. It is
 and then combine the final results of all of these on a single canvas. [CITE]
 
 \subsubsection{The deterministic method on the GPU}
-\label{sec:org2344154}
+\label{sec:org8dbf566}
 \label{subsection:deterministic_gpu}
 
 An exciting approach taken in [CITE] uses the deterministic method instead:
@@ -315,7 +327,7 @@ evaluated using the deterministic method, programmed in normal GPU shaders that 
 
 
 \section{Research Question}
-\label{sec:org7da9d97}
+\label{sec:orgd15dd1c}
 \label{section:research_question}
 
 In the last section, the construction of an IFS's attractor was formally defined, 
@@ -331,14 +343,14 @@ This leads us to the research question of this thesis:
 \todo[inline]{Maybe rephrase question?}
 
 \section{Approach}
-\label{sec:orgc6ae034}
+\label{sec:org118baf6}
 \label{section:approach}
 
 To put this to the test, a simple software program was created which calculates the IFS' attractor only once,
 and then allows a user to interactively zoom and pan the camera around to investigate different parts of the attractor.
 
 \subsection{Design}
-\label{sec:org1087d3f}
+\label{sec:org7a15ed7}
 
 The inspiration of the design is two-fold:
 
@@ -350,7 +362,7 @@ it is possible to detect when we are looking at a self-similar part of the attra
 This allows us, in many situations, to replace the current camera viewport with a more \emph{shallow} one, keeping the amount of detail high.
 
 \subsubsection{Point clouds}
-\label{sec:org4dcdc14}
+\label{sec:orgd7b6cf9}
 
 The main inspiration for the re-usability approach is that we can modify the GPU-variant of the chaos game algorithm outlined in \autoref{subsection:chaos_game_gpu}
 to render to a \emph{point cloud} instead of immediately to a canvas.
@@ -373,7 +385,7 @@ to run in \(\mathcal{O}(\log{N})\) instead, which is a big improvement.
 \todo[inline]{Modify big-Oh by using $p$ as paralellism factor}
 
 \subsubsection{Potential point cloud-based optimizations}
-\label{sec:org70d7668}
+\label{sec:org1bb2bc3}
 \label{subsection:point_cloud_optimizations}
 
 The generation and rendering of point clouds is a quite well-understood problem[CITE]. point clouds see widespread use,
@@ -387,7 +399,7 @@ which speeds up the rendering procedure tremendously.
 However, while this problem is well-understood, the implementation is far from trivial [CITE].
 
 \subsubsection{Detecting self-similarity: 'Zooming In by Zooming Out'}
-\label{sec:orgcd38a76}
+\label{sec:orgb1f4922}
 \label{subsection:self_similarity}
 
 When using a point-cloud, we retain detail when zooming in up to a certain depth. In this way, a point cloud is more flexible than a 
@@ -412,7 +424,7 @@ can be used to check whether all points of one polygon are inside the other.}.
 \todo[inline]{Example picture}
 
 \subsubsection{Coloring the rendering}
-\label{sec:org610e614}
+\label{sec:org51ff82f}
 \label{subsection:coloring}
 
 The simplest way of rendering an IFS attractor simply renders points that are on the attractor a different colour
@@ -429,7 +441,7 @@ If we now 'jump up' (so we use points from virtually the whole fern), we have to
 
 
 \subsection{Implementation}
-\label{sec:org60c3ccb}
+\label{sec:org6af2525}
 
 \begin{figure}
   \centering
@@ -453,7 +465,7 @@ and testing each of these independently, being a pure functional language.
 A general overviwe of the flow of the program can be seen in \autoref{figure:program_flow}.
 
 \subsubsection{Simplicity}
-\label{sec:orgb0a68cc}
+\label{sec:orgf58f1a8}
 
 To be able to complete the implementation within the time allotted for the thesis project,
 the decision was made to keep the implementation as simple as possible.
@@ -472,11 +484,11 @@ it is able to answer the simpler question of whether the technique of using a po
 in combination with 'self-similarity jumping' is at all feasible.
 
 \subsubsection{Command-line options}
-\label{sec:orgc38f891}
+\label{sec:org3c3b2b3}
 \todo[inline]{Write}
 
 \subsubsection{`.ifs' file format}
-\label{sec:orgf768fb0}
+\label{sec:orgb946bcb}
 
 The configuration language 'Dhall'[CITE] was used to 
 easily faciltate the specification of different IFSs.
@@ -491,7 +503,7 @@ As such, one still needs to write e.g. \(1/3\) as \(0.3333333333333333\).}
 \todo[inline]{Include (a couple) example file(s) as snippets here.}
 
 \subsubsection{Rendering}
-\label{sec:org2826a46}
+\label{sec:orgb30e0ad}
 The program computes the point cloud once, on startup, and then re-renders the image that is shown in the program window
 every time the user changes the camera viewport.
 
@@ -503,14 +515,14 @@ More sophisticated rendering techniques are possible (see \autoref{subsection:co
 but not implemented in the program.
 
 \subsubsection{Changing the camera viewport}
-\label{sec:org245a010}
+\label{sec:org5d5e5c2}
 Changing the camera viewport can be done by either zooming in or out using the scrollwheel,
 or dragging with the mouse to translate the camera viewport.
 
 The camera's view transformation itself is stored as a transformation matrix relative to the unit square.
 
 \subsubsection{Manually performing 'self-similarity jumping'}
-\label{sec:org9035a3d}
+\label{sec:org5dd0a31}
 
 While the program is running, a user can go back to a more shallow view by pressing `+`\footnote{Strictly speaking, by pressing the `=` key; pressing SHIFT is not necessary.}, and then when inside one or multiple shallower views,
 `-` can be pressed to undo the last jump.
@@ -521,7 +533,7 @@ That this process is kept manual was intentional, because it allows the user to 
 the representation looks with and without the jumping, and allows for a full exploration of the circumstances
 in which a jump up is and is not actually correct (see \autoref{subsection:jumping_restrictions}).
 \subsubsection{Rendering 'guides'}
-\label{sec:org65ea20c}
+\label{sec:org7b39d67}
 
 To make it easier to see how an IFS is constructed, as well as easier for a user to orient themselves when
 testing the 'self-similarity jumping', it is possible to toggle the rendering of 'guides' by pressing the `g` key.
@@ -532,11 +544,11 @@ Different colours are used for guides at different sequence-depths.
 \todo[inline]{picture}
 
 \section{Findings}
-\label{sec:org6f842db}
+\label{sec:org39e32bd}
 \label{section:findings}
 
 \subsection{Restrictions on replacing the view with a more shallow view}
-\label{sec:org8f1cabd}
+\label{sec:org4bb8045}
 \label{subsection:jumping_restrictions}
 
 From experimentation with the program it turns out that there are two common situations
@@ -544,7 +556,7 @@ in which the technique of replacing the camera viewport with a more shallow came
 
 \begin{enumerate}
 \item Borders between transformations
-\label{sec:org488bbf1}
+\label{sec:org70b49b0}
 
 It is rather common to zoom in on the borders between transformations, as this is often
 where interesting visual details of the IFS might appear.
@@ -553,7 +565,7 @@ However, the algortihm as outlined in [REF EARLIER ALGORITHM] is not able to han
 thus making it useless in these scenarios.
 
 \item Overlapping subtransformations
-\label{sec:org0beb14e}
+\label{sec:org74826ba}
 
 A more shallow view of the attractor only shows the same as a deeper view when
 there are no points transformed by another mapping that end up in the deeper view.
@@ -615,7 +627,7 @@ per mapping, where the unit square would end up after a couple of mappings with 
 \end{enumerate}
 
 \subsection{Memory Usage}
-\label{sec:org0fd95bc}
+\label{sec:org82da4a8}
 
 Point clouds take up a lot of data on the GPU. To render a fractal at reasonable detail, 
 hundreds of millions if not billions of points are necessary (depending on the particular IFS).
@@ -627,7 +639,7 @@ For current generation GPUs\footnote{At the time of writing, high-end consumer G
 CITE: \url{https://www.ign.com/articles/the-best-graphics-cards-3}}, this often is more memory than available.
 
 \section{Conclusion}
-\label{sec:org9a80e89}
+\label{sec:org15662eb}
 \label{section:conclusion}
 
 A program was implemented which has shown that there is \emph{some} merit to rendering an IFS' attractor using a point-cloud as re-usable intermediate structure.
@@ -637,7 +649,7 @@ Furthermore, self-similarity 'jumps' make more sophisticated rendering technique
 As long as these two problems remain unsolved, the proposed technique can only be considered impractical.
 
 \section{Further Work}
-\label{sec:org8df2c05}
+\label{sec:org4e032ab}
 \label{section:further_work}
 
 It is our hope that a more sophisticated way of detecting self-similarity might be found,
@@ -653,4 +665,17 @@ zooms in on a particular region, on demand.
 
 Finally it is worth noting that as mentioned in \autoref{subsection:deterministic_gpu}, [CITE] already presents an efficient way to render a large set of IFSs using a very different approach, 
 which might be worthwhile to explore further.
+
+\appendix
+
+\section{IFSs used}
+\label{sec:orgcdc464f}
+
+This appendix lists the transformation matrices of the IFSs that were used throughout this thesis.
+
+\todo[inline]{Sierpi\'nsky}
+\todo[inline]{Dragon Curve}
+\todo[inline]\{Barnsley Fern|
+
+\label{ifs:sierpinsky}
 \end{document}

@@ -5,13 +5,13 @@
                      '(("article" "11pt")))
    (TeX-add-to-alist 'LaTeX-provided-package-options
                      '(("inputenc" "utf8") ("fontenc" "T1") ("ulem" "normalem") ("geometry" "a4paper" "total={7in, 9in}") ("algorithm2e" "ruled" "procnumbered") ("xcolor" "dvipsnames") ("enumitem" "shortlabels")))
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "href")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
    (add-to-list 'LaTeX-verbatim-macros-with-braces-local "path")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "href")
    (add-to-list 'LaTeX-verbatim-macros-with-delims-local "path")
    (TeX-run-style-hooks
     "latex2e"
@@ -46,63 +46,66 @@
     "xmark"
     "altasterism")
    (LaTeX-add-labels
-    "sec:org782f9d6"
-    "sec:org16646db"
-    "sec:org48b19dd"
-    "sec:org154a729"
+    "sec:org4ce1f34"
+    "sec:org4fac3a5"
+    "sec:orgd1c0691"
+    "sec:org00bff84"
     "section:background"
-    "sec:orgbe4e2fc"
-    "sec:orgaab5fd9"
-    "sec:org03f2397"
-    "sec:org56ea640"
+    "sec:org3c3c85b"
+    "figure:sierpinsky_iterations"
+    "sec:org2b0b9d9"
+    "sec:orge0e3ca2"
+    "sec:org72d009b"
     "subsection:viewport_transformation"
-    "sec:org1ff68b9"
-    "sec:orgbe18a8c"
-    "sec:org6e66bad"
+    "sec:org8fd1462"
+    "sec:org99d4759"
+    "sec:orgade29b6"
     "subsection:chaos_game"
     "chaosGame"
-    "sec:orgeceb933"
-    "sec:org536623b"
+    "sec:org5827968"
+    "sec:orge7c52a3"
     "subsection:chaos_game_gpu"
-    "sec:org2344154"
+    "sec:org8dbf566"
     "subsection:deterministic_gpu"
-    "sec:org7da9d97"
+    "sec:orgd15dd1c"
     "section:research_question"
-    "sec:orgc6ae034"
+    "sec:org118baf6"
     "section:approach"
-    "sec:org1087d3f"
-    "sec:org4dcdc14"
-    "sec:org70d7668"
+    "sec:org7a15ed7"
+    "sec:orgd7b6cf9"
+    "sec:org1bb2bc3"
     "subsection:point_cloud_optimizations"
-    "sec:orgcd38a76"
+    "sec:orgb1f4922"
     "subsection:self_similarity"
-    "sec:org610e614"
+    "sec:org51ff82f"
     "subsection:coloring"
-    "sec:org60c3ccb"
+    "sec:org6af2525"
     "figure:program_flow"
-    "sec:orgb0a68cc"
-    "sec:orgc38f891"
-    "sec:orgf768fb0"
-    "sec:org2826a46"
-    "sec:org245a010"
-    "sec:org9035a3d"
-    "sec:org65ea20c"
-    "sec:org6f842db"
+    "sec:orgf58f1a8"
+    "sec:org3c3b2b3"
+    "sec:orgb946bcb"
+    "sec:orgb30e0ad"
+    "sec:org5d5e5c2"
+    "sec:org5dd0a31"
+    "sec:org7b39d67"
+    "sec:org39e32bd"
     "section:findings"
-    "sec:org8f1cabd"
+    "sec:org4bb8045"
     "subsection:jumping_restrictions"
-    "sec:org488bbf1"
-    "sec:org0beb14e"
+    "sec:org70b49b0"
+    "sec:org74826ba"
     "figigure:dragon_curve_a"
     "figigure:dragon_curve_b"
     "fig:five over x"
     "figigure:dragon_curve_d"
     "figure:dragon_curve_overlaps"
-    "sec:org0fd95bc"
-    "sec:org9a80e89"
+    "sec:org82da4a8"
+    "sec:org15662eb"
     "section:conclusion"
-    "sec:org8df2c05"
-    "section:further_work")
+    "sec:org4e032ab"
+    "section:further_work"
+    "sec:orgcdc464f"
+    "ifs:sierpinsky")
    (LaTeX-add-bibliographies
     "bibliography")
    (LaTeX-add-newfloat-DeclareFloatingEnvironments
