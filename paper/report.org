@@ -78,10 +78,12 @@ For instance, many kinds of animations consist of transformations of the camera 
 This means that (an approximation of) the fractal might be computed once and then be used for all frames.
 
 Furthermore, because of the self-similar nature of the rendered fractals,
-it might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow viewport
+it might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow camera viewport
 that shares the same self-similarity as the original one. 
 
 Investigating this claim in detail is the essence of this thesis.
+
+\todo[inline]{Odd ending of section that needs to be fixed}
 
 ** Overview
 
@@ -89,7 +91,13 @@ Investigating this claim in detail is the essence of this thesis.
 
 * Background
 \label{section:background}
-  
+
+This section will describe the different building blocks necessary to formalate the research question.
+First, IFSs are formalized, followed by a description of the different ways in which an IFS' attractor can be rendered, 
+and how these techniques might be paralellized.
+
+** Informal description of an Iterated Function System
+
 Informally, an Iterated Function System is a set of transformations that, given any input image, can create a new image by
 
 1. transforming the input image with each of the transformations
@@ -331,12 +339,7 @@ for instance in a binary search tree that is ordered using the Morton space fill
 Storing the points of a point cloud in this way allows us to efficiently cull most uninteresting points (i.e. points that would end up outside of the current camera viewport),
 which speeds up the rendering procedure tremendously.
 
-However, while this problem is well-understood, the implementation is not trivial at all [CITE].
-As such, the program developed for this thesis does not implement these techniques.
-Instead, the choice was made for simplicity, 
-and the use of a bounded volume hierarchy is treated as a potential future optimization.
-
-\todo[inline]{mention this in the 'Implementation' section instead?}
+However, while this problem is well-understood, the implementation is far from trivial [CITE].
 
 *** Detecting self-similarity: 'Zooming In by Zooming Out'
 \label{subsection:self_similarity}
@@ -481,7 +484,21 @@ These techniques are difficult, if not impossible, to combine with the concept o
 While techniques to 'smooth out' the jump exist (such as overlaying mulltiple cameras at different zoom-levels at once and gradually fading between them),
 they are more akin a 'treatment of the symptoms' rather than a full solution of the cause.
 
+** Memory Usage
+
+Point clouds take up a lot of data on the GPU. To render a fractal at reasonable detail, 
+hundreds of millions if not billions of points are necessary (depending on the particular IFS).
+
+A reasonable way to store a point cloud is by using for each 2D-point, 32 bits for each coordinate, thus fitting the pair in exactly one machine word of 64-bit systems.
+Stored this way, a point cloud of 100,000,000 points requires 0.596 GiB of GPU memory,
+and 1,000,000,000 points requires 5.96 GiB.
+For current generation GPUs[fn:GPU2020], this often is more memory than available.
+
+[fn:GPU2020] At the time of writing, high-end consumer GPUs contain somewhere between 2 and 24 GiB of available memory. [CITE]
+CITE: https://www.ign.com/articles/the-best-graphics-cards-3
+
 * Discussion
+
 
 # Point clouds are big, and you need many points for an IFS. Keeping them in memory for a GPU is a hassle.
 
