@@ -376,6 +376,22 @@ and then transform all of its corner points. For the resulting two polygons, the
 [CITE]
 can be used to check whether all points of one polygon are inside the other. 
 
+*** Coloring the rendering
+\label{subsection:coloring}
+
+The simplest way of rendering an IFS attractor simply renders points that are on the attractor a different colour
+than the points that are not.
+
+However, more visually pleasing methods use a /color map/ to e.g. indicate the density (the number of points ending up at a particular canvas location) of the attractor.
+Yet more advanced methods [CITE fractal flame] keep track of a per-point colour, based on the sequence of transformations it has undergone.
+
+It seems possible to combine these techinques with the 'self-similarity jumping', since we keep track of which mappings we've (inversely) applied to the camera viewport:
+to determine the final colors of all points, all visible points need to be multiplied 
+all points's colors need to be altered by the color-mutations that each of the inversely-applied mappings would apply.
+Essentially, say we are viewing the lower left leaf of a fractal fern, whose mapping would make the contained points reddish. 
+If we now 'jump up' (so we use points from virtually the whole fern), we have to alter all points so they get the same reddish hues.
+
+
 ** Implementation
 
 \todo[inline]{Picture of program running as state diagram}
@@ -395,10 +411,16 @@ and testing each of these independently, being a pure functional language.
 To be able to complete the implementation within the time allotted for the thesis project,
 the decision was made to keep the implementation as simple as possible.
 
-This mainly means that the optimizations mentioned in autoref:subsection:point_cloud_optimizations were /not/ implemented.
+This means that 
 
-\todo[inline]{Mention how this still allows us to (dis)prove hypothesis}
+- the optimizations mentioned in autoref:subsection:point_cloud_optimizations were not implemented.
+- points are rendered on screen using a simple binary mapping (if a pixel contains one or more points, it is white; otherwise black.)
+  the more fancy coloring techniques outlined in autoref:subsection:coloring were not used.
 
+This means that while the program cannot on its own fully answer the question of whether
+this technique is fast enough for real-time usage in all circumstances,
+it is able to answer the simpler question of whether the technique of using a point cloud
+in combination with 'self-similarity jumping' is at all feasible.
 
 *** Command-line options
 \todo[inline]{Write}
@@ -547,20 +569,6 @@ per mapping, where the unit square would end up after a couple of mappings with 
 # Further restriction: when viewport overlaps multiple transformations there is a problem, 
 # even if this would theoretically be a possibility. Maybe there are smarter ways of recognizing self-similarity?
 
-** Difficulty of embellishing the rendering
-\label{subsection:coloring}
-
-\todo[inline]{This information is probably incorrect}
-The simplest way of rendering an IFS attractor simply renders points that are on the attractor a different colour
-than the points that are not.
-
-However, more visually pleasing methods use a /color map/ to e.g. indicate the density (the number of points ending up at a particular canvas location) of the attractor.
-Yet more advanced methods [CITE fractal flame] keep track of a per-point colour, based on the sequence of transformations it has undergone.
-
-These techniques are difficult, if not impossible, to combine with the concept of 'secretly zooming out' because this would create a noticeable jump in colours.
-While techniques to 'smooth out' the jump exist (such as overlaying mulltiple cameras at different zoom-levels at once and gradually fading between them),
-they are more akin a 'treatment of the symptoms' rather than a full solution of the cause.
-
 ** Memory Usage
 
 Point clouds take up a lot of data on the GPU. To render a fractal at reasonable detail, 
@@ -593,9 +601,6 @@ As long as these two problems remain unsolved, the proposed technique can only b
 
 It is our hope that a more sophisticated way of detecting self-similarity might be found,
 which would make 'self-similarity jumping' more practical.
-
-The same is true for if a technique for coloring the result that is usable even when jumping between zoom-levels on a point cloud.
-This would also make the proposed technique more practical to use.
 
 Besides this, while we have shown in a proof-of-concept program that it is possible to render an IFS using a point cloud
 with a reasonable speed, there are many optimizations that could be made to make the program run faster (potentially even in real-time),
