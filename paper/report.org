@@ -366,14 +366,13 @@ by transforming all of the points exactly once with the 'view transformation'
 This is faster than re-evaluating the whole attractor using the chaos game at every frame which would require transforming all points /many/ times.
 
 Formally, to render an attractor approximation consisting of $N$ points, 
-running the whole chaos game each frame takes $(2(N+x))$ transformations per frame. [fn:definitions]
+running the whole chaos game each frame takes $2(N+x)$ transformations per frame. [fn:definitions] 
+Running this on $p$ parallel threads has a time complexity of $\mathcal{O}(\frac{2(N+px)}{p})$.
 
-Unoptimized, it takes $N$ transformations to render a precomputed point cloud to screen each frame.
-This does not seem very impressive since $\mathcal{O}(2(N+x)) \approx \mathcal{O}(2N) \approx \mathcal{O}(N)$,
+Unoptimized, it takes $N$ transformations to render a precomputed point cloud to screen each frame (in parallel this corresponds to a time complexity of $\mathcal{O}(\frac{N}{p})$).
+This does not seem very impressive since $\mathcal{O}(\frac{2(N+x)}{p}) \approx \mathcal{O}(\frac{2N}{p}) \approx \mathcal{O}(\frac{N}{p})$,
 placing the two approaches in the same order of efficiency. However, it is possible to optimize point cloud-based rendering using the techniques outlined in the next section
-to run in $\mathcal{O}(\log{N})$ instead, which is a big improvement.
-
-\todo[inline]{Modify big-Oh by using $p$ as paralellism factor}
+to run in $\mathcal{O}(\frac{\log{N}}{p})$ instead, which is a big improvement.
 
 [fn:transformation_composition] We transform each point twice: Once with the view transformation to render the current point to the canvas in relation to the camera,
 and once with the randomly chosen mapping to transform the current point to the next point.
