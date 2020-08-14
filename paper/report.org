@@ -58,7 +58,16 @@
 
 * Abstract
 
-\todo[inline]{Write}
+Iterated Function Systems are a mathematical approach to rendering fractals that sees wide usage in the modeling of physical phenomena, 
+image compression, and the creation of abstract art.
+Current IFS rendering techniques meant that up to now, interactively exploring an IFS required fully re-approximating the IFS' attractor at every frame.
+
+This thesis proposes a combination of two techniques to enable the faster exploring of IFSs.
+First, a point cloud is used as intermediate attractor approximation, that can be re-used between animation frames.
+Secondly, a technique coined 'self-similarity jumping' is employed to keep the attractor representation detailed, even when zooming in very far.
+
+A proof-of-concept computer program was implemented which shows that the usefullness of the employed techniques, while promising, 
+is hampered by the fact that self-similarity jumping cannot be used in a couple of common situations.
 
 * Introduction
 
@@ -79,15 +88,17 @@ This means that (an approximation of) the fractal might be computed once and the
 
 Furthermore, because of the self-similar nature of the rendered fractals,
 it might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow camera viewport
-that shares the same self-similarity as the original one. 
+that shares the same self-similarity as the original one.
 
-Investigating this claim in detail is the essence of this thesis.
-
-\todo[inline]{Odd ending of section that needs to be fixed}
+In this thesis, these two ideas are investigated in detail.
 
 ** Overview
 
-\todo[inline]{Write Overview}
+In the next section, autoref:section:background, Iterated Function Systems will be introduced and pre-existing methods to render their attractors in single-threaded and heavily parallel environments described.
+This then leads to a clear definition of the research question in autoref:section:research_question.
+The approach taken to test this question is described in autoref:section:approach, followed by qualitative results in autoref:section:findings.
+We conclude in autoref:section:conclusion and finally hint at some approaches for further work in autoref:section:further_work
+
 
 * Background
 \label{section:background}
@@ -279,7 +290,8 @@ by using the fast inverse square root operation, even unbounded (noncontracting)
 evaluated using the deterministic method, programmed in normal GPU shaders that manipulate a couple of GPU textures.
 
 
-* Problem Description
+* Research Question
+\label{section:research_question}
 
 In the last section, the construction of an IFS's attractor was formally defined, 
 and different approaches of rendering it were outlined.
@@ -294,6 +306,7 @@ This leads us to the research question of this thesis:
 \todo[inline]{Maybe rephrase question?}
 
 * Approach
+\label{section:approach}
 
 To put this to the test, a simple software program was created which calculates the IFS' attractor only once,
 and then allows a user to interactively zoom and pan the camera around to investigate different parts of the attractor.
@@ -394,7 +407,12 @@ If we now 'jump up' (so we use points from virtually the whole fern), we have to
 
 ** Implementation
 
-\todo[inline]{Picture of program running as state diagram}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/program_execution}
+  \caption{Overview of the proof-of-concept program's execution flow.}
+\label{figure:program_flow}
+\end{figure}
 
 The program was implemented using the general-purpose programming language Haskell, 
 in combination with the GPGPU library Accelerate [CITE].
@@ -405,6 +423,8 @@ which is more high-level and less error-prone than writing shader code in e.g. C
 The usage of Haskell as implementation language also allowed 
 the easy construction of different subcomponents making up the program,
 and testing each of these independently, being a pure functional language.
+
+A general overviwe of the flow of the program can be seen in autoref:figure:program_flow.
 
 *** Simplicity
 
@@ -486,6 +506,7 @@ Accelerate presents errors at compile-time in many cases. Furthermore, Accelerat
 single-threaded reference implementation that runs on the CPU that can be used to sanity-check the behaviour of code.
 
 * Findings
+\label{section:findings}
 
 ** Restrictions on replacing the view with a more shallow view
 \label{subsection:jumping_restrictions}
@@ -582,14 +603,8 @@ For current generation GPUs[fn:GPU2020], this often is more memory than availabl
 [fn:GPU2020] At the time of writing, high-end consumer GPUs contain somewhere between 2 and 24 GiB of available memory. [CITE]
 CITE: https://www.ign.com/articles/the-best-graphics-cards-3
 
-* Discussion
-
-
-# Point clouds are big, and you need many points for an IFS. Keeping them in memory for a GPU is a hassle.
-
-# Maybe comment on Accelerate's lack of certain functions?
-
 * Conclusion
+\label{section:conclusion}
 
 A program was implemented which has shown that there is /some/ merit to rendering an IFS' attractor using a point-cloud as re-usable intermediate structure.
 However, the self-similarity detection method that was proposed turns out to be unusable in common cases.
@@ -598,6 +613,7 @@ Furthermore, self-similarity 'jumps' make more sophisticated rendering technique
 As long as these two problems remain unsolved, the proposed technique can only be considered impractical.
 
 * Further Work
+\label{section:further_work}
 
 It is our hope that a more sophisticated way of detecting self-similarity might be found,
 which would make 'self-similarity jumping' more practical.

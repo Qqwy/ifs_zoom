@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="program_execution.svg"
+   id="svg102"
+   style="font-weight:italic bold; font-size:12pt; font-family:'Calibri', Helvetica, sans-serif;;stroke-width:3;stroke-linejoin:round;stroke-linecap:round"
+   viewbox="0 0 574 552"
+   height="552"
+   width="574"
+   version="1.1">
+  <metadata
+     id="metadata108">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>nomnoml</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs106" />
+  <sodipodi:namedview
+     inkscape:current-layer="svg102"
+     inkscape:window-maximized="1"
+     inkscape:window-y="0"
+     inkscape:window-x="0"
+     inkscape:cy="320.43615"
+     inkscape:cx="204.61692"
+     inkscape:zoom="1.3278986"
+     showgrid="false"
+     id="namedview104"
+     inkscape:window-height="1029"
+     inkscape:window-width="1920"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <title
+     id="title2">nomnoml</title>
+  <desc
+     id="desc4">[&lt;start&gt; start] -&gt; [parse command-line options and IFS file]
+[exit]
+
+[start program] -&gt; [generate point-cloud]
+[generate point-cloud] -&gt; [render point cloud]
+
+[render point cloud] -&gt; [wait for user input]
+[transform camera] -&gt; [render point cloud]
+
+[parse command-line options and IFS file] -&gt; [start program]
+[parse command-line options and IFS file] -&gt; [print 'usage' info]
+[parse command-line options and IFS file] -&gt; [show error]
+[show error] -&gt; [print 'usage' info]
+[print 'usage' info] -&gt; [exit]
+
+[wait for user input] -&gt; [exit]
+[wait for user input] -&gt; [transform camera]
+
+[exit] -&gt; [&lt;end&gt; end]</desc>
+  <path
+     id="path8"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M207 43.5 L207 63.5 L207 83.5 L207 83.5 " />
+  <path
+     id="path10"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M201.7 70.2 L207 76.8 L212.3 70.2 L207 83.5 Z" />
+  <path
+     id="path12"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M428.3 185.5 L428.3 205.5 L428.3 225.5 L428.3 225.5 " />
+  <path
+     id="path14"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M422.9 212.2 L428.3 218.8 L433.6 212.2 L428.3 225.5 Z" />
+  <path
+     id="path16"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M428.3 256.5 L428.3 276.5 L428.3 296.5 L428.3 296.5 " />
+  <path
+     id="path18"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M422.9 283.2 L428.3 289.8 L433.6 283.2 L428.3 296.5 Z" />
+  <path
+     id="path20"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M398 327.5 L359 347.5 L359 367.5 L359 367.5 " />
+  <path
+     id="path22"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M353.7 354.2 L359 360.8 L364.3 354.2 L359 367.5 Z" />
+  <path
+     id="path24"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M486.2 438.5 L497.5 418.5 L497.5 383 L497.5 383 L497.5 347.5 L497.5 347.5 L458.5 327.5 L458.5 327.5 " />
+  <path
+     id="path26"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M472.8 328.8 L464.4 330.5 L467.9 338.3 L458.5 327.5 Z" />
+  <path
+     id="path28"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M303.6 114.5 L428.3 134.5 L428.3 154.5 L428.3 154.5 " />
+  <path
+     id="path30"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M422.9 141.2 L428.3 147.8 L433.6 141.2 L428.3 154.5 Z" />
+  <path
+     id="path32"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M165.3 114.5 L111.5 134.5 L111.5 170 L111.5 170 L111.5 205.5 L111.5 205.5 L138.4 225.5 L138.4 225.5 " />
+  <path
+     id="path34"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M124.5 221.8 L133.1 221.5 L130.9 213.3 L138.4 225.5 Z" />
+  <path
+     id="path36"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M207 114.5 L207 134.5 L207 154.5 L207 154.5 " />
+  <path
+     id="path38"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M201.7 141.2 L207 147.8 L212.3 141.2 L207 154.5 Z" />
+  <path
+     id="path40"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M207 185.5 L207 205.5 L180.1 225.5 L180.1 225.5 " />
+  <path
+     id="path42"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M187.6 213.3 L185.4 221.5 L194 221.8 L180.1 225.5 Z" />
+  <path
+     id="path44"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M159.3 256.5 L159.3 276.5 L159.3 312 L159.3 312 L159.3 347.5 L159.3 347.5 L159.3 383 L159.3 383 L159.3 418.5 L159.3 418.5 L170.5 438.5 L170.5 438.5 " />
+  <path
+     id="path46"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M159.3 429.5 L167.2 432.7 L168.6 424.3 L170.5 438.5 Z" />
+  <path
+     id="path48"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M337.5 398.5 L309.8 418.5 L206.3 446.7 L206.3 446.7 " />
+  <path
+     id="path50"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M217.7 438 L212.7 444.9 L220.5 448.3 L206.3 446.7 Z" />
+  <path
+     id="path52"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M380.5 398.5 L408.3 418.5 L447.3 438.5 L447.3 438.5 " />
+  <path
+     id="path54"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M433 437.2 L441.3 435.5 L437.8 427.7 L447.3 438.5 Z" />
+  <path
+     id="path56"
+     style="stroke:#33322E;fill:none;stroke-dasharray:none;"
+     d="M179.3 469.5 L179.3 489.5 L179.3 509.5 L179.3 509.5 " />
+  <path
+     id="path58"
+     style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"
+     d="M173.9 496.2 L179.3 502.8 L184.6 496.2 L179.3 509.5 Z" />
+  <circle
+     id="circle60"
+     style="stroke:none; fill:#33322E;"
+     cy="28.5"
+     cx="207"
+     r="12" />
+  <rect
+     id="rect62"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="387"
+     height="31"
+     y="83.5"
+     x="13.5" />
+  <text
+     id="text64"
+     style="fill: #33322E;text-anchor: middle;"
+     y="105"
+     x="207">parse command-line options and IFS file</text>
+  <rect
+     id="rect66"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="54"
+     height="31"
+     y="438.5"
+     x="152.5" />
+  <text
+     id="text68"
+     style="fill: #33322E;text-anchor: middle;"
+     y="460"
+     x="179.5">exit</text>
+  <rect
+     id="rect70"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="140"
+     height="31"
+     y="154.5"
+     x="358.5" />
+  <text
+     id="text72"
+     style="fill: #33322E;text-anchor: middle;"
+     y="176"
+     x="428.5">start program</text>
+  <rect
+     id="rect74"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="206"
+     height="31"
+     y="225.5"
+     x="325.5" />
+  <text
+     id="text76"
+     style="fill: #33322E;text-anchor: middle;"
+     y="247"
+     x="428.5">generate point-cloud</text>
+  <rect
+     id="rect78"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="187"
+     height="31"
+     y="296.5"
+     x="334.5" />
+  <text
+     id="text80"
+     style="fill: #33322E;text-anchor: middle;"
+     y="318"
+     x="428">render point cloud</text>
+  <rect
+     id="rect82"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="197"
+     height="31"
+     y="367.5"
+     x="260.5" />
+  <text
+     id="text84"
+     style="fill: #33322E;text-anchor: middle;"
+     y="389"
+     x="359">wait for user input</text>
+  <rect
+     id="rect86"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="168"
+     height="31"
+     y="438.5"
+     x="393.5" />
+  <text
+     id="text88"
+     style="fill: #33322E;text-anchor: middle;"
+     y="460"
+     x="477.5">transform camera</text>
+  <rect
+     id="rect90"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="187"
+     height="31"
+     y="225.5"
+     x="65.5" />
+  <text
+     id="text92"
+     style="fill: #33322E;text-anchor: middle;"
+     y="247"
+     x="159">print 'usage' info</text>
+  <rect
+     id="rect94"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     width="111"
+     height="31"
+     y="154.5"
+     x="151.5" />
+  <text
+     id="text96"
+     style="fill: #33322E;text-anchor: middle;"
+     y="176"
+     x="207">show error</text>
+  <circle
+     id="circle98"
+     style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"
+     cy="524.5"
+     cx="179.3"
+     r="10" />
+  <circle
+     id="circle100"
+     style="stroke:none; fill:#33322E;"
+     cy="524.5"
+     cx="179.3"
+     r="6" />
+  <rect
+     y="280.76511"
+     x="244.26482"
+     height="210.07446"
+     width="324.18735"
+     id="rect110"
+     style="opacity:1;fill:none;fill-opacity:0.27433;stroke-width:3.77999997;stroke:#b1b1b1;stroke-miterlimit:4;stroke-dasharray:30.23999977, 30.23999977000000072;stroke-dashoffset:0;stroke-opacity:1" />
+  <text
+     id="text937"
+     y="142.84885"
+     x="333.05423"
+     style="font-size:14.0626px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:1.0547"
+     xml:space="preserve"><tspan
+       style="stroke-width:1.0547"
+       y="142.84885"
+       x="333.05423"
+       id="tspan935"
+       sodipodi:role="line">success</tspan></text>
+  <text
+     id="text941"
+     y="135.01909"
+     x="215.33923"
+     style="font-size:14.0626px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:1.0547"
+     xml:space="preserve"><tspan
+       style="stroke-width:1.0547"
+       y="135.01909"
+       x="215.33923"
+       id="tspan939"
+       sodipodi:role="line">error</tspan></text>
+  <text
+     id="text945"
+     y="417.09161"
+     x="410.02036"
+     style="font-size:14.0626px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:1.0547"
+     xml:space="preserve"><tspan
+       style="stroke-width:1.0547"
+       y="417.09161"
+       x="410.02036"
+       id="tspan943"
+       sodipodi:role="line">interact</tspan></text>
+  <text
+     id="text949"
+     y="440.11954"
+     x="278.56696"
+     style="font-size:14.0626px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:1.0547"
+     xml:space="preserve"><tspan
+       style="stroke-width:1.0547"
+       y="440.11954"
+       x="278.56696"
+       id="tspan947"
+       sodipodi:role="line">close</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-size:14.0626px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:1.0547"
+     x="10.193938"
+     y="172.95367"
+     id="text953"><tspan
+       sodipodi:role="line"
+       id="tspan951"
+       x="10.193938"
+       y="172.95367"
+       style="stroke-width:1.0547">ask for usage</tspan></text>
+</svg>
