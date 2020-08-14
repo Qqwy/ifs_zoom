@@ -25,10 +25,10 @@
      inkscape:window-width="1920"
      showgrid="false"
      inkscape:document-rotation="0"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g33-3"
      inkscape:document-units="mm"
-     inkscape:cy="362.29407"
-     inkscape:cx="1232.336"
+     inkscape:cy="362.88568"
+     inkscape:cx="1233.3775"
      inkscape:zoom="63.356767"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
@@ -502,28 +502,19 @@ gg==
     <g
        transform="translate(281.01376,-3.6868064)"
        id="g33-3">
-      <rect
-         y="98.943558"
-         x="44.008358"
-         height="1.0002053"
-         width="1"
-         id="rect24-6"
-         style="opacity:0.5;fill:#00ff00;fill-opacity:0.27433;stroke:none;stroke-width:0.0377905" />
-      <rect
+      <path
+         d="m 44.008358,98.943558 h 1 v 1.000205 h -1 z"
+         style="opacity:0.5;fill:#00ff00;fill-opacity:0.27433;stroke:none;stroke-width:0.0377905"
+         id="rect24-6" />
+      <path
+         d="m 101.69472,38.23341 h 0.70549 v 0.705635 h -0.70549 z"
          transform="matrix(0.70533875,0.70887041,-0.70533875,0.70887041,0,0)"
          style="opacity:0.5;fill:#ff0000;fill-opacity:0.27433;stroke:none;stroke-width:0.0266608"
-         id="rect26-7"
-         width="0.70548987"
-         height="0.70563465"
-         x="101.69472"
-         y="38.23341" />
-      <rect
+         id="rect26-7" />
+      <path
+         d="m 44.008358,98.943558 h 0.5 v 0.500102 h -0.5 z"
          style="opacity:0.5;fill:#00ffff;fill-opacity:0.27433;stroke:none;stroke-width:0.0188952"
-         id="rect28-5"
-         width="0.5"
-         height="0.50010264"
-         x="44.008358"
-         y="98.943558" />
+         id="rect28-5" />
     </g>
   </g>
 </svg>

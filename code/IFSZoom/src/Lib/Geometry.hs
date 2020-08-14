@@ -22,7 +22,9 @@ isPolygonInsidePolygon outer inner =
 -- | Tests whether a single 2D point is inside a (concave) polygon
 --
 -- Haskell implementation of the algorithm
--- described at https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+-- known as 'even-odd rule' algorithm or 'crossing number' algorithm
+-- described in detail at
+-- https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 --
 -- ## Examples:
 --
