@@ -7,7 +7,7 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {todo}{reference picture}{3}{section*.6}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{Some examples of IFSs? (that are used later on in the thesis)}{3}{section*.7}%
+\contentsline {todo}{Some examples of IFSs? (that are used later on in the thesis)}{4}{section*.7}%
 \defcounter {refsection}{0}\relax 
 \contentsline {todo}{PICTURE OF THIS TREE}{5}{section*.8}%
 \defcounter {refsection}{0}\relax 
@@ -15,18 +15,24 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {todo}{Maybe rephrase question?}{7}{section*.10}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{More info}{9}{section*.11}%
+\contentsline {todo}{Modify big-Oh by using $p$ as paralellism factor}{8}{section*.11}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{Example picture}{9}{section*.12}%
+\contentsline {todo}{More info}{9}{section*.12}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{Picture of program running as state diagram}{9}{section*.13}%
+\contentsline {todo}{Example picture}{9}{section*.13}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{Mention how this still allows us to (dis)prove hypothesis}{10}{section*.14}%
+\contentsline {todo}{Picture of program running as state diagram}{9}{section*.14}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{Include (a couple) example file(s) as snippets here.}{10}{section*.15}%
+\contentsline {todo}{Mention how this still allows us to (dis)prove hypothesis}{10}{section*.15}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{picture}{10}{section*.16}%
+\contentsline {todo}{Write}{10}{section*.16}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{pseudocode}{11}{section*.17}%
+\contentsline {todo}{Include (a couple) example file(s) as snippets here.}{10}{section*.17}%
 \defcounter {refsection}{0}\relax 
-\contentsline {todo}{This information is probably incorrect}{11}{section*.18}%
+\contentsline {todo}{picture}{11}{section*.18}%
+\defcounter {refsection}{0}\relax 
+\contentsline {todo}{Dragon curve IFS definition.}{12}{section*.20}%
+\defcounter {refsection}{0}\relax 
+\contentsline {todo}{pseudocode}{12}{section*.21}%
+\defcounter {refsection}{0}\relax 
+\contentsline {todo}{This information is probably incorrect}{12}{section*.22}%
