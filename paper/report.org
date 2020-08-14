@@ -221,6 +221,26 @@ Be aware that when affine transformation functions are represented as matrices (
 *** The chaos game
 \label{subsection:chaos_game}
 
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.4\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/barnsley_1000000}
+         \caption{1,000,000 points}
+         \label{figure:barnsley_mil}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.4\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/barnsley_100000000}
+         \caption{10,000,000}
+         \label{figure:barnsley_ten_mil}
+     \end{subfigure}
+        \caption{The Barnsley Fern, rendered using the chaos game with different amounts of points.}
+        \label{figure:barnsley_chaos_game_points}
+\end{figure}
+
+
 The /stochastic method/[CITE], also known as the /random iteration algorithm/[CITE] or more frequently the /chaos game/, works as seen in autoref:chaosGame
 
 \begin{algorithm}[H]
@@ -250,9 +270,8 @@ The nice thing about the chaos game is that it does not require any extra memory
 Also, because it is so simple and little auxiliary memory is needed, it runs very efficiently on modern CPU architectures.
 
 A disadvantage of the chaos game is that the result is by its very nature /non-deterministic/.
-If not enough points are used, the result might end up 'grainy' and it is not predictable what part of the attractor will be covered.
+If not enough points are used, the result might end up 'grainy' and it is not predictable what part of the attractor will be covered (see autoref:figure:barnsley_chaos_game_points).
 
-\todo[inline]{Picture outlining the importance of the number of points?}
 
 One further disadvantage the chaos game has, is that in its simplest form, all transformations have an equally likely chance to be used.
 However, because some transformations might be (much) more contracting than others, this means that coverage of the attractor is not even,
@@ -263,7 +282,7 @@ All these probabilities together ought to sum up to 1.[fn:probabilities]
 
 \altasterism
 
-Because of its simplicity and efficiency, the chaos game is used more frequently than the deterministic method for practical implementations.
+Because of its simplicity and computational efficiency, the chaos game is used more frequently than the deterministic method for practical implementations.
 The chaos game is also easier to paralellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
 
 [fn:contraction] Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of $x$) exist [CITE], 
@@ -506,11 +525,37 @@ in which a jump up is and is not actually correct (see autoref:subsection:jumpin
 
 To make it easier to see how an IFS is constructed, as well as easier for a user to orient themselves when
 testing the 'self-similarity jumping', it is possible to toggle the rendering of 'guides' by pressing the `g` key.
+Similarly, the rendering of points can be toggled by pressing the `p` key (allowing one to see the guides more clearly, when desired).
 
 These 'guides' are the unit squre, after undergoing a sequence of zero, one, two etc. mappings of the IFS.
 Different colours are used for guides at different sequence-depths.
 
-\todo[inline]{picture}
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/barnsley_points}
+         \caption{only points}
+         \label{figure:barnsley_guides}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/barnsley_guides_and_points}
+         \caption{guides and points}
+         \label{figure:barnsley_guides_and_points}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/barnsley_guides}
+         \caption{only guides}
+         \label{figure:barnsley_guides}
+     \end{subfigure}
+        \caption{The Barnsley Fern (\autoref{ifs:barnsley_fern}) rendered by the program in different ways.}
+        \label{figure:barnsley_guides_vs_points}
+\end{figure}
+
 
 [fn:EDSL] Embedded Domain-Specific Language.
 [fn:debugging] Instead of being presented with a black screen when a programming mistake is made, 
@@ -562,35 +607,32 @@ per mapping, where the unit square would end up after a couple of mappings with 
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_a}
          \caption{The unit square (indicated in white) transformed by the two mappings of $D$ (indicated in green)}
-         \label{figigure:dragon_curve_a}
+         \label{figure:dragon_curve_a}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_b}
          \caption{The first of the two mappings, transformed one more time by the mappings of $D$ (indicated in red)}
-         \label{figigure:dragon_curve_b}
+         \label{figure:dragon_curve_b}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_c}
          \caption{The second of the two mappings, transformed one more time by the mappings of $D$ (indicated in blue)}
-         \label{fig:five over x}
+         \label{figure:dragon_curve_c}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_d}
          \caption{The region in which (b) and (c) overlap (indicated in magenta)}
-         \label{figigure:dragon_curve_d}
+         \label{figure:dragon_curve_d}
      \end{subfigure}
-        \caption{Showing the first couple of iterations of rendering the attractor of the dragon curve IFS $D$, and the regions in which (sequences of) transformations overlap.}
+        \caption{Showing the first couple of iterations of rendering the attractor of the dragon curve IFS $D$ (\autoref{ifs:dragon_curve}), and the regions in which (sequences of) transformations overlap.}
         \label{figure:dragon_curve_overlaps}
 \end{figure}
-
-\todo[inline]{Dragon curve IFS definition.}
-
 
 \todo[inline]{pseudocode}
 
@@ -649,6 +691,8 @@ This appendix lists the transformation matrices of the IFSs that were used throu
 
 \todo[inline]{Sierpi\'nsky}
 \todo[inline]{Dragon Curve}
-\todo[inline]{Barnsley Fern|
+\todo[inline]{Barnsley Fern}
 
 \label{ifs:sierpinsky}
+\label{ifs:barnsley_fern}
+\label{ifs:dragon_curve}
