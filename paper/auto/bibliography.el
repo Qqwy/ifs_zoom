@@ -13,6 +13,10 @@
     "lawlor2012gpu"
     "wimmer2006instant"
     "hepting1991rendering"
-    "draves2003fractal"))
+    "draves2003fractal"
+    "haines1994point"
+    "chakravarty2011accelerating"
+    "gonzalez2019"
+    "ign2020topgpus"))
  :bibtex)
 

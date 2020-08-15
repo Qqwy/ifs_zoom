@@ -16,5 +16,452 @@
   {}
 \endgroup
 
+
+\refsection{0}
+  \datalist[entry]{anyt/global//global/global}
+    \entry{barnsley2014fractals}{book}{}
+      \name{author}{1}{}{%
+        {{hash=025b5fe0c98ac90abad4e94473298337}{%
+           family={Barnsley},
+           familyi={B\bibinitperiod},
+           given={Michael\bibnamedelima F},
+           giveni={M\bibinitperiod\bibinitdelim F\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Academic press}%
+      }
+      \strng{namehash}{025b5fe0c98ac90abad4e94473298337}
+      \strng{fullhash}{025b5fe0c98ac90abad4e94473298337}
+      \strng{bibnamehash}{025b5fe0c98ac90abad4e94473298337}
+      \strng{authorbibnamehash}{025b5fe0c98ac90abad4e94473298337}
+      \strng{authornamehash}{025b5fe0c98ac90abad4e94473298337}
+      \strng{authorfullhash}{025b5fe0c98ac90abad4e94473298337}
+      \field{labelalpha}{Bar14}
+      \field{sortinit}{B}
+      \field{sortinithash}{8de16967003c7207dae369d874f1456e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Fractals everywhere}
+      \field{year}{2014}
+    \endentry
+    \entry{chakravarty2011accelerating}{inproceedings}{}
+      \name{author}{5}{}{%
+        {{hash=4ed7cdd3d6c868db9802c1ec5ef97549}{%
+           family={Chakravarty},
+           familyi={C\bibinitperiod},
+           given={Manuel\bibnamedelima MT},
+           giveni={M\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+        {{hash=3f32044f22cea4bdb08861d76a33900c}{%
+           family={Keller},
+           familyi={K\bibinitperiod},
+           given={Gabriele},
+           giveni={G\bibinitperiod}}}%
+        {{hash=4bc0586d3049d8be593efc7d57bb2bb2}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Sean},
+           giveni={S\bibinitperiod}}}%
+        {{hash=fe96e700a25f4203828155f1789484cf}{%
+           family={McDonell},
+           familyi={M\bibinitperiod},
+           given={Trevor\bibnamedelima L},
+           giveni={T\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+        {{hash=880484b144cca49dfdeca586dcda580a}{%
+           family={Grover},
+           familyi={G\bibinitperiod},
+           given={Vinod},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{0e143dfe733d2e51b0b3e5de41b0f07f}
+      \strng{fullhash}{2bc1edc8386b47cc56c6b122d6eda326}
+      \strng{bibnamehash}{0e143dfe733d2e51b0b3e5de41b0f07f}
+      \strng{authorbibnamehash}{0e143dfe733d2e51b0b3e5de41b0f07f}
+      \strng{authornamehash}{0e143dfe733d2e51b0b3e5de41b0f07f}
+      \strng{authorfullhash}{2bc1edc8386b47cc56c6b122d6eda326}
+      \field{labelalpha}{Cha+11}
+      \field{sortinit}{C}
+      \field{sortinithash}{4c244ceae61406cdc0cc2ce1cb1ff703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the sixth workshop on Declarative aspects of multicore programming}
+      \field{title}{Accelerating Haskell array codes with multicore GPUs}
+      \field{year}{2011}
+      \field{pages}{3\bibrangedash 14}
+      \range{pages}{12}
+    \endentry
+    \entry{draves2003fractal}{article}{}
+      \name{author}{2}{}{%
+        {{hash=6550a7ad6f9861d62b7e9f26c09fb1c7}{%
+           family={Draves},
+           familyi={D\bibinitperiod},
+           given={Scott},
+           giveni={S\bibinitperiod}}}%
+        {{hash=6049aca46a6a75f2363a0f5a478ab0f7}{%
+           family={Reckase},
+           familyi={R\bibinitperiod},
+           given={Erik},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Citeseer}%
+      }
+      \strng{namehash}{2c15e6a8d649d6f362684fbfea3ed338}
+      \strng{fullhash}{2c15e6a8d649d6f362684fbfea3ed338}
+      \strng{bibnamehash}{2c15e6a8d649d6f362684fbfea3ed338}
+      \strng{authorbibnamehash}{2c15e6a8d649d6f362684fbfea3ed338}
+      \strng{authornamehash}{2c15e6a8d649d6f362684fbfea3ed338}
+      \strng{authorfullhash}{2c15e6a8d649d6f362684fbfea3ed338}
+      \field{labelalpha}{DR03}
+      \field{sortinit}{D}
+      \field{sortinithash}{c438b3d5d027251ba63f5ed538d98af5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Forthcoming, available from http: I Itlam3. com/flame. pdf}
+      \field{title}{The fractal flame algorithm}
+      \field{year}{2003}
+    \endentry
+    \entry{gonzalez2019}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=8925cb3de8e31957cd4b6df63a587d9f}{%
+           family={Gonzalez},
+           familyi={G\bibinitperiod},
+           given={Gabriel},
+           giveni={G\bibinitperiod}}}%
+        {{hash=a8b2e39951bba535f313f563f6abaef6}{%
+           family={contributors},
+           familyi={c\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {GitHub}%
+      }
+      \strng{namehash}{b1f1e70e99a8916d9c7daaf4f2f386af}
+      \strng{fullhash}{b1f1e70e99a8916d9c7daaf4f2f386af}
+      \strng{bibnamehash}{b1f1e70e99a8916d9c7daaf4f2f386af}
+      \strng{authorbibnamehash}{b1f1e70e99a8916d9c7daaf4f2f386af}
+      \strng{authornamehash}{b1f1e70e99a8916d9c7daaf4f2f386af}
+      \strng{authorfullhash}{b1f1e70e99a8916d9c7daaf4f2f386af}
+      \field{labelalpha}{Gc19}
+      \field{sortinit}{G}
+      \field{sortinithash}{62eb2aa29549e4fdbd3cb154ec5711cb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://github.com/dhall-lang/dhall-lang}}
+      \field{journaltitle}{GitHub repository}
+      \field{title}{Dhall Configuration Language}
+      \field{year}{2019}
+    \endentry
+    \entry{green2005gpu}{incollection}{}
+      \name{author}{1}{}{%
+        {{hash=32b958fc03a4a7a1a4b7b41512e77d94}{%
+           family={Green},
+           familyi={G\bibinitperiod},
+           given={Simon\bibnamedelima G},
+           giveni={S\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+      }
+      \strng{namehash}{32b958fc03a4a7a1a4b7b41512e77d94}
+      \strng{fullhash}{32b958fc03a4a7a1a4b7b41512e77d94}
+      \strng{bibnamehash}{32b958fc03a4a7a1a4b7b41512e77d94}
+      \strng{authorbibnamehash}{32b958fc03a4a7a1a4b7b41512e77d94}
+      \strng{authornamehash}{32b958fc03a4a7a1a4b7b41512e77d94}
+      \strng{authorfullhash}{32b958fc03a4a7a1a4b7b41512e77d94}
+      \field{labelalpha}{Gre05}
+      \field{sortinit}{G}
+      \field{sortinithash}{62eb2aa29549e4fdbd3cb154ec5711cb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{ACM SIGGRAPH 2005 Sketches}
+      \field{title}{GPU-accelerated iterated function systems}
+      \field{year}{2005}
+      \field{pages}{15\bibrangedash es}
+      \range{pages}{-1}
+    \endentry
+    \entry{haines1994point}{article}{}
+      \name{author}{1}{}{%
+        {{hash=f2cd5883c9757f88d9a81f92ee663907}{%
+           family={Haines},
+           familyi={H\bibinitperiod},
+           given={Eric},
+           giveni={E\bibinitperiod}}}%
+      }
+      \strng{namehash}{f2cd5883c9757f88d9a81f92ee663907}
+      \strng{fullhash}{f2cd5883c9757f88d9a81f92ee663907}
+      \strng{bibnamehash}{f2cd5883c9757f88d9a81f92ee663907}
+      \strng{authorbibnamehash}{f2cd5883c9757f88d9a81f92ee663907}
+      \strng{authornamehash}{f2cd5883c9757f88d9a81f92ee663907}
+      \strng{authorfullhash}{f2cd5883c9757f88d9a81f92ee663907}
+      \field{labelalpha}{Hai94}
+      \field{sortinit}{H}
+      \field{sortinithash}{6db6145dae8dc9e1271a8d556090b50a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Graphics Gems}
+      \field{title}{Point in Polygon Strategies.}
+      \field{volume}{4}
+      \field{year}{1994}
+      \field{pages}{24\bibrangedash 46}
+      \range{pages}{23}
+    \endentry
+    \entry{hart1996fractal}{article}{}
+      \name{author}{1}{}{%
+        {{hash=7bad69c46a63aeccf4c066ba4b4a618a}{%
+           family={Hart},
+           familyi={H\bibinitperiod},
+           given={John\bibnamedelima C},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{7bad69c46a63aeccf4c066ba4b4a618a}
+      \strng{fullhash}{7bad69c46a63aeccf4c066ba4b4a618a}
+      \strng{bibnamehash}{7bad69c46a63aeccf4c066ba4b4a618a}
+      \strng{authorbibnamehash}{7bad69c46a63aeccf4c066ba4b4a618a}
+      \strng{authornamehash}{7bad69c46a63aeccf4c066ba4b4a618a}
+      \strng{authorfullhash}{7bad69c46a63aeccf4c066ba4b4a618a}
+      \field{labelalpha}{Har96}
+      \field{sortinit}{H}
+      \field{sortinithash}{6db6145dae8dc9e1271a8d556090b50a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Computer Graphics and Applications}
+      \field{number}{4}
+      \field{title}{Fractal image compression and recurrent iterated function systems}
+      \field{volume}{16}
+      \field{year}{1996}
+      \field{pages}{25\bibrangedash 33}
+      \range{pages}{9}
+    \endentry
+    \entry{hepting1991rendering}{incollection}{}
+      \name{author}{3}{}{%
+        {{hash=208501b776e47f9b23814a019485b855}{%
+           family={Hepting},
+           familyi={H\bibinitperiod},
+           given={Daryl},
+           giveni={D\bibinitperiod}}}%
+        {{hash=9b2d19fde5df78b690670244c09547c1}{%
+           family={Prusinkiewicz},
+           familyi={P\bibinitperiod},
+           given={Przemyslaw},
+           giveni={P\bibinitperiod}}}%
+        {{hash=3585b44617dbef13b850eb74764b6ed2}{%
+           family={Saupe},
+           familyi={S\bibinitperiod},
+           given={Dietmar},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {North-Holland}%
+      }
+      \strng{namehash}{db5549307076ceabc19fb72cf404f0f4}
+      \strng{fullhash}{db5549307076ceabc19fb72cf404f0f4}
+      \strng{bibnamehash}{db5549307076ceabc19fb72cf404f0f4}
+      \strng{authorbibnamehash}{db5549307076ceabc19fb72cf404f0f4}
+      \strng{authornamehash}{db5549307076ceabc19fb72cf404f0f4}
+      \strng{authorfullhash}{db5549307076ceabc19fb72cf404f0f4}
+      \field{labelalpha}{HPS91}
+      \field{sortinit}{H}
+      \field{sortinithash}{6db6145dae8dc9e1271a8d556090b50a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Rendering methods for iterated function systems}
+      \field{year}{1991}
+    \endentry
+    \entry{jeffrey1990chaos}{article}{}
+      \name{author}{1}{}{%
+        {{hash=570a620c9eb5789eecd66f18b9543482}{%
+           family={Jeffrey},
+           familyi={J\bibinitperiod},
+           given={H\bibnamedelima Joel},
+           giveni={H\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{570a620c9eb5789eecd66f18b9543482}
+      \strng{fullhash}{570a620c9eb5789eecd66f18b9543482}
+      \strng{bibnamehash}{570a620c9eb5789eecd66f18b9543482}
+      \strng{authorbibnamehash}{570a620c9eb5789eecd66f18b9543482}
+      \strng{authornamehash}{570a620c9eb5789eecd66f18b9543482}
+      \strng{authorfullhash}{570a620c9eb5789eecd66f18b9543482}
+      \field{labelalpha}{Jef90}
+      \field{sortinit}{J}
+      \field{sortinithash}{c45040a764d616897e7f5b30174d7b92}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Nucleic acids research}
+      \field{number}{8}
+      \field{title}{Chaos game representation of gene structure}
+      \field{volume}{18}
+      \field{year}{1990}
+      \field{pages}{2163\bibrangedash 2170}
+      \range{pages}{8}
+    \endentry
+    \entry{lauterbach2009construction}{inproceedings}{}
+      \name{author}{5}{}{%
+        {{hash=28a21f6412851a476541fc531af9f6ed}{%
+           family={Lauterbach},
+           familyi={L\bibinitperiod},
+           given={C},
+           giveni={C\bibinitperiod}}}%
+        {{hash=334d7e4dd82845deb442672e1725daae}{%
+           family={Garland},
+           familyi={G\bibinitperiod},
+           given={M},
+           giveni={M\bibinitperiod}}}%
+        {{hash=eeb9a5a67244761d5ab06dc1565c9218}{%
+           family={Sengupta},
+           familyi={S\bibinitperiod},
+           given={S},
+           giveni={S\bibinitperiod}}}%
+        {{hash=b45fd1a30394b5c3d019b655e705fb6a}{%
+           family={Luebke},
+           familyi={L\bibinitperiod},
+           given={D},
+           giveni={D\bibinitperiod}}}%
+        {{hash=1f89c3a04d8e0c9525436cae23dfa92d}{%
+           family={Manocha},
+           familyi={M\bibinitperiod},
+           given={D},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{c4bd6094d3a6db86732f1f42d05ea2f9}
+      \strng{fullhash}{df477759fbb5b9aa76393bf7d9b208a5}
+      \strng{bibnamehash}{c4bd6094d3a6db86732f1f42d05ea2f9}
+      \strng{authorbibnamehash}{c4bd6094d3a6db86732f1f42d05ea2f9}
+      \strng{authornamehash}{c4bd6094d3a6db86732f1f42d05ea2f9}
+      \strng{authorfullhash}{df477759fbb5b9aa76393bf7d9b208a5}
+      \field{labelalpha}{Lau+09}
+      \field{sortinit}{L}
+      \field{sortinithash}{dad3efd0836470093a7b4a7bb756eb8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the Eurographics Symposium on Rendering, Eurographics and ACM/SIGGRAPH}
+      \field{title}{fast BVH construction on GPUs}
+      \field{year}{2009}
+    \endentry
+    \entry{lawlor2012gpu}{article}{}
+      \name{author}{1}{}{%
+        {{hash=d61a55dc763b51c31f071893cabc874a}{%
+           family={Lawlor},
+           familyi={L\bibinitperiod},
+           given={Orion\bibnamedelima Sky},
+           giveni={O\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Hindawi}%
+      }
+      \strng{namehash}{d61a55dc763b51c31f071893cabc874a}
+      \strng{fullhash}{d61a55dc763b51c31f071893cabc874a}
+      \strng{bibnamehash}{d61a55dc763b51c31f071893cabc874a}
+      \strng{authorbibnamehash}{d61a55dc763b51c31f071893cabc874a}
+      \strng{authornamehash}{d61a55dc763b51c31f071893cabc874a}
+      \strng{authorfullhash}{d61a55dc763b51c31f071893cabc874a}
+      \field{labelalpha}{Law12}
+      \field{sortinit}{L}
+      \field{sortinithash}{dad3efd0836470093a7b4a7bb756eb8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{ISRN Computer Graphics}
+      \field{title}{GPU-accelerated rendering of unbounded nonlinear iterated function system fixed points}
+      \field{volume}{2012}
+      \field{year}{2012}
+    \endentry
+    \entry{ign2020topgpus}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=dd12628ece2c2bcccc0e876cbeafa9c9}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Kevin},
+           giveni={K\bibinitperiod}}}%
+        {{hash=275580bae442d9685a298c5ce833ef28}{%
+           family={Knap},
+           familyi={K\bibinitperiod},
+           given={Mark},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IGN}%
+      }
+      \strng{namehash}{03477b197decc37a640ede0b138f30d9}
+      \strng{fullhash}{03477b197decc37a640ede0b138f30d9}
+      \strng{bibnamehash}{03477b197decc37a640ede0b138f30d9}
+      \strng{authorbibnamehash}{03477b197decc37a640ede0b138f30d9}
+      \strng{authornamehash}{03477b197decc37a640ede0b138f30d9}
+      \strng{authorfullhash}{03477b197decc37a640ede0b138f30d9}
+      \field{labelalpha}{LK20}
+      \field{sortinit}{L}
+      \field{sortinithash}{dad3efd0836470093a7b4a7bb756eb8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.ign.com/articles/the-best-graphics-cards-3}}
+      \field{month}{8}
+      \field{title}{Best Graphics Cards 2020: Top GPUs for Every Budget}
+      \field{year}{2020}
+    \endentry
+    \entry{mendivil2003fractals}{article}{}
+      \name{author}{1}{}{%
+        {{hash=9783caeec239744853615b5ccb84f378}{%
+           family={Mendivil},
+           familyi={M\bibinitperiod},
+           given={Franklin},
+           giveni={F\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Taylor \& Francis}%
+      }
+      \strng{namehash}{9783caeec239744853615b5ccb84f378}
+      \strng{fullhash}{9783caeec239744853615b5ccb84f378}
+      \strng{bibnamehash}{9783caeec239744853615b5ccb84f378}
+      \strng{authorbibnamehash}{9783caeec239744853615b5ccb84f378}
+      \strng{authornamehash}{9783caeec239744853615b5ccb84f378}
+      \strng{authorfullhash}{9783caeec239744853615b5ccb84f378}
+      \field{labelalpha}{Men03}
+      \field{sortinit}{M}
+      \field{sortinithash}{2e5c2f51f7fa2d957f3206819bf86dc3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The American mathematical monthly}
+      \field{number}{6}
+      \field{title}{Fractals, graphs, and fields}
+      \field{volume}{110}
+      \field{year}{2003}
+      \field{pages}{503\bibrangedash 515}
+      \range{pages}{13}
+    \endentry
+    \entry{wimmer2006instant}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=77854efdfdf328947f7a9ffdf286f9f1}{%
+           family={Wimmer},
+           familyi={W\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=12e80f14b3942d8f5760a53120b58e73}{%
+           family={Scheiblauer},
+           familyi={S\bibinitperiod},
+           given={Claus},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Citeseer}%
+      }
+      \strng{namehash}{ea1bc313e38058697001eee8182f99b8}
+      \strng{fullhash}{ea1bc313e38058697001eee8182f99b8}
+      \strng{bibnamehash}{ea1bc313e38058697001eee8182f99b8}
+      \strng{authorbibnamehash}{ea1bc313e38058697001eee8182f99b8}
+      \strng{authornamehash}{ea1bc313e38058697001eee8182f99b8}
+      \strng{authorfullhash}{ea1bc313e38058697001eee8182f99b8}
+      \field{labelalpha}{WS06}
+      \field{sortinit}{W}
+      \field{sortinithash}{1af34bd8c148ffb32de1494636b49713}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{SPBG}
+      \field{title}{Instant Points: Fast Rendering of Unprocessed Point Clouds.}
+      \field{year}{2006}
+      \field{pages}{129\bibrangedash 136}
+      \range{pages}{8}
+    \endentry
+  \enddatalist
+\endrefsection
 \endinput
 

@@ -73,11 +73,11 @@ is hampered by the fact that self-similarity jumping cannot be used in a couple 
 * Introduction
 
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
-by repeatedly applying simple mathematical functions until a fixed point is reached. [CITE]
-IFSs see use in rendering/modeling of physical phenomena[CITE], image compression [CITE] and representing gene structures [CITE].
-Sometimes they also see use simply for the aesthetic beauty of their graphical representations[CITE].
+by repeatedly applying simple mathematical functions until a fixed point is reached. cite:barnsley2014fractals
+IFSs see use in rendering/modeling of physical phenomena, image compression cite:hart1996fractal and representing gene structures cite:jeffrey1990chaos.
+Sometimes they also see use simply for the aesthetic beauty of their graphical representations cite:draves2003fractal.
 
-Various computer algorithms to visualize IFSs exist [CITE], [CITE].
+Various computer algorithms to visualize IFSs exist cite:hepting1991rendering.
 However, these all take either a still image as final result, or, if they want to render an animation,
 view this as a sequence of separate still images to generate.
 
@@ -155,7 +155,7 @@ If we perform this operation an arbitrary number of times, we approach the fixed
 
 $$\mathcal{A} = \lim_{n \rightarrow \infty} \mathcal{S}_n$$
 
-Curiously, which set of points $\mathcal{S}_0$ we started with makes no difference (we might even start with a single point) [CITE].
+Curiously, which set of points $\mathcal{S}_0$ we started with makes no difference (we might even start with a single point) cite:mendivil2003fractals.
 
 *** Restriction to affine transformations on the two-dimensional euclidean plane 
 
@@ -168,7 +168,7 @@ Because of their prevalence, these are also the restrictions that will be used i
 \label{subsection:viewport_transformation}
 
 For any IFS with mappings we can transform its attractor by any invertible function $t$ by adjusting each of the mappings according to the
-transform theorem [CITE fractals everywhere] $f_i' = t \cdot f_i \cdot t^{-1}$, essentially transforming points from the new space to the old space, then applying the mapping, and finally transforming them back to the new space. 
+transform theorem cite:barnsley2014fractals $f_i' = t \cdot f_i \cdot t^{-1}$, essentially transforming points from the new space to the old space, then applying the mapping, and finally transforming them back to the new space. 
 This allows us to give users freedom to choose any desired mappings and 'initial camera viewport' of the attractor,
 while still allowing all calculations to happen with regard to the unit square (which keeps them simpler).
 
@@ -187,7 +187,7 @@ where each sub-tree is self-similar to the tree as a whole.
 
 Different algorithms take different approaches to evaluating this tree (up to a chosen finite depth).
 
-More in-depth information about the rendering of Iterated Function Systems can be found [CITE]. 
+More in-depth information about the rendering of Iterated Function Systems can be found cite:hepting1991rendering. 
 Short summaries of the two most common techniques will now follow.
 
 # All of the rendering techniques have in common that the iteration of the Hutchkinson operator is seen as an (infinitely deep) tree with branching factor $N$.
@@ -211,7 +211,7 @@ Since $z_{k} = f_{i_k-1}(z_{k-1})$ this procedure takes, for an approximation th
 - a logarithmic amount ( $\mathcal{O}(\log{N})$ ) of memory for a depth-first tree-traversal.
 
 The advantage of the breadth-first traversal is that generation could be stopped interactively,
-while the depth-first traversal requires the stopping criterion to be known beforehand. [CITE]
+while the depth-first traversal requires the stopping criterion to be known beforehand. cite:hepting1991rendering
 
 While the deterministic method is easy to understand (and indeed is a direct translation of the informal process described at the start of autoref:section:background),
 it is usually less efficient and more complex to implement on a computer than the algorithm that will be described next.
@@ -242,7 +242,7 @@ Be aware that when affine transformation functions are represented as matrices (
 \end{figure}
 
 
-The /stochastic method/[CITE], also known as the /random iteration algorithm/[CITE] or more frequently the /chaos game/, works as seen in autoref:chaosGame
+The /stochastic method/ cite:hepting1991rendering, also known as the /random iteration algorithm/ cite:barnsley2014fractals or more frequently the /chaos game/, works as seen in autoref:chaosGame
 
 \begin{algorithm}[H]
 \caption{the chaos game}
@@ -286,10 +286,10 @@ All these probabilities together ought to sum up to 1.[fn:probabilities]
 Because of its simplicity and computational efficiency, the chaos game is used more frequently than the deterministic method for practical implementations.
 The chaos game is also easier to paralellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
 
-[fn:contraction] Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of $x$) exist [CITE], 
+[fn:contraction] Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of $x$) exist cite:hepting1991rendering, 
 but are not relevant for this thesis.
 
-[fn:probabilities] These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well [CITE] section 2.4.
+[fn:probabilities] These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well cite:hepting1991rendering.
 
 ** Paralellizing IFS rendering by using a Graphical Processor Unit
 
@@ -312,12 +312,12 @@ The deterministic method is difficult to paralellize on the GPU because of the e
 Coordinating which GPU thread would calculate which part of the tree and sharing results would be a hassle.
 
 Instead, the chaos game is more frequently used because of its simplicity. It is paralellized in a straightforward way, by running the iteration process many times side-by-side (one per GPU thread),
-and then combine the final results of all of these on a single canvas. [CITE]
+and then combine the final results of all of these on a single canvas. cite:green2005gpu
 
 *** The deterministic method on the GPU
 \label{subsection:deterministic_gpu}
 
-An exciting approach taken in [CITE] uses the deterministic method instead:
+An exciting approach taken in cite:lawlor2012gpu uses the deterministic method instead:
 by using the fast inverse square root operation, even unbounded (noncontracting) and nonlinear IFSs can be efficiently
 evaluated using the deterministic method, programmed in normal GPU shaders that manipulate a couple of GPU textures.
 
@@ -383,15 +383,15 @@ and $x$ is the minimum number of transformations we need to apply to any arbitra
 *** Potential point cloud-based optimizations
 \label{subsection:point_cloud_optimizations}
 
-The generation and rendering of point clouds is a quite well-understood problem[CITE]. point clouds see widespread use,
+The generation and rendering of point clouds is a quite well-understood problem cite:wimmer2006instant. point clouds see widespread use,
 most commonly in 3D-graphics that originates from a '3D scanner' .
 
 point clouds can be rendered in a reasonably efficient manner by storing them in a 'Bounding Volume Hierarchy',
-for instance in a binary search tree that is ordered using the Morton space filling curve. [CITE]
+for instance in a binary search tree that is ordered using the Morton space filling curve. cite:lauterbach2009construction
 Storing the points of a point cloud in this way allows us to efficiently cull most uninteresting points (i.e. points that would end up outside of the current camera viewport),
 which speeds up the rendering procedure tremendously.
 
-However, while this problem is well-understood, the implementation is far from trivial [CITE].
+However, while this problem is well-understood, the implementation is far from trivial cite:lauterbach2009construction.
 
 *** Detecting self-similarity: 'Zooming In by Zooming Out'
 \label{subsection:self_similarity}
@@ -407,7 +407,7 @@ However, it follows from the self-similar nature of the IFS that we might, in ce
 'secretly' zoom out to a shallower camera viewport of the point cloud that shows the same information of the attractor
 as the original viewport, but containing more points of the point cloud.
 
-THis can be done by identifying a mapping that fully encompasses the current camera viewport, and then applying its inverse
+This can be done by identifying a mapping that fully encompasses the current camera viewport, and then applying its inverse
 to the viewport.
 'Fully encompasses' here means that the unit square transformed by the mapping fully encompasses
 the unit square transformed by the inverse of the camera viewport transformation [fn:fully_encompassing].
@@ -417,7 +417,7 @@ the unit square transformed by the inverse of the camera viewport transformation
 
 [fn:fully_encompassing] A simple way to do this is to treat the unit square as a simple polygon,
 and then transform all of its corner points. For the resulting two polygons, the 'even-odd rule' algorithm
-[CITE]
+cite:haines1994point
 can be used to check whether all points of one polygon are inside the other. 
 
 *** Coloring the rendering
@@ -427,7 +427,7 @@ The simplest way of rendering an IFS attractor simply renders points that are on
 than the points that are not.
 
 However, more visually pleasing methods use a /color map/ to e.g. indicate the density (the number of points ending up at a particular canvas location) of the attractor.
-Yet more advanced methods [CITE fractal flame] keep track of a per-point colour, based on the sequence of transformations it has undergone.
+Yet more advanced methods cite:draves2003fractal keep track of a per-point colour, based on the sequence of transformations it has undergone.
 
 It seems possible to combine these techinques with the 'self-similarity jumping', since we keep track of which mappings we've (inversely) applied to the camera viewport:
 to determine the final colors of all points, all visible points need to be multiplied 
@@ -446,7 +446,7 @@ If we now 'jump up' (so we use points from virtually the whole fern), we have to
 \end{figure}
 
 The program was implemented using the general-purpose programming language Haskell, 
-in combination with the GPGPU library Accelerate [CITE].
+in combination with the GPGPU library Accelerate cite:chakravarty2011accelerating.
 This programming stack was chosen because Accelerate 
 offers a statically-typed EDSL[fn:EDSL] to array-based GPGPU programming,
 which is more high-level and less error-prone than writing shader code in e.g. CUDA or OpenCL directly.[fn:debugging]
@@ -484,7 +484,7 @@ The proof-of-concept program allows the customization of the following options
 
 *** `.ifs' file format
 
-The configuration language 'Dhall'[CITE] was used to 
+The configuration language 'Dhall' cite:gonzalez2019 was used to 
 easily faciltate the specification of different IFSs.
 
 The file structure allows one to indicate a list of affine transformations with associated chaos game probabilities,
@@ -523,7 +523,7 @@ An example file can be seen in autoref:listing:barnsley_fern_ifs_file .
 
 \end{lstlisting}
 
-[fn:floating_point] Unfortunately, Dhall explicitly does not allow floating-point arithmetic.[CITE]
+[fn:floating_point] Unfortunately, Dhall explicitly does not allow floating-point arithmetic.
 As such, one still needs to write e.g. $1/3$ as $0.3333333333333333$.
 
 *** Rendering
@@ -609,7 +609,9 @@ in which the technique of replacing the camera viewport with a more shallow came
 It is rather common to zoom in on the borders between transformations, as this is often
 where interesting visual details of the IFS might appear.
 
-However, the algortihm as outlined in [REF EARLIER ALGORITHM] is not able to handle borders between transformations,
+\todo[inline]{Reference to-be-written earlier algorithm}
+
+However, the algortihm as outlined in [REF] is not able to handle borders between transformations,
 thus making it useless in these scenarios.
 
 **** Overlapping subtransformations
@@ -621,7 +623,7 @@ When there are points from another mapping in the current view,
 going to a more shallow view will make points 'disappear' from the perspective of the user.
 In practice, this means that for many IFSs there are large regions in which the technique cannot be used at all.
 
-Simple IFSs like the Sierpinský Triangle[REF], in which transformations
+Simple IFSs like the Sierpi\'nsky Triangle (autoref:ifs:sierpinsky), in which transformations
 do not overlap, do not exhibit this problem. 
 Slightly more complicated IFSs like the Dragon Curve[REF] or the Barnsly Fern[REF] however do.
 See autoref:figure:dragon_curve_overlaps for an graphical explanation.
@@ -687,8 +689,7 @@ Stored this way, a point cloud of 100,000,000 points requires 0.596 GiB of GPU m
 and 1,000,000,000 points requires 5.96 GiB.
 For current generation GPUs[fn:GPU2020], this often is more memory than available.
 
-[fn:GPU2020] At the time of writing, high-end consumer GPUs contain somewhere between 2 and 24 GiB of available memory. [CITE]
-CITE: https://www.ign.com/articles/the-best-graphics-cards-3
+[fn:GPU2020] At the time of writing, high-end consumer GPUs contain somewhere between 2 and 24 GiB of available memory. cite:ign2020topgpus
 
 * Conclusion
 \label{section:conclusion}
@@ -713,8 +714,11 @@ Another venue that could be explored is the rendering of an IFS' attractor at mu
 It might be possible to create more detailed local versions of the point cloud (based on the points of the less detailed point cloud) when the user
 zooms in on a particular region, on demand.
 
-Finally it is worth noting that as mentioned in autoref:subsection:deterministic_gpu, [CITE] already presents an efficient way to render a large set of IFSs using a very different approach, 
+Finally it is worth noting that as mentioned in autoref:subsection:deterministic_gpu, cite:lawlor2012gpu already presents an efficient way to render a large set of IFSs using a very different approach, 
 which might be worthwhile to explore further.
+
+\pagebreak
+\printbibliography
 
 \appendix
 
