@@ -6,16 +6,16 @@
    (TeX-add-to-alist 'LaTeX-provided-package-options
                      '(("inputenc" "utf8") ("fontenc" "T1") ("ulem" "normalem") ("geometry" "a4paper" "total={7in, 9in}") ("algorithm2e" "ruled" "procnumbered") ("xcolor" "dvipsnames") ("enumitem" "shortlabels")))
    (add-to-list 'LaTeX-verbatim-environments-local "lstlisting")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "path")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "href")
    (add-to-list 'LaTeX-verbatim-macros-with-braces-local "lstinline")
-   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "path")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "href")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "path")
    (add-to-list 'LaTeX-verbatim-macros-with-delims-local "lstinline")
+   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "path")
    (TeX-run-style-hooks
     "latex2e"
     "article"
@@ -50,72 +50,72 @@
     "xmark"
     "altasterism")
    (LaTeX-add-labels
-    "sec:orgbf73d8d"
-    "sec:org449267a"
-    "sec:orge15cc62"
-    "sec:orgbf93686"
+    "sec:org9854f1c"
+    "sec:orgd1b06aa"
+    "sec:orgc42c656"
+    "sec:orga9c5e61"
     "section:background"
-    "sec:orge63dd7c"
+    "sec:org326c556"
     "figure:sierpinsky_iterations"
-    "sec:org6bbb3c0"
-    "sec:orgfce7251"
-    "sec:orgf986d6f"
+    "sec:orgf8b444a"
+    "sec:org49102d5"
+    "sec:orgc1a2b21"
     "subsection:viewport_transformation"
-    "sec:org76381a2"
-    "sec:org49cfff6"
-    "sec:org94c5930"
+    "sec:org9da4c3f"
+    "sec:org217e165"
+    "sec:orgf93f516"
     "subsection:chaos_game"
     "figure:barnsley_mil"
     "figure:barnsley_ten_mil"
     "figure:barnsley_chaos_game_points"
     "chaosGame"
-    "sec:orgf26de1e"
-    "sec:orge6ac5f7"
+    "sec:org49b5ea7"
+    "sec:org029d2ae"
     "subsection:chaos_game_gpu"
-    "sec:org5b04555"
+    "sec:org575e15b"
     "subsection:deterministic_gpu"
-    "sec:orgc9da940"
+    "sec:org450d7ed"
     "section:research_question"
-    "sec:orgba5c68e"
+    "sec:orgae4a53b"
     "section:approach"
-    "sec:org60385e8"
-    "sec:orge016262"
-    "sec:org017fd4b"
+    "sec:org3cdbdd0"
+    "sec:org6b49e1a"
+    "sec:org05e8372"
     "subsection:point_cloud_optimizations"
-    "sec:orgd05001c"
+    "sec:org57c8b7f"
     "subsection:self_similarity"
-    "sec:orgfa8677d"
+    "sec:org0b00b60"
     "subsection:coloring"
-    "sec:orgf632874"
+    "sec:org0ef1806"
     "figure:program_flow"
-    "sec:org5954dc1"
-    "sec:org9bdcc64"
-    "sec:org92b912e"
+    "sec:orga2c51f5"
+    "sec:orgc94da2a"
+    "sec:org4c22d9b"
     "listing:barnsley_fern_ifs_file"
-    "sec:org4471ce4"
-    "sec:org0d212d3"
-    "sec:orgf83c71c"
-    "sec:org3240249"
+    "sec:org4507a57"
+    "sec:orgb079939"
+    "sec:org503fd53"
+    "sec:org302e9d4"
     "figure:barnsley_guides"
     "figure:barnsley_guides_and_points"
     "figure:barnsley_guides_vs_points"
-    "sec:org4136bac"
+    "sec:orgc9570dc"
     "section:findings"
-    "sec:org6f088f2"
+    "sec:org66f8907"
     "subsection:jumping_restrictions"
-    "sec:org6681592"
-    "sec:orgf2038ec"
+    "sec:org5801534"
+    "sec:org1eef9d6"
     "figure:dragon_curve_a"
     "figure:dragon_curve_b"
     "figure:dragon_curve_c"
     "figure:dragon_curve_d"
     "figure:dragon_curve_overlaps"
-    "sec:org55cf330"
-    "sec:orgea1fb94"
+    "sec:org8f0c896"
+    "sec:org859e1d7"
     "section:conclusion"
-    "sec:org5966c97"
+    "sec:orge9c6be0"
     "section:further_work"
-    "sec:org9de4cd9"
+    "sec:orgd0fd36b"
     "ifs:sierpinsky"
     "ifs:dragon_curve"
     "ifs:barnsley_fern")
