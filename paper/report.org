@@ -480,7 +480,7 @@ The proof-of-concept program allows the customization of the following options
 - `samples`: the number of points to use for the chaos game (defaults to 100,000,000)
 - `paralellism`: the number of GPU-threads to split the number of samples across. (defaults to 2048)
 - `seed`: a number to seed the random number generator with. If not provided, a different arbitrary seed will be used each time.
-- `render_width` and `render_height` set the resolution of the program window that is displayed (defaults to $800 \times 800$).
+- `render\under{}width` and `render\under{}height` set the resolution of the program window that is displayed (defaults to $800 \times 800$).
 
 *** `.ifs' file format
 
