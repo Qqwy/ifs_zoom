@@ -639,12 +639,41 @@ in which the technique of replacing the camera viewport with a more shallow came
 It is rather common to zoom in on the borders between transformations, as this is often
 where interesting visual details of the IFS might appear.
 
-\todo[inline]{Reference to-be-written earlier algorithm}
-
-However, the algortihm as outlined in [REF] is not able to handle borders between transformations,
+However, autoref:algorithm:self_similarity_jump_up is not able to handle borders between transformations,
 thus making it useless in these scenarios.
 
+An example can be seen in figure autoref:figure:sierpinsky_transformation_borders
+
+\begin{figure}
+\centering
+\includegraphics[width=0.3\textwidth]{figures/sierpinsky_transformation_borders}
+\caption{In this example the camera viewport (indicated in cyan) overlaps both $f_1$ and $f_2$ of \autoref{ifs:sierpinsky} partially. This case is not handled by \autoref{algorithm:self_similarity_jump_up}. }
+\label{figure:sierpinsky_transformation_borders}
+\end{figure}
+
 **** Overlapping subtransformations
+
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/barnsley_colored_jump1}
+         \caption{Since the camera viewport only sees points of $f_2$, the jump up is proper.}
+         \label{figure:barnsley_jump_a}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/barnsley_colored_jump2}
+         \caption{Since the camera viewport sees both points of $f_2$ and $f_3$, the jump is incorrect. Note the leaf in the lower left missing after the jump.}
+         \label{figure:barnsley_jump_b}
+     \end{subfigure}
+        \caption{Problems when jumping up on \autoref{ifs:barnsley_fern}. Camera viewport indicated as white dashed polygon.
+Points colored based on their latest mapping. }
+        \label{figure:barnsley_jump}
+\end{figure}
+
+
 
 A more shallow view of the attractor only shows the same as a deeper view when
 there are no points transformed by another mapping that end up in the deeper view.
@@ -699,15 +728,6 @@ per mapping, where the unit square would end up after a couple of mappings with 
         \label{figure:dragon_curve_overlaps}
 \end{figure}
 
-\todo[inline]{pseudocode}
-
-
-# Zooming out is possible iff
-# - The camera is fully contained inside the transformation
-# - The camera is not overlapping any of the other transformations' 'immediate child-transforms'
-
-# Further restriction: when viewport overlaps multiple transformations there is a problem, 
-# even if this would theoretically be a possibility. Maybe there are smarter ways of recognizing self-similarity?
 
 ** Memory Usage
 
