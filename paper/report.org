@@ -35,7 +35,7 @@
 #+LATEX_HEADER: \usepackage[shortlabels]{enumitem}
 
 #+LATEX_HEADER: \usepackage{newfloat}
-#+LATEX_HEADER: \DeclareFloatingEnvironment[fileext=lol, listname={List of L-system definitions}, name=L-system, placement=tbhp, within=section]{lsystem}
+#+LATEX_HEADER: \DeclareFloatingEnvironment[fileext=lol, listname={List of Iterated Function System definitions}, name=IFS, placement=tbhp, within=section]{ifs}
 
 #+LATEX_HEADER: \usepackage{wrapfig}
 #+LATEX_HEADER: \usepackage{todonotes}
@@ -190,12 +190,6 @@ Different algorithms take different approaches to evaluating this tree (up to a 
 More in-depth information about the rendering of Iterated Function Systems can be found cite:hepting1991rendering. 
 Short summaries of the two most common techniques will now follow.
 
-# All of the rendering techniques have in common that the iteration of the Hutchkinson operator is seen as an (infinitely deep) tree with branching factor $N$.
-# We traverse this tree up to a certain depth.
-
-\todo[inline]{PICTURE OF THIS TREE}
-
-
 *** The deterministic method
 
 In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
@@ -334,8 +328,6 @@ none of them re-uses information from rendering one image of the IFS for renderi
 This leads us to the research question of this thesis:
 
 **Is it possible, by re-using information between animation frames, to render animations of an Iterated Function System's attractor in which the camera zooms in, in real-time?**
-
-\todo[inline]{Maybe rephrase question?}
 
 * Approach
 \label{section:approach}
@@ -719,6 +711,7 @@ which might be worthwhile to explore further.
 
 \pagebreak
 \printbibliography
+\clearpage
 
 \appendix
 
@@ -726,10 +719,32 @@ which might be worthwhile to explore further.
 
 This appendix lists the transformation matrices of the IFSs that were used throughout this thesis.
 
-\todo[inline]{Sierpi\'nsky}
-\todo[inline]{Dragon Curve}
 \todo[inline]{Barnsley Fern}
 
+
+\begin{ifs}
+$$ 
+\begin{aligned}
+f_1(x, y) &= \begin{pmatrix} \frac{1}{2} & 0 \\ 0 & \frac{1}{2} \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} \\
+f_2(x, y) &= \begin{pmatrix} \frac{1}{2} & 0 \\ 0 & \frac{1}{2} \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} + \begin{pmatrix} \frac{1}{2} \\ 0 \end{pmatrix} \\
+f_3(x, y) &= \begin{pmatrix} \frac{1}{2} & 0 \\ 0 & \frac{1}{2} \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} + \begin{pmatrix} \frac{1}{4} \\ \frac{\sqrt{3}}{4} \end{pmatrix} \\
+\end{aligned}
+$$
+
+\caption{the Sierpi\'nsky triangle or gasket}
 \label{ifs:sierpinsky}
-\label{ifs:barnsley_fern}
+\end{ifs}
+
+\begin{ifs}
+$$ 
+\begin{aligned}
+f_1(x,y) &= \frac{1}{\sqrt{2}}\begin{pmatrix} \cos 45^\circ & -\sin 45^\circ \\ \sin 45^\circ & \cos 45^\circ \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix}  \\
+f_2(x,y) &= \frac{1}{\sqrt{2}}\begin{pmatrix} \cos 135^\circ & -\sin 135^\circ \\ \sin 135^\circ & \cos 135^\circ \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} + \begin{pmatrix} 1 \\ 0 \end{pmatrix} \\
+\end{aligned}
+$$
+
+\caption{the Heighway Dragon Curve}
 \label{ifs:dragon_curve}
+\end{ifs}
+
+\label{ifs:barnsley_fern}
