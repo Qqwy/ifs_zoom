@@ -4,7 +4,7 @@
    (LaTeX-add-bibitems
     "green2005gpu"
     "jampour2010new"
-    "barnsley2014fractals"
+    "barnsley1988fractals"
     "jeffrey1990chaos"
     "barnsley2010chaos"
     "lauterbach2009construction"

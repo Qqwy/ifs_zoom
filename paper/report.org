@@ -73,7 +73,7 @@ is hampered by the fact that self-similarity jumping cannot be used in a couple 
 * Introduction
 
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
-by repeatedly applying simple mathematical functions until a fixed point is reached. cite:barnsley2014fractals
+by repeatedly applying simple mathematical functions until a fixed point is reached. cite:barnsley1988fractals
 IFSs see use in rendering/modeling of physical phenomena, image compression cite:hart1996fractal and representing gene structures cite:jeffrey1990chaos.
 Sometimes they also see use simply for the aesthetic beauty of their graphical representations cite:draves2003fractal.
 
@@ -133,12 +133,12 @@ This process is then repeated an arbitrary number of times, until changes betwee
 What you end up with is a visual representation of the IFS's attractor.
 A simple example of this process can be seen in autoref:figure:sierpinsky_iterations
 
-\todo[inline]{Some examples of IFSs? (that are used later on in the thesis)}
+\todo[inline]{Some examples of IFSs? (that are seen again later on in the thesis)}
 
 
 ** Formal definition of an Iterated Function System
 
-Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space $(\mathcal{M}, d)$ to itself:
+Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space $(\mathcal{M}, d)$ to itself cite:barnsley1988fractals :
 
 $$ = \{ f_i : \mathcal{M} \rightarrow \mathcal{M} | i = 1, 2, \ldots, N \}, N \in \mathbb{N}$$
 
@@ -168,7 +168,7 @@ Because of their prevalence, these are also the restrictions that will be used i
 \label{subsection:viewport_transformation}
 
 For any IFS with mappings we can transform its attractor by any invertible function $t$ by adjusting each of the mappings according to the
-transform theorem cite:barnsley2014fractals $f_i' = t \cdot f_i \cdot t^{-1}$, essentially transforming points from the new space to the old space, then applying the mapping, and finally transforming them back to the new space. 
+transform theorem cite:barnsley1988fractals $f_i' = t \cdot f_i \cdot t^{-1}$, essentially transforming points from the new space to the old space, then applying the mapping, and finally transforming them back to the new space. 
 This allows us to give users freedom to choose any desired mappings and 'initial camera viewport' of the attractor,
 while still allowing all calculations to happen with regard to the unit square (which keeps them simpler).
 
@@ -236,7 +236,7 @@ Be aware that when affine transformation functions are represented as matrices (
 \end{figure}
 
 
-The /stochastic method/ cite:hepting1991rendering, also known as the /random iteration algorithm/ cite:barnsley2014fractals or more frequently the /chaos game/, works as seen in autoref:chaosGame
+The /stochastic method/ cite:hepting1991rendering, also known as the /random iteration algorithm/ cite:barnsley1988fractals or more frequently the /chaos game/, works as seen in autoref:chaosGame
 
 \begin{algorithm}[H]
 \caption{the chaos game}
@@ -385,12 +385,20 @@ which speeds up the rendering procedure tremendously.
 
 However, while this problem is well-understood, the implementation is far from trivial cite:lauterbach2009construction.
 
-*** Detecting self-similarity: 'Zooming In by Zooming Out'
+*** Self-similarity jumping: 'Zooming In by Zooming Out'
 \label{subsection:self_similarity}
+
+\begin{figure}
+
+\includegraphics[width=\textwidth]{figures/sierpinsky_jump}
+\caption{An example of the self-similarity jumping technique. Pictured is the Sierpi\'nsky triangle IFS (autoref:ifs:sierpinsky).
+The viewport (pictured in cyan) on the left can be transformed to the one on the right by applying the inverse mapping $f_1^{-1}$ to it.
+The resulting viewport looks the same but contains more points.}
+\label{figure:sierpinsky_jump}
+\end{figure}
 
 When using a point-cloud, we retain detail when zooming in up to a certain depth. In this way, a point cloud is more flexible than a 
 static pixel canvas, which will already show rendering artefacts when zooming in slightly beyond its intended size.
-\todo[inline]{More info}
 
 Nonetheless, beyond a certain depth, the number of points of the point cloud that fall outside of the current camera viewport
 (and thus are 'useless' for the quality of the rendered attractor) grows larger and larger.
@@ -404,7 +412,37 @@ to the viewport.
 'Fully encompasses' here means that the unit square transformed by the mapping fully encompasses
 the unit square transformed by the inverse of the camera viewport transformation [fn:fully_encompassing].
 
-\todo[inline]{Example picture}
+See autoref:figure:sierpinsky_jump for an example. 
+
+The algorithm is specified in autoref:algorithm:self_similarity_jump_up and autoref:algorithm:self_similarity_jump_down.
+
+\begin{algorithm}[H]
+\caption{self-similarity jump-up}
+\label{algorithm:self_similarity_jump_up}
+  $n$: the number of transformations the IFS consists of. \\
+  $v$: the current camera's viewport transformation. \\
+  $s$: a stack of jumps made until now. \\
+  \For{$i \leftarrow [0..n)$}{ 
+    \If{is\_invertible($f_i$)  and inside($v^{-1}$, $f_i$) }{
+      push($s$, $f_i$) \\
+      $v = f_i^{-1}(v)$ \\
+      break \\
+    }
+  }
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{self-similarity jump-down}
+\label{algorithm:self_similarity_jump_down}
+  $u$: the identity transformation \\
+  $v$: the current camera's viewport transformation. \\
+  $s$: a stack of jumps made until now. \\
+  \If{not\_empty($s$) and outside($v^{-1}$, $u$) }{
+    $f_i$ = pop($s$) \\
+    $v = f_i(v)$ \\
+  }
+\end{algorithm}
+
 
 
 [fn:fully_encompassing] A simple way to do this is to treat the unit square as a simple polygon,
@@ -718,8 +756,6 @@ which might be worthwhile to explore further.
 * IFSs used
 
 This appendix lists the mapping functions of the IFSs that were used throughout this thesis.
-
-\todo[inline]{add pictures of these as well here?}
 
 \begin{ifs}
 $$ 

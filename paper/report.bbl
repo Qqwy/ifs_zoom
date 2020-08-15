@@ -19,7 +19,7 @@
 
 \refsection{0}
   \datalist[entry]{anyt/global//global/global}
-    \entry{barnsley2014fractals}{book}{}
+    \entry{barnsley1988fractals}{book}{}
       \name{author}{1}{}{%
         {{hash=025b5fe0c98ac90abad4e94473298337}{%
            family={Barnsley},
@@ -36,13 +36,13 @@
       \strng{authorbibnamehash}{025b5fe0c98ac90abad4e94473298337}
       \strng{authornamehash}{025b5fe0c98ac90abad4e94473298337}
       \strng{authorfullhash}{025b5fe0c98ac90abad4e94473298337}
-      \field{labelalpha}{Bar14}
+      \field{labelalpha}{Bar88}
       \field{sortinit}{B}
       \field{sortinithash}{8de16967003c7207dae369d874f1456e}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{Fractals everywhere}
-      \field{year}{2014}
+      \field{year}{1988}
     \endentry
     \entry{chakravarty2011accelerating}{inproceedings}{}
       \name{author}{5}{}{%
