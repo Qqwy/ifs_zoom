@@ -237,7 +237,7 @@ Be aware that when affine transformation functions are represented as matrices (
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/barnsley_1000000}
-         \caption{1,000,000 points}
+         \caption{1,000,000}
          \label{figure:barnsley_mil}
      \end{subfigure}
      \hfill
@@ -247,7 +247,7 @@ Be aware that when affine transformation functions are represented as matrices (
          \caption{10,000,000}
          \label{figure:barnsley_ten_mil}
      \end{subfigure}
-        \caption{The Barnsley Fern, rendered using the chaos game with different amounts of points.}
+        \caption{The Barnsley Fern (\autoref{ifs:barnsley_fern}), rendered using the chaos game with different amounts of points.}
         \label{figure:barnsley_chaos_game_points}
 \end{figure}
 
