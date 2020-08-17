@@ -418,7 +418,7 @@ The resulting viewport looks the same but contains more points.}
 \label{figure:sierpinsky_jump}
 \end{figure}
 
-When using a point-cloud, we retain detail when zooming in up to a certain depth. In this way, a point cloud is more flexible than a 
+When using a point cloud, we retain detail when zooming in up to a certain depth. In this way, a point cloud is more flexible than a 
 static pixel canvas, which will already show rendering artefacts when zooming in slightly beyond its intended size.
 
 Nonetheless, while zooming in, more and more points of the point cloud fall outside of the current camera viewport
@@ -438,13 +438,13 @@ See autoref:figure:sierpinsky_jump for an example.
 
 The algorithm and its inverse are specified in autoref:algorithm:self_similarity_jump_up and autoref:algorithm:self_similarity_jump_down.
 
-\begin{algorithm}[H]
+\begin{algorithm}
 \caption{self-similarity jump-up}
 \label{algorithm:self_similarity_jump_up}
   $n$: the number of mappings the IFS consists of. \\
   $v$: the current camera's view transformation. \\
   $s$: a stack of jumps made so far. \\
-  \For{$i \leftarrow [0..n)$}{ 
+  \For{$i \leftarrow [1..n]$}{ 
     \If{isInvertible($f_i$)  and isInside($v^{-1}$, $f_i$) }{
       push($s$, $f_i$) \\
       $v = f_i^{-1}(v)$ \\
@@ -453,7 +453,7 @@ The algorithm and its inverse are specified in autoref:algorithm:self_similarity
   }
 \end{algorithm}
 
-\begin{algorithm}[H]
+\begin{algorithm}
 \caption{self-similarity jump-down}
 \label{algorithm:self_similarity_jump_down}
   $u$: the identity transformation \\
@@ -652,7 +652,7 @@ single-threaded reference implementation that runs on the CPU that can be used t
 \label{subsection:jumping_restrictions}
 
 From experimentation with the program it turns out that there are two common situations
-in which the technique of replacing the camera viewport with a more shallow camera viewport that is outlined in autoref:subsection:self_similarity cannot be used.
+in which the technique outlined in autoref:subsection:self_similarity cannot be used.
 
 **** Borders between transformations
 
@@ -662,7 +662,7 @@ where interesting visual details of the IFS might appear.
 However, autoref:algorithm:self_similarity_jump_up is not able to handle borders between transformations,
 thus making it useless in these scenarios.
 
-An example can be seen in figure autoref:figure:sierpinsky_transformation_borders
+An example can be seen in figure autoref:figure:sierpinsky_transformation_borders.
 
 \begin{figure}
 \centering
@@ -699,19 +699,21 @@ A more shallow view of the attractor only shows the same as a deeper view when
 there are no points transformed by another mapping that end up in the deeper view.
 
 When there are points from another mapping in the current view, 
-going to a more shallow view will make points 'disappear' from the perspective of the user.
+going to a more shallow view will make points disappear from the perspective of the user.
 In practice, this means that for many IFSs there are large regions in which the technique cannot be used at all.
 
-Simple IFSs like the Sierpi\'nsky Triangle (autoref:ifs:sierpinsky), in which transformations
+Simple IFSs like the Sierpińsky Triangle (autoref:ifs:sierpinsky) in which transformations
 do not overlap, do not exhibit this problem. 
-Slightly more complicated IFSs like the Dragon Curve[REF] or the Barnsly Fern[REF] however do.
+Slightly more complex IFSs like the Dragon Curve (autoref:ifs:dragon_curve) or the Barnsley Fern (autoref:ifs:barnsley_fern) however do.
 See autoref:figure:dragon_curve_overlaps for an graphical explanation.
 
+\todo[inline]{Clarify figure}
+
 This case is annoyingly common and there is no clear solution to alleviate this restriction.
-What is more, it is not simple to check whether we are currently in a region that exhibits the problem,
+Furthermore, it is not simple to check whether we are currently in a region that exhibits the problem,
 as this would require evaluating the IFS itself.
 
-It is possible to take a rough 'upper bound' estimate of the disallowed regions by keeping track, 
+It is possible to take a rough `upper bound' estimate of the disallowed regions by keeping track, 
 per mapping, where the unit square would end up after a couple of mappings with this mapping as last (i.e. most significant) one.
 
 
@@ -720,21 +722,21 @@ per mapping, where the unit square would end up after a couple of mappings with 
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_a}
-         \caption{The unit square (indicated in white) transformed by the two mappings of $D$ (indicated in green)}
+         \caption{The unit square (indicated in white) transformed by $f_1$ and $f_2$ (indicated in green)}
          \label{figure:dragon_curve_a}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_b}
-         \caption{The first of the two mappings, transformed one more time by the mappings of $D$ (indicated in red)}
+         \caption{Subtransformations of $f_1$: $f_1 \circ f_1$ and $f_1 \circ f_2$ (indicated in red)}
          \label{figure:dragon_curve_b}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_c}
-         \caption{The second of the two mappings, transformed one more time by the mappings of $D$ (indicated in blue)}
+         \caption{Subtransformations of $f_2$: $f_2 \circ f_1$ and $f_2 \circ f_2$. (indicated in blue)}
          \label{figure:dragon_curve_c}
      \end{subfigure}
      \hfill
@@ -751,10 +753,11 @@ per mapping, where the unit square would end up after a couple of mappings with 
 
 ** Memory Usage
 
-Point clouds take up a lot of data on the GPU. To render a fractal at reasonable detail, 
-hundreds of millions if not billions of points are necessary (depending on the particular IFS).
+Point clouds take up a lot of memory on the GPU. To render a fractal at reasonable detail, depending on the particular IFS,
+hundreds of millions if not billions of points are necessary.
 
-A reasonable way to store a point cloud is by using for each 2D-point, 32 bits for each coordinate, thus fitting the pair in exactly one machine word of 64-bit systems.
+A reasonable way to store a point cloud is by using 32 bits for each of the two coordinates of a point. 
+This means that one point takes up exactly one machine word of a 64-bit computer system.
 Stored this way, a point cloud of 100,000,000 points requires 0.596 GiB of GPU memory,
 and 1,000,000,000 points requires 5.96 GiB.
 For current generation GPUs[fn:GPU2020], this often is more memory than available.
@@ -764,28 +767,29 @@ For current generation GPUs[fn:GPU2020], this often is more memory than availabl
 * Conclusion
 \label{section:conclusion}
 
-A program was implemented which has shown that there is /some/ merit to rendering an IFS' attractor using a point-cloud as re-usable intermediate structure.
+A program was implemented which has shown that there is /some/ merit to rendering an IFS' attractor using a point cloud as re-usable intermediate structure.
 However, the self-similarity detection method that was proposed turns out to be unusable in common cases.
-Furthermore, self-similarity 'jumps' make more sophisticated rendering techniques difficult if not impossible to use.
 
-As long as these two problems remain unsolved, the proposed technique can only be considered impractical.
+Therefore, the proposed technique can be considered of limited practicality, 
+at least until a more sophisticated self-similarity detection method is found.
 
 * Further Work
 \label{section:further_work}
 
 It is our hope that a more sophisticated way of detecting self-similarity might be found,
-which would make 'self-similarity jumping' more practical.
+which would make `self-similarity jumping' more practical.
 
 Besides this, while we have shown in a proof-of-concept program that it is possible to render an IFS using a point cloud
 with a reasonable speed, there are many optimizations that could be made to make the program run faster (potentially even in real-time),
 most notably the rendering optimizations listed in autoref:subsection:point_cloud_optimizations
 
-Another venue that could be explored is the rendering of an IFS' attractor at multiple 'levels of detail':
+Another venue that could be explored is the rendering of an IFS' attractor at multiple `levels of detail':
 It might be possible to create more detailed local versions of the point cloud (based on the points of the less detailed point cloud) when the user
 zooms in on a particular region, on demand.
 
-Finally it is worth noting that as mentioned in autoref:subsection:deterministic_gpu, cite:lawlor2012gpu already presents an efficient way to render a large set of IFSs using a very different approach, 
-which might be worthwhile to explore further.
+Finally it is worth noting that cite:lawlor2012gpu already presents an efficient way to render 
+a large set of IFSs using a very different approach (c.f. autoref:subsection:deterministic_gpu), 
+which might be worthwhile to be explored further.
 
 \pagebreak
 \printbibliography
@@ -798,6 +802,8 @@ which might be worthwhile to explore further.
 This appendix lists the mapping functions of the IFSs that were used throughout this thesis.
 
 \begin{ifs}
+\centering
+\includegraphics[width=0.2\textwidth]{figures/sierpinsky}
 $$ 
 \begin{aligned}
 f_1(x, y) &= \begin{bmatrix} \frac{1}{2} & 0 \\ 0 & \frac{1}{2} \end{bmatrix} & \begin{bmatrix} x \\ y \end{bmatrix} & , &p_1 = \frac{1}{3} \\
@@ -811,6 +817,8 @@ $$
 \end{ifs}
 
 \begin{ifs}
+\centering
+\includegraphics[width=0.2\textwidth]{figures/dragon_curve}
 $$ 
 \begin{aligned}
 f_1(x,y) &= \frac{1}{\sqrt{2}}\begin{bmatrix} \cos 45^\circ & -\sin 45^\circ \\ \sin 45^\circ & \cos 45^\circ \end{bmatrix} & \begin{bmatrix} x \\ y \end{bmatrix} & , &p_1 = \frac{1}{2} \\
@@ -823,13 +831,15 @@ $$
 \end{ifs}
 
 \begin{ifs}
+\centering
+\includegraphics[width=0.2\textwidth]{figures/barnsley_100000000}
 $$ 
 \begin{aligned}
 f_1(x,y) &= \begin{bmatrix} \ 0.00 & \ 0.00 \ \\ 0.00 & \ 0.16 \end{bmatrix}  & \begin{bmatrix} \ x \\ y \end{bmatrix} & , &p_1 = 0.01 \\
 f_2(x,y) &= \begin{bmatrix} \ 0.85 & \ 0.04 \ \\ -0.04 & \ 0.85 \end{bmatrix} & \begin{bmatrix} \ x \\ y \end{bmatrix} &+ \begin{bmatrix} \ 0.00 \\ 1.60 \end{bmatrix} , &p_2 = 0.85 \\
 f_3(x,y) &= \begin{bmatrix} \ 0.20 & \ -0.26 \ \\ 0.23 & \ 0.22 \end{bmatrix} & \begin{bmatrix} \ x \\ y \end{bmatrix} &+ \begin{bmatrix} \ 0.00 \\ 1.60 \end{bmatrix} , &p_3 = 0.07 \\
 f_4(x,y) &= \begin{bmatrix} \ -0.15 & \ 0.28 \ \\ 0.26 & \ 0.24 \end{bmatrix} & \begin{bmatrix} \ x \\ y \end{bmatrix} &+ \begin{bmatrix} \ 0.00 \\ 0.44 \end{bmatrix} , &p_4 = 0.07 \\
-camera(x, y) &= \begin{bmatrix} 0.09 & \ 0.00 \\ 0.00 & \ -0.09 \end{bmatrix} & \begin{bmatrix} \ x \\ y \end{bmatrix} &+ \begin{bmatrix} \ 0.50 \\ 1.00 \end{bmatrix} \\
+v(x, y) &= \begin{bmatrix} 0.09 & \ 0.00 \\ 0.00 & \ -0.09 \end{bmatrix} & \begin{bmatrix} \ x \\ y \end{bmatrix} &+ \begin{bmatrix} \ 0.50 \\ 1.00 \end{bmatrix} \\
 \end{aligned}
 $$
 \caption{the Barnsley Fern}

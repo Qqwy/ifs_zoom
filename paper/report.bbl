@@ -89,7 +89,7 @@
       \field{pages}{3\bibrangedash 14}
       \range{pages}{12}
     \endentry
-    \entry{draves2003fractal}{article}{}
+    \entry{draves2003fractal}{misc}{}
       \name{author}{2}{}{%
         {{hash=6550a7ad6f9861d62b7e9f26c09fb1c7}{%
            family={Draves},
@@ -103,7 +103,7 @@
            giveni={E\bibinitperiod}}}%
       }
       \list{publisher}{1}{%
-        {Citeseer}%
+        {CiteSeer}%
       }
       \strng{namehash}{2c15e6a8d649d6f362684fbfea3ed338}
       \strng{fullhash}{2c15e6a8d649d6f362684fbfea3ed338}
@@ -111,14 +111,14 @@
       \strng{authorbibnamehash}{2c15e6a8d649d6f362684fbfea3ed338}
       \strng{authornamehash}{2c15e6a8d649d6f362684fbfea3ed338}
       \strng{authorfullhash}{2c15e6a8d649d6f362684fbfea3ed338}
-      \field{labelalpha}{DR03}
+      \field{labelalpha}{DR04}
       \field{sortinit}{D}
       \field{sortinithash}{c438b3d5d027251ba63f5ed538d98af5}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Forthcoming, available from http: I Itlam3. com/flame. pdf}
+      \field{howpublished}{\url{http://flam3.com/flame.pdf}}
       \field{title}{The fractal flame algorithm}
-      \field{year}{2003}
+      \field{year}{2004}
     \endentry
     \entry{gonzalez2019}{misc}{}
       \name{author}{2}{}{%
