@@ -108,9 +108,11 @@ We conclude in autoref:section:conclusion and finally hint at some approaches fo
 
 This section will describe the different building blocks necessary to formalate the research question.
 First, IFSs are formalized, followed by a description of the different ways in which an IFS' attractor can be rendered, 
-and how these techniques might be paralellized.
+and how these techniques might be parallellized.
 
 ** Informal description of an Iterated Function System
+\label{subsection:informal_description}
+
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{figures/sierpinsky_iterations}
@@ -183,22 +185,22 @@ We use the term `zooming' to disambugate this type of scaling where a camera is 
 For any IFS with mappings we can transform its attractor by any invertible function $t$ by adjusting each of the mappings according to the
 transform theorem: $f_i' = t \cdot f_i \cdot t^{-1}$ cite:barnsley1988fractals. Essentially points are transformed from the new space to the old space, then the mapping is applied, and finally the points are transformed back to the new space.
 This allows users the freedom to choose any desired mappings together with an `initial camera transformation' (i.e. the camera's initial position + frustrum),
-while still allowing all calculations to happen with regard to the unit square, keeping them simple.
+while still allowing all calculations to happen with regard to the unit square (`unit space'), keeping them simple.
 
 [fn:euclidean] More formally, the two-dimensional Euclidean space: $\left(\mathbb{R}^2, d(p, q) = \sqrt{(p - q)^2}\right)$.
 
 ** Rendering an Iterated Function System
 
-A couple of algoritms exist to render (visualize) the attarctor of an Iterated Function System. 
-While it is impossible to render the attractor exactly, as this would require an infinite number of transformation steps,
-we can approximate it until we are certain that the difference between our approximation and the attractor is smaller than
-the smallest thing we can visually represent (e.g. smaller than the size of a pixel).
+A couple of algoritms exist to render the attractor of an Iterated Function System. 
+It is impossible to render the attractor exactly, as this would require an infinite number of transformation steps.
+However, we can approximate it until the difference between our approximation and the attractor is smaller than
+the smallest thing we can visually represent (e.g. when rendering to a screen, smaller than the size of a pixel).
 
 Because we apply $H$ many times and each time consists of taking the union of $N$ different transformations,
 the result can be seen as traversing an (infinitely deep) tree of transformations, 
 where each sub-tree is self-similar to the tree as a whole.
 
-Different algorithms take different approaches to evaluating this tree (up to a chosen finite depth).
+Different algorithms take different approaches to evaluating this tree up to a chosen finite depth.
 
 More in-depth information about the rendering of Iterated Function Systems can be found cite:hepting1991rendering. 
 Short summaries of the two most common techniques will now follow.
@@ -208,23 +210,25 @@ Short summaries of the two most common techniques will now follow.
 In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
 
 1. Pick a starting point $z_0$;
-2. Traverse the tree down to the chosen depth $k$, building up a sequence of transformations [fn:function_composition]
+2. traverse the tree down to the chosen depth $k$, building up a sequence of transformations [fn:function_composition]
    $f_{i_k} \circ \ldots \circ f_{i_1}$;
-3. For each node at this depth, evaluate and render $z_k = (f_{i_k} \circ \ldots \circ f_{i_1})(z_0) = f_{i_k-1}(z_{k-1})$;
+3. for each node at this depth, evaluate and render $z_k = (f_{i_k} \circ \ldots \circ f_{i_1})(z_0) = f_{i_k-1}(z_{k-1})$.
 
 Since $z_{k} = f_{i_k-1}(z_{k-1})$ this procedure takes, for an approximation that consists of $N$ points, depending on the tree traversal chosen:
 
-- a linear amount ( $\mathcal{O}(N)$ ) of memory  for a breadth-first tree-traversal.
-- a logarithmic amount ( $\mathcal{O}(\log{N})$ ) of memory for a depth-first tree-traversal.
+- a linear amount of memory ( $\mathcal{O}(N)$ ) for a breadth-first tree-traversal;
+- a logarithmic amount of memory ( $\mathcal{O}(\log{N})$ ) for a depth-first tree-traversal.
 
-The advantage of the breadth-first traversal is that generation could be stopped interactively,
+The advantage of the breadth-first traversal is that the rendering process can be stopped interactively,
 while the depth-first traversal requires the stopping criterion to be known beforehand. cite:hepting1991rendering
 
-While the deterministic method is easy to understand (and indeed is a direct translation of the informal process described at the start of autoref:section:background),
+Both kinds of traversals take a linear amount of time ( $\mathcal{O}(n \cdot N) \approx \mathcal{O}(N)$, where $n$ is the number of mappings the IFS consists of).
+
+While the deterministic method is easy to understand (and indeed is a direct implementation of the informal process described in autoref:subsection:informal_description),
 it is usually less efficient and more complex to implement on a computer than the algorithm that will be described next.
 
 [fn:function_composition] $\circ$ stands for function composition: $(f \circ g)(x) = f(g(x))$. 
-Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), matrix multiplication is in the opposite order ($f \circ g \equiv G \cdot F$)
+Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), matrix multiplication is in the opposite order ($f \circ g \Leftrightarrow G \cdot F$)
 
 *** The chaos game
 \label{subsection:chaos_game}
@@ -251,15 +255,16 @@ Be aware that when affine transformation functions are represented as matrices (
 
 The /stochastic method/ cite:hepting1991rendering, also known as the /random iteration algorithm/ cite:barnsley1988fractals or more frequently the /chaos game/, works as seen in autoref:chaosGame
 
-\begin{algorithm}[H]
+\begin{algorithm}
 \caption{the chaos game}
 \label{chaosGame}
-  $n$: the number of transformations the IFS consists of. \\
-  $z$: a random point on the screen  \\
+  $n$: the number of mappings the IFS consists of. \\
+  $z$: an arbitrary starting point \\
+  $v$: the camera's view transformation. \\
   \While{less than $N$ points plotted}{ 
     $i$: a random integer between $0$ and $n$.  \\
-    $z = f_i(z)$  \\
-    render($z$) except during the first $x$ iterations \\
+    render($v(z)$) except during the first $x$ iterations. \\
+    $z = f_i(z)$ \\
   }
 
 \end{algorithm}
@@ -274,73 +279,77 @@ This method converges to a correct result because of the following two facts:
 Therefore, all intermediate points after the first $x$ iterations are visually indistinguishable from the a point that is part of the attractor.
 By running this non-deterministic approach for enough iterations we approach a diverse enough set of 'transformation sequences of length $x$' that we end up covering the whole attractor.
 
-The nice thing about the chaos game is that it does not require any extra memory (besides the point $z$).
-Also, because it is so simple and little auxiliary memory is needed, it runs very efficiently on modern CPU architectures.
+The nice thing about the chaos game is that it requires only a constant amount of auxiliary memory, so its memory complexity is $\mathcal{O}(1)$.
+Furthermore, its time complexity is similar to the deterministic method but with a smaller constant factor, at $\mathcal{O}(2(N + x)) \approx \mathcal{O}(N + x)$. [fn:linear_time_chaos_game]
 
 A disadvantage of the chaos game is that the result is by its very nature /non-deterministic/.
-If not enough points are used, the result might end up 'grainy' and it is not predictable what part of the attractor will be covered (see autoref:figure:barnsley_chaos_game_points).
+If not enough points are used, the result might end up `grainy' and it is not predictable what part of the attractor will be covered (see autoref:figure:barnsley_chaos_game_points).
 
+One further disadvantage, is that in its simplest form, all mappings have an equally likely chance to be used.
+However, because some mappings might be (much) more contracting than others, this means that coverage of the attractor is not even,
+which means that we need to use many more iterations.
 
-One further disadvantage the chaos game has, is that in its simplest form, all transformations have an equally likely chance to be used.
-However, because some transformations might be (much) more contracting than others, this means that coverage of the attractor is not even,
-which means that we need to use much more iterations than would be the case if we balance it out.
-
-Therefore, most implementations of the chaos game allow (or require) the user to specify a /probability/ for each transformation.
-All these probabilities together ought to sum up to 1.[fn:probabilities]
+Therefore, most implementations of the chaos game allow the user to specify for each mapping a /probability/ that it is used. 
+When highly contracting mappings are chosen less frequently, coverage of the attractor will be even. [fn:probabilities]
 
 \altasterism
 
 Because of its simplicity and computational efficiency, the chaos game is used more frequently than the deterministic method for practical implementations.
-The chaos game is also easier to paralellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
+The chaos game is also easier to parallellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
 
 [fn:contraction] Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of $x$) exist cite:hepting1991rendering, 
 but are not relevant for this thesis.
 
 [fn:probabilities] These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well cite:hepting1991rendering.
 
-** Paralellizing IFS rendering by using a Graphical Processor Unit
+[fn:linear_time_chaos_game] which again is $\approx \mathcal{O}(N)$ when $x << N$ which is often the case.
 
-It is enticing to port IFS rendering to run on GPU-architecture because to produce a smooth image, often hundreds of millions of points are needed.
+** Parallellizing IFS rendering by using a Graphical Processor Unit
+
+It is enticing to port IFS rendering to run on a Graphical Processor Unit (GPU) because to produce a smooth image, hundreds of millions of points are often needed.
 
 However, optimizing IFS rendering to run well on GPU-architectures is a bit of a challenge.
 
-GPU shaders usually operate by running a check for every pixel on the final canvas, to determine its color.
+GPU shaders usually operate by running a check for every pixel on the final texture (i.e. canvas), to determine its color.
 For other fractals like the Mandelbrot- and Julia-sets, this is a natural fit since the construction of those fractals works exactly in that way.
 
-For an IFS this does not work, as an IFS is created in the other direction. Points end up at some location on the canvas /only after transforming/ many times.
+For an IFS this does not work, as an IFS is created in the other direction. Points end up at some location on the canvas only after transforming many times.
 Attempts to go the other way fall flat, for instance because this would require to invert the IFS' mappings, but they are not guaranteed to be invertible.
 
-Instead, General-Purpose GPU-techniques are used that are able to use the top-down approach.
+Instead, General-Purpose GPU-programming (GPGPU) techniques have to be employed, as these are able to use the top-down approach.
 
 *** The chaos game on the GPU
 \label{subsection:chaos_game_gpu}
 
-The deterministic method is difficult to paralellize on the GPU because of the extra memory that is required to keep track of the current position in the tree.
+The (classical) deterministic method is difficult to parallellize on the GPU because of the extra memory that is required to keep track of the current position in the tree.
 Coordinating which GPU thread would calculate which part of the tree and sharing results would be a hassle.
 
-Instead, the chaos game is more frequently used because of its simplicity. It is paralellized in a straightforward way, by running the iteration process many times side-by-side (one per GPU thread),
+Instead, the chaos game is more frequently used because of its simplicity. 
+It is parallellized in a straightforward way, 
+by running the iteration process many times side-by-side (one iteration process per GPU thread),
 and then combine the final results of all of these on a single canvas. cite:green2005gpu
 
 *** The deterministic method on the GPU
 \label{subsection:deterministic_gpu}
 
-An exciting approach taken in cite:lawlor2012gpu uses the deterministic method instead:
-by using the fast inverse square root operation, even unbounded (noncontracting) and nonlinear IFSs can be efficiently
+An exciting approach taken in cite:lawlor2012gpu /does/ use the deterministic method instead:
+by using the fast inverse square root operation together with a few other tricks, 
+even unbounded (noncontracting) and nonlinear IFSs can be efficiently
 evaluated using the deterministic method, programmed in normal GPU shaders that manipulate a couple of GPU textures.
-
 
 * Research Question
 \label{section:research_question}
 
 In the last section, the construction of an IFS's attractor was formally defined, 
-and different approaches of rendering it were outlined.
+and different approaches of rendering were outlined.
 
 While many different approaches to IFS rendering exist, some of them quite efficient,
-none of them re-uses information from rendering one image of the IFS for rendering another.
+none re-use information from rendering one image of the IFS for the rendering of another.
 
 This leads us to the research question of this thesis:
 
-**Is it possible, by re-using information between animation frames, to render animations of an Iterated Function System's attractor in which the camera zooms in, in real-time?**
+**Is it possible, by re-using information between animation frames, 
+to render animations of an Iterated Function System's attractor in which the camera zooms in, in real-time?**
 
 * Approach
 \label{section:approach}
@@ -355,9 +364,10 @@ The inspiration of the design is two-fold:
 First, we use the insight that the (parallel) chaos game can be used to generate a /point cloud/, allowing us to re-use parts of the computation between animation frames
 and thus render each frames faster.
 
-Second, while a point cloud only allows /zooming in/ up to a particular depth before losing considerable detail, 
+Second, while zooming in on a point cloud only works up to a particular depth before losing considerable detail, 
 it is possible to detect when we are looking at a self-similar part of the attractor.
-This allows us, in many situations, to replace the current camera viewport with a more /shallow/ one, keeping the amount of detail high.
+This allows us, in many situations, to replace the current camera viewport with a more shallow one, 
+keeping the amount of detail high.
 
 *** Point clouds
 
@@ -365,40 +375,38 @@ The main inspiration for the re-usability approach is that we can modify the GPU
 to render to a /point cloud/ instead of immediately to a canvas.
 When we then move around the camera, we are able to re-use the points in the point cloud;
 only where the points in the point cloud end up on screen exactly needs to be re-calculated, 
-by transforming all of the points exactly once with the 'view transformation' 
-(and culling all points outside of the viewport).
+by transforming all of the points exactly once with the camera's `view transformation'.
 
 This is faster than re-evaluating the whole attractor using the chaos game at every frame which would require transforming all points /many/ times.
 
 Formally, to render an attractor approximation consisting of $N$ points, 
-running the whole chaos game each frame takes $2(N+x)$ transformations per frame. [fn:definitions] 
+running the whole chaos game each frame takes $2(N+x)$ transformations per frame (c.f. autoref:subsection:chaos_game). 
 Running this on $p$ parallel threads has a time complexity of $\mathcal{O}(\frac{2(N+px)}{p})$.
 
-Unoptimized, it takes $N$ transformations to render a precomputed point cloud to screen each frame (in parallel this corresponds to a time complexity of $\mathcal{O}(\frac{N}{p})$).
-This does not seem very impressive since $\mathcal{O}(\frac{2(N+x)}{p}) \approx \mathcal{O}(\frac{2N}{p}) \approx \mathcal{O}(\frac{N}{p})$,
+Unoptimized, it takes $N$ transformations to render a precomputed point cloud to screen each frame 
+(paralellized this corresponds to a time complexity of $\mathcal{O}(\frac{N}{p})$).
+This does not seem very impressive since $\mathcal{O}(\frac{2(N+px)}{p}) \approx \mathcal{O}(\frac{2N}{p}) \approx \mathcal{O}(\frac{N}{p})$,
 placing the two approaches in the same order of efficiency. However, it is possible to optimize point cloud-based rendering using the techniques outlined in the next section
 to run in $\mathcal{O}(\frac{\log{N}}{p})$ instead, which is a big improvement.
 
 [fn:transformation_composition] We transform each point twice: Once with the view transformation to render the current point to the canvas in relation to the camera,
 and once with the randomly chosen mapping to transform the current point to the next point.
 This is what gives rise to the factor $2$.
-[fn:definitions] Using the definitions of autoref:subsection:chaos_game: $N$ is the total number of points we want to render in our attractor approximation, 
-and $x$ is the minimum number of transformations we need to apply to any arbitrary point to make it visually indistinguishable from a point exactly on the attractor.
 
 *** Potential point cloud-based optimizations
 \label{subsection:point_cloud_optimizations}
 
 The generation and rendering of point clouds is a quite well-understood problem cite:wimmer2006instant. point clouds see widespread use,
-most commonly in 3D-graphics that originates from a '3D scanner' .
+most commonly in 3D-graphics that originates from a `3D scanner'.
 
-point clouds can be rendered in a reasonably efficient manner by storing them in a 'Bounding Volume Hierarchy',
+Point clouds can be rendered in a reasonably efficient manner by storing them in a `Bounding Volume Hierarchy',
 for instance in a binary search tree that is ordered using the Morton space filling curve. cite:lauterbach2009construction
-Storing the points of a point cloud in this way allows us to efficiently cull most uninteresting points (i.e. points that would end up outside of the current camera viewport),
+Storing the points of a point cloud in this way also allows us to efficiently cull most points that would end up outside of the current camera viewport,
 which speeds up the rendering procedure tremendously.
 
-However, while this problem is well-understood, the implementation is far from trivial cite:lauterbach2009construction.
+However, while this algorithm is well-understood, the implementation is far from trivial cite:lauterbach2009construction.
 
-*** Self-similarity jumping: 'zooming in by zooming out'
+*** Self-similarity jumping: `zooming in by zooming out'
 \label{subsection:self_similarity}
 
 \begin{figure}
@@ -413,30 +421,31 @@ The resulting viewport looks the same but contains more points.}
 When using a point-cloud, we retain detail when zooming in up to a certain depth. In this way, a point cloud is more flexible than a 
 static pixel canvas, which will already show rendering artefacts when zooming in slightly beyond its intended size.
 
-Nonetheless, beyond a certain depth, the number of points of the point cloud that fall outside of the current camera viewport
-(and thus are 'useless' for the quality of the rendered attractor) grows larger and larger.
+Nonetheless, while zooming in, more and more points of the point cloud fall outside of the current camera viewport
+(and thus are 'useless' for the quality of the rendered image), degrading quality beyond a certain depth more than is acceptable.
 
 However, it follows from the self-similar nature of the IFS that we might, in certain situations,
-'secretly' zoom out to a shallower camera viewport of the point cloud that shows the same information of the attractor
+`unnoticeably' zoom out to a shallower camera viewport of the point cloud that shows the same information of the attractor
 as the original viewport, but containing more points of the point cloud.
 
 This can be done by identifying a mapping that fully encompasses the current camera viewport, and then applying its inverse
 to the viewport.
-'Fully encompasses' here means that the unit square transformed by the mapping fully encompasses
-the unit square transformed by the inverse of the camera viewport transformation [fn:fully_encompassing].
+`Fully encompasses' here means that 
+all corners of the unit square transformed by the inverse of the camera viewport transformation
+lie inside of the unit square transformed by the mapping [fn:fully_encompassing].
 
 See autoref:figure:sierpinsky_jump for an example. 
 
-The algorithm is specified in autoref:algorithm:self_similarity_jump_up and autoref:algorithm:self_similarity_jump_down.
+The algorithm and its inverse are specified in autoref:algorithm:self_similarity_jump_up and autoref:algorithm:self_similarity_jump_down.
 
 \begin{algorithm}[H]
 \caption{self-similarity jump-up}
 \label{algorithm:self_similarity_jump_up}
-  $n$: the number of transformations the IFS consists of. \\
-  $v$: the current camera's viewport transformation. \\
-  $s$: a stack of jumps made until now. \\
+  $n$: the number of mappings the IFS consists of. \\
+  $v$: the current camera's view transformation. \\
+  $s$: a stack of jumps made so far. \\
   \For{$i \leftarrow [0..n)$}{ 
-    \If{is\_invertible($f_i$)  and inside($v^{-1}$, $f_i$) }{
+    \If{isInvertible($f_i$)  and isInside($v^{-1}$, $f_i$) }{
       push($s$, $f_i$) \\
       $v = f_i^{-1}(v)$ \\
       break \\
@@ -448,11 +457,11 @@ The algorithm is specified in autoref:algorithm:self_similarity_jump_up and auto
 \caption{self-similarity jump-down}
 \label{algorithm:self_similarity_jump_down}
   $u$: the identity transformation \\
-  $v$: the current camera's viewport transformation. \\
+  $v$: the current camera's view transformation. \\
   $s$: a stack of jumps made until now. \\
-  \If{not\_empty($s$) and outside($v^{-1}$, $u$) }{
-    $f_i$ = pop($s$) \\
-    $v = f_i(v)$ \\
+  \If{notEmpty($s$) and isOutside($v^{-1}$, $u$) }{
+    $f$ = pop($s$) \\
+    $v = f(v)$ \\
   }
 \end{algorithm}
 
@@ -466,18 +475,19 @@ can be used to check whether all points of one polygon are inside the other.
 *** Coloring the rendering
 \label{subsection:coloring}
 
-The simplest way of rendering an IFS attractor simply renders points that are on the attractor a different colour
+The simplest way of rendering an IFS attractor simply renders points that are on the attractor a different color
 than the points that are not.
 
 However, more visually pleasing methods use a /color map/ to e.g. indicate the density (the number of points ending up at a particular canvas location) of the attractor.
-Yet more advanced methods cite:draves2003fractal keep track of a per-point colour, based on the sequence of transformations it has undergone.
+Yet more advanced methods cite:draves2003fractal keep track of a per-point color, based on the sequence of transformations it has undergone.
 
-It seems possible to combine these techinques with the 'self-similarity jumping', since we keep track of which mappings we've (inversely) applied to the camera viewport:
-to determine the final colors of all points, all visible points need to be multiplied 
-all points's colors need to be altered by the color-mutations that each of the inversely-applied mappings would apply.
-Essentially, say we are viewing the lower left leaf of a fractal fern, whose mapping would make the contained points reddish. 
-If we now 'jump up' (so we use points from virtually the whole fern), we have to alter all points so they get the same reddish hues.
+It seems possible to combine these techinques with the `self-similarity jumping', since we keep track of which mappings we've (inversely) applied to the camera viewport:
+to determine the final colors of all points that will be rendered this frame, 
+all visible points' colors need to be altered by the color-mutations that each of the mappings in $s$ would apply.
 
+As an example, say we are viewing the lower left leaf of a fractal fern (like autoref:ifs:barnsley_fern) and that mapping creating the lower left leaf would make the contained points red. 
+If we now `jump up' we use points from virtually the whole fern.
+To make these points still look visually identical from the lower left leaf, we have to alter the points' colors so they get the same reddish hues.
 
 ** Implementation
 
@@ -491,47 +501,46 @@ If we now 'jump up' (so we use points from virtually the whole fern), we have to
 The program was implemented using the general-purpose programming language Haskell, 
 in combination with the GPGPU library Accelerate cite:chakravarty2011accelerating.
 This programming stack was chosen because Accelerate 
-offers a statically-typed EDSL[fn:EDSL] to array-based GPGPU programming,
-which is more high-level and less error-prone than writing shader code in e.g. CUDA or OpenCL directly.[fn:debugging]
+offers a statically-typed EDSL[fn:EDSL] for array-based GPGPU programming,
+which is more high-level and less error-prone than writing code 
+in lower-level alternatives like CUDA or OpenCL directly.[fn:debugging]
 
-The usage of Haskell as implementation language also allowed 
+The usage of Haskell as implementation language, being a pure functional language, also allowed 
 the easy construction of different subcomponents making up the program,
-and testing each of these independently, being a pure functional language.
+and testing each of these independently.
 
-A general overviwe of the flow of the program can be seen in autoref:figure:program_flow.
+A general overview of the flow of the program can be seen in autoref:figure:program_flow.
 
 *** Simplicity
 
 To be able to complete the implementation within the time allotted for the thesis project,
 the decision was made to keep the implementation as simple as possible.
 
-This means that 
+This means that:
 
-- the optimizations mentioned in autoref:subsection:point_cloud_optimizations were not implemented.
-- points are rendered on screen using a simple binary mapping (if a pixel contains one or more points, it is white; otherwise black.)
-  the more fancy coloring techniques outlined in autoref:subsection:coloring were not used.
+- The optimizations mentioned in autoref:subsection:point_cloud_optimizations were not implemented;
+- Points are rendered on screen using a simple binary mapping. (If a pixel contains one or more points, it is white; otherwise black.)
+  The more fancy coloring techniques outlined in autoref:subsection:coloring were not used.
 
-This means that while the program cannot on its own fully answer the question of whether
-this technique is fast enough for real-time usage in all circumstances,
-it is able to answer the simpler question of whether the technique of using a point cloud
-in combination with 'self-similarity jumping' is at all feasible.
+While the program on its own might therefore not be enough to fully answer the research question,
+it is able to answer the simpler question of whether the technique is at all feasible.
 
 *** Command-line options
 
 The proof-of-concept program allows the customization of the following options
 
 - `samples`: the number of points to use for the chaos game (defaults to 100,000,000)
-- `paralellism`: the number of GPU-threads to split the number of samples across. (defaults to 2048)
+- `parallellism`: the number of GPU-threads to split the number of samples across. (defaults to 2048)
 - `seed`: a number to seed the random number generator with. If not provided, a different arbitrary seed will be used each time.
 - `render\under{}width` and `render\under{}height` set the resolution of the program window that is displayed (defaults to $800 \times 800$).
 
 *** `.ifs' file format
 
-The configuration language 'Dhall' cite:gonzalez2019 was used to 
+The configuration language `Dhall' cite:gonzalez2019 was used to 
 easily faciltate the specification of different IFSs.
 
 The file structure allows one to indicate a list of affine transformations with associated chaos game probabilities,
-as well as an 'initial camera viewport transformation'. autoref:subsection:viewport_transformation
+as well as an initial camera view transformation. autoref:subsection:viewport_transformation
 
 Dhall allows the definition and re-use of variables, which can be useful
 for numerical constants that are used in multiple transformations.[fn:floating_point]
@@ -571,20 +580,18 @@ As such, one still needs to write e.g. $1/3$ as $0.3333333333333333$.
 
 *** Rendering
 The program computes the point cloud once, on startup, and then re-renders the image that is shown in the program window
-every time the user changes the camera viewport.
+every time the user moves the camera.
 
 Rendering is done by iterating (in parallel) over all points in the point cloud and filling a two-dimensional histogram with the same dimensions
 as the canvas with numbers. 
 This histogram is then used to draw the attractor (any non-empty pixel is colored white and the rest black).
 
-More sophisticated rendering techniques are possible (see autoref:subsection:coloring), 
-but not implemented in the program.
+*** Moving the camera
+The camera can be moved by either zooming in or out using the scrollwheel,
+or translating the camera by dragging with the mouse.
 
-*** Changing the camera viewport
-Changing the camera viewport can be done by either zooming in or out using the scrollwheel,
-or dragging with the mouse to translate the camera viewport.
-
-The camera's view transformation itself is stored as a transformation matrix relative to the unit square.
+These operations alter the camera's current view transformation, 
+which is stored as a transformation matrix relative to unit space.
 
 *** Manually performing 'self-similarity jumping'
 
@@ -605,7 +612,7 @@ testing the 'self-similarity jumping', it is possible to toggle the rendering of
 Similarly, the rendering of points can be toggled by pressing the `p` key (allowing one to see the guides more clearly, when desired).
 
 These 'guides' are the unit squre, after undergoing a sequence of zero, one, two etc. mappings of the IFS.
-Different colours are used for guides at different sequence-depths.
+Different colors are used for guides at different sequence-depths.
 
 \begin{figure}
      \centering
