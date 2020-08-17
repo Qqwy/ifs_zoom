@@ -593,23 +593,23 @@ or translating the camera by dragging with the mouse.
 These operations alter the camera's current view transformation, 
 which is stored as a transformation matrix relative to unit space.
 
-*** Manually performing 'self-similarity jumping'
+*** Performing 'self-similarity jumping'
 
 While the program is running, a user can go back to a more shallow view by pressing `+`[fn:plus], and then when inside one or multiple shallower views,
 `-` can be pressed to undo the last jump.
 
 Care is taken to only allow the jump up if the current camera viewport is fully contained within one mapping's region.
 
-That this process is kept manual was intentional, because it allows the user to more easily compare how
-the representation looks with and without the jumping, and allows for a full exploration of the circumstances
+This process was intentionally kept manual, because it allows the user to more easily compare how
+the visualization looks with and without the jumping, and allows for a full exploration of the circumstances
 in which a jump up is and is not actually correct (see autoref:subsection:jumping_restrictions).
 
-[fn:plus] Strictly speaking, by pressing the `=` key; pressing SHIFT is not necessary.
-*** Rendering 'guides'
+[fn:plus] Strictly speaking, by pressing the `=' key; pressing SHIFT is not necessary.
+*** Rendering `guides'
 
 To make it easier to see how an IFS is constructed, as well as easier for a user to orient themselves when
-testing the 'self-similarity jumping', it is possible to toggle the rendering of 'guides' by pressing the `g` key.
-Similarly, the rendering of points can be toggled by pressing the `p` key (allowing one to see the guides more clearly, when desired).
+testing the 'self-similarity jumping', it is possible to toggle the rendering of `guides' by pressing the `g' key.
+Similarly, the rendering of points can be toggled by pressing the `p' key (allowing one to see the guides more clearly, when desired).
 
 These 'guides' are the unit squre, after undergoing a sequence of zero, one, two etc. mappings of the IFS.
 Different colors are used for guides at different sequence-depths.

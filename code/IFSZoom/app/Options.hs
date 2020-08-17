@@ -76,7 +76,7 @@ commandLineOptions = CLIOptions
   <*> option auto
   (
     long "render_height"
-    <> short 'w'
+    <> short 'h'
     <> metavar "HEIGHT"
     <> help "The height in pixels of the rendering we are generating."
     <> showDefault
