@@ -55,7 +55,7 @@
 
 #+OPTIONS: toc:4
 
-\listoftodos
+# \listoftodos
 
 
 * Abstract
@@ -135,7 +135,6 @@ This process is then repeated an arbitrary number of times, until changes betwee
 The image you end up with is a visual representation of the IFS's attractor.
 A simple example of this process can be seen in autoref:figure:sierpinsky_iterations.
 
-\todo[inline]{Some examples of IFSs? (that are seen again later on in the thesis)}
 
 
 ** Formal definition of an Iterated Function System
@@ -677,18 +676,19 @@ An example can be seen in figure autoref:figure:sierpinsky_transformation_border
      \centering
      \begin{subfigure}[b]{\textwidth}
          \centering
-         \includegraphics[width=\textwidth]{figures/barnsley_colored_jump1}
+         \includegraphics[width=0.6\textwidth]{figures/barnsley_colored_jump1}
          \caption{Since the camera viewport only sees points of $f_2$, the jump up is proper.}
          \label{figure:barnsley_jump_a}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{\textwidth}
          \centering
-         \includegraphics[width=\textwidth]{figures/barnsley_colored_jump2}
+         \includegraphics[width=0.6\textwidth]{figures/barnsley_colored_jump2}
          \caption{Since the camera viewport sees both points of $f_2$ and $f_3$, the jump is incorrect. Note the leaf in the lower left missing after the jump.}
          \label{figure:barnsley_jump_b}
      \end{subfigure}
-        \caption{Problems when jumping up on \autoref{ifs:barnsley_fern}. Camera viewport indicated as white dashed polygon.
+        \caption{Problems when jumping up on \autoref{ifs:barnsley_fern}. The top row of each figure is `world space' with the camera viewport indicated as white dashed polygon. 
+The bottom row shows the camera viewport.
 Points colored based on their latest mapping. }
         \label{figure:barnsley_jump}
 \end{figure}
@@ -707,7 +707,6 @@ do not overlap, do not exhibit this problem.
 Slightly more complex IFSs like the Dragon Curve (autoref:ifs:dragon_curve) or the Barnsley Fern (autoref:ifs:barnsley_fern) however do.
 See autoref:figure:dragon_curve_overlaps for an graphical explanation.
 
-\todo[inline]{Clarify figure}
 
 This case is annoyingly common and there is no clear solution to alleviate this restriction.
 Furthermore, it is not simple to check whether we are currently in a region that exhibits the problem,
