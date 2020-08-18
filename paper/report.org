@@ -106,7 +106,7 @@ We conclude in autoref:section:conclusion and finally hint at some approaches fo
 * Background
 \label{section:background}
 
-This section will describe the different building blocks necessary to formalate the research question.
+This section will describe the different building blocks necessary to formulate the research question.
 First, IFSs are formalized, followed by a description of the different ways in which an IFS' attractor can be rendered, 
 and how these techniques might be parallellized.
 
