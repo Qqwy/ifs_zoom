@@ -9,7 +9,6 @@ import Pipe
 import qualified Lib
 import qualified Lib.Common
 import Lib.Common (Point)
-import Lib.Transformation (Transformation)
 import qualified Lib.Transformation
 import qualified Lib.Geometry
 
@@ -26,7 +25,7 @@ drawGuides ::
   Lib.Camera          -- ^ The current camera matrix
   -> Lib.Camera       -- ^ The initial camera matrix
   -> (Word, Word)     -- ^ The screen dimensions
-  -> [Transformation] -- ^List of transformations of this IFS
+  -> [Lib.Transformation] -- ^List of transformations of this IFS
   -> Gloss.Picture
 drawGuides camera initial_camera dimensions transformations =
   guides
@@ -46,7 +45,7 @@ drawGuides camera initial_camera dimensions transformations =
 guide_colors :: [Gloss.Color]
 guide_colors = [Gloss.red, Gloss.green, Gloss.blue, Gloss.cyan, Gloss.magenta, Gloss.yellow]
 
-buildGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> Guide
+buildGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Lib.Transformation] -> Guide
 buildGuide camera initial_camera dimensions transformations =
   unitGuide
   |> transformGuide (Lib.Camera.inverse initial_camera)
@@ -55,7 +54,7 @@ buildGuide camera initial_camera dimensions transformations =
   |> guideToScreen camera dimensions
 
 
-drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Transformation] -> Gloss.Color -> Gloss.Picture
+drawGuide :: Lib.Camera -> Lib.Camera -> (Float, Float) -> [Lib.Transformation] -> Gloss.Color -> Gloss.Picture
 drawGuide camera initial_camera dimensions transformations color =
   buildGuide camera initial_camera dimensions transformations
   |> guideToPicture dimensions
@@ -69,7 +68,7 @@ guideFromCoords :: (Float, Float, Float, Float) ->  Guide
 guideFromCoords (x, y, w, h) =
   [(x, y), (x+w, y), (x+w, y+h), (x, y+h), (x, y)]
 
-transformGuide :: Transformation -> Guide -> Guide
+transformGuide :: Lib.Transformation -> Guide -> Guide
 transformGuide transformation guide_points =
   guide_points
   |> fmap (Lib.Camera.cameraTransform transformation)
@@ -140,8 +139,8 @@ combinationsUpToDepth' depth elems =
 -- (which `camera` uses)
 -- and 'world coordinates'
 -- (which `transformation` uses).
-isCameraInsideTransformation :: Lib.Camera -> Lib.Camera -> Transformation -> Bool
-isCameraInsideTransformation camera initial_camera transformation =
+isCameraInsideTransformation :: Lib.Camera -> Lib.Transformation -> Bool
+isCameraInsideTransformation camera transformation =
   Lib.Transformation.isInvertible transformation
   &&
   Lib.Geometry.isPolygonInsidePolygon transformation_coords camera_coords
@@ -149,8 +148,6 @@ isCameraInsideTransformation camera initial_camera transformation =
       camera_coords =
         unitGuide
         |> transformGuide (Lib.Camera.inverse camera)
-        |> transformGuide (Lib.Camera.inverse initial_camera)
       transformation_coords =
         unitGuide
-        |> transformGuide (Lib.Camera.inverse initial_camera)
         |> transformGuide transformation

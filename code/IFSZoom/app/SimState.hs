@@ -40,7 +40,7 @@ data SimState = SimState
   , _dimensions :: (Word, Word)
   , _camera :: Lib.Camera
   , _input :: Input
-  , _transformations_list :: [IFSConfig.TransformationWithProbability]
+  , _transformations_list :: [Lib.Transformation]
   , _initial_camera :: Lib.Camera
   , _jumps :: [Lib.Transformation]
   }
@@ -52,23 +52,23 @@ initial ifs_config options random_matrix =
   SimState
   { _picture = Accelerate.fromList (Z :. 0 :. 0) []
   , _should_update = True
-  , _point_cloud = Lib.ChaosGame.chaosGame transformations n_points_per_thread paralellism' (Accelerate.use random_matrix)
+  , _point_cloud = Lib.ChaosGame.chaosGame ifs n_points_per_thread paralellism' (Accelerate.use random_matrix)
   , _dimensions = (picture_width, picture_height)
   , _camera = Lib.Camera.identity
   , _input = Input.initial
-  , _transformations_list = transformations_list
-  , _initial_camera = Lib.Camera.fromSixtuple (ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple)
+  , _transformations_list = transformations
+  , _initial_camera = initial_camera
   , _jumps = []
   }
   where
-    seed' = options ^. seed |> Data.Maybe.fromMaybe 0
     samples' = options ^. samples |> fromIntegral
     paralellism' = options ^. paralellism |> fromIntegral
     n_points_per_thread = samples' `div` paralellism'
     picture_width = options ^. render_width |> fromIntegral
     picture_height = options ^. render_height |> fromIntegral
-    transformations_list = ifs_config |> IFSConfig.transformations
-    transformations = buildTransformations transformations_list
+    ifs = ifs_config |> IFSConfig.transformations |> buildIFS initial_camera
+    transformations = ifs_config |> IFSConfig.transformations |> IFSConfig.extractTransformations initial_camera
+    initial_camera = ifs_config |> IFSConfig.initialCamera |> IFSConfig.transformationToSixtuple |> Lib.Camera.fromSixtuple
 
 
 -- | Updates the state of the sim_state based on earlier user input.
@@ -87,7 +87,7 @@ update _time_elapsed sim_state =
 
       putStrLn (show (sim_state^.camera))
       let cam = sim_state^.camera
-      let res = map (Lib.Guide.isCameraInsideTransformation cam (sim_state^.initial_camera)) (IFSConfig.extractTransformations (sim_state^.transformations_list))
+      let res = map (Lib.Guide.isCameraInsideTransformation cam ) (sim_state^.transformations_list)
       putStrLn (show res)
 
       return new_sim_state
@@ -104,7 +104,7 @@ drawWithGuides sim_state =
       else Graphics.Gloss.Data.Picture.blank
     guides_picture =
       if sim_state^.input.show_guides
-      then Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) (IFSConfig.extractTransformations (sim_state^.transformations_list))
+      then Lib.Guide.drawGuides (sim_state^.camera) (sim_state^.initial_camera) (sim_state^.dimensions) (sim_state^.transformations_list)
       else Graphics.Gloss.Data.Picture.blank
 
 
@@ -133,13 +133,14 @@ render sim_state =
       |> Accelerate.lift
       |> Accelerate.unit
 
-buildTransformations :: [IFSConfig.TransformationWithProbability] -> Accelerate.Acc IFS
-buildTransformations transformations_list =
+buildIFS :: Lib.Camera -> [IFSConfig.TransformationWithProbability] -> Accelerate.Acc IFS
+buildIFS initial_camera transformations_list =
   transformations_list
   |> map IFSConfig.transformationWithProbabilityToSixtuplePair
+  |> map Lib.Transformation.fromSixtuplePair
+  |> map (over _1 (Lib.Camera.absorbInitialCamera initial_camera))
   |> Accelerate.fromList (Z :. (length transformations_list))
   |> Accelerate.use
-  |> Accelerate.map Lib.Transformation.fromSixtuplePairGPU
 
 applyDragging :: SimState -> SimState
 applyDragging sim_state =
@@ -196,8 +197,7 @@ jumpUp sim_state =
 jumpTargets :: SimState -> [Lib.Transformation]
 jumpTargets sim_state =
   (sim_state^.transformations_list)
-  |> IFSConfig.extractTransformations
-  |> filter (Lib.Guide.isCameraInsideTransformation (sim_state^.camera) (sim_state^.initial_camera))
+  |> filter (Lib.Guide.isCameraInsideTransformation (sim_state^.camera))
   |> map (\val -> Lib.Transformation.combine (reverse [Lib.Camera.inverse (sim_state^.initial_camera), Lib.Camera.inverse val, sim_state^.initial_camera]))
 
 jumpDown :: SimState -> SimState

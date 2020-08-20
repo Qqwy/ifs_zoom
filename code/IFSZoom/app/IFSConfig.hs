@@ -16,6 +16,8 @@ module IFSConfig
 import Prelude hiding (read)
 import Pipe
 import qualified Lib.Transformation
+import qualified Lib.Camera
+import qualified Lib
 
 import Dhall
 import qualified GHC.Float
@@ -72,9 +74,10 @@ transformationToSixtuple (Transformation a b c d e f) =
   where
     d2f = GHC.Float.double2Float
 
-extractTransformations :: [TransformationWithProbability] -> [Lib.Transformation.Transformation]
-extractTransformations transformations_list =
+extractTransformations :: Lib.Camera -> [TransformationWithProbability] -> [Lib.Transformation.Transformation]
+extractTransformations initial_camera transformations_list =
   transformations_list
   |> fmap transformationWithProbabilityToSixtuplePair
   |> fmap Lib.Transformation.fromSixtuplePair
   |> fmap fst
+  |> fmap (Lib.Camera.absorbInitialCamera initial_camera)

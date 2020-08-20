@@ -25,6 +25,7 @@ module Lib.Camera
   , inverse
   , withInitial
   , identity
+  , absorbInitialCamera
   ) where
 
 import Pipe
@@ -108,4 +109,10 @@ withInitial :: Camera -> Camera -> Camera
 withInitial initial_camera camera =
   camera Matrix.!*! initial_camera
 
+identity :: Camera
 identity = Lib.Transformation.identity
+
+
+absorbInitialCamera :: Camera -> Transformation -> Transformation
+absorbInitialCamera initial_camera transformation =
+  Lib.Transformation.combine [initial_camera, transformation, inverse initial_camera]
