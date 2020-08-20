@@ -115,4 +115,4 @@ identity = Lib.Transformation.identity
 
 absorbInitialCamera :: Camera -> Transformation -> Transformation
 absorbInitialCamera initial_camera transformation =
-  Lib.Transformation.combine [initial_camera, transformation, inverse initial_camera]
+  Lib.Transformation.combine [inverse initial_camera, transformation, initial_camera]

@@ -50,7 +50,7 @@ buildGuide camera initial_camera dimensions transformations =
   unitGuide
   |> transformGuide (Lib.Camera.inverse initial_camera)
   |> transformGuide (Lib.Transformation.combine transformations)
-  |> fmap (Lib.Camera.cameraTransform initial_camera)
+  -- |> fmap (Lib.Camera.cameraTransform initial_camera)
   |> guideToScreen camera dimensions
 
 
