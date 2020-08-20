@@ -50,7 +50,7 @@
 #+LATEX_HEADER: \supervisor{dr. J. Kosinka}
 #+LATEX_HEADER: \supervisor{G. J. Hettinga}
 #+LATEX_HEADER: \date{August 2020}
-#+LATEX_HEADER: \faculty{fwn} % Or feb, fgg, fgmw, fl, frg, frw, fw, umcg
+#+LATEX_HEADER: \faculty{fse} % Or feb, fgg, fgmw, fl, frg, frw, fw, umcg
 #+LATEX_HEADER: \thesistype{Bachelor's thesis} % Will be printed unmodified
 
 #+OPTIONS: toc:4
@@ -411,7 +411,7 @@ However, while this algorithm is well-understood, the implementation is far from
 \begin{figure}
 
 \includegraphics[width=\textwidth]{figures/sierpinsky_jump}
-\caption{An example of the self-similarity jumping technique. Pictured is the Sierpi\'nsky triangle IFS (autoref:ifs:sierpinsky).
+\caption{An example of the self-similarity jumping technique. Pictured is the Sierpi\'nsky triangle IFS (\autoref{ifs:sierpinsky}).
 The viewport (pictured in cyan) on the left can be transformed to the one on the right by applying the inverse mapping $f_1^{-1}$ to it.
 The resulting viewport looks the same but contains more points.}
 \label{figure:sierpinsky_jump}
