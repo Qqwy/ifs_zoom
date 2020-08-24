@@ -5,7 +5,7 @@
 
 #+LATEX_HEADER: \setlength{\parindent}{1em}
 #+LATEX_HEADER: \setlength{\parskip}{0.5em}
-#+LATEX_HEADER: \usepackage[citestyle=alphabetic,bibstyle=alphabetic, hyperref=true, backref=true,maxcitenames=3,url=true,backend=biber,natbib=true] {biblatex}
+#+LATEX_HEADER: \usepackage[citestyle=alphabetic,bibstyle=alphabetic, hyperref=true, backref=true,maxcitenames=3,url=true,backend=biber,natbib=true, maxbibnames=9] {biblatex}
 #+LATEX_HEADER: \addbibresource{bibliography.bib}
 
 #+LATEX_HEADER: \usepackage[a4paper, total={7in, 9in}]{geometry}
@@ -458,6 +458,8 @@ to the viewport.
 all corners of the unit square transformed by the inverse of the camera viewport transformation
 lie inside of the unit square transformed by the mapping [fn:fully_encompassing].
 
+In a similar sense, transformations $a$ and $b$ `overlap' if the unit square transformed by $a$ overlaps the unit square transformed by $b$.
+
 See autoref:figure:sierpinsky_jump for an example. 
 
 The algorithm and its inverse are specified in autoref:algorithm:self_similarity_jump_up and autoref:algorithm:self_similarity_jump_down, respectively.
@@ -508,16 +510,18 @@ It seems possible to combine these techinques with the `self-similarity jumping'
 to determine the final colors of all points that will be rendered this frame, 
 all visible points' colors need to be altered by the color-mutations that each of the mappings in the stack $s$ specified by autoref:algorithm:self_similarity_jump_up and autoref:algorithm:self_similarity_jump_down would apply.
 
-As an example, say we are viewing the lower left leaf of a fractal fern (like autoref:ifs:barnsley_fern) and that mapping creating the lower left leaf would make the contained points red. 
+As an example, say we are viewing the lower left leaf of a fractal fern (autoref:ifs:barnsley_fern) and that mapping creating the lower left leaf would make the contained points red. 
 If we now `jump up' we use points from virtually the whole fern.
 To make these points still look visually identical from the lower left leaf, we have to alter the points' colors so they get the same reddish hues.
+
+\todo[inline]{Picture of example fern with fancy coloring?}
 
 ** Implementation
 
 \begin{figure}
   \centering
   \includegraphics[width=0.5\textwidth]{figures/program_execution}
-  \caption{Overview of the proof-of-concept program's execution flow.}
+  \caption{Overview of the proof-of-concept program's execution flow. The dashed box indicates the main program loop.}
 \label{figure:program_flow}
 \end{figure}
 
@@ -553,22 +557,26 @@ it is able to answer the simpler question of whether the technique is at all fea
 The proof-of-concept program allows the customization of the following options
 
 - `samples`: the number of points to use for the chaos game (defaults to 100,000,000)
-- `parallellism`: the number of GPU-threads to split the number of samples across. (defaults to 2048)
+- `parallellism`: the number of GPU-threads to split the number of samples across (defaults to 2048)
 - `seed`: a number to seed the random number generator with. If not provided, a different arbitrary seed will be used each time.
 - `render\under{}width` and `render\under{}height` set the resolution of the program window that is displayed (defaults to $800 \times 800$).
 
 *** The `.ifs' file format
 
 The configuration language `Dhall' cite:gonzalez2019 was used to 
-easily faciltate the specification of different IFSs.
+easily allow a user to specify different IFSs.
 
 The file structure allows one to indicate a list of affine transformations with associated chaos game probabilities,
-as well as an initial camera view transformation. autoref:subsection:viewport_transformation
+as well as an initial camera view transformation.
 
 Dhall allows the definition and re-use of variables, which can be useful
 for numerical constants that are used in multiple transformations.[fn:floating_point]
 
-An example file can be seen in autoref:listing:barnsley_fern_ifs_file .
+An example file can be seen in autoref:listing:barnsley_fern_ifs_file.
+
+The fields $a \ldots f$ used for each of the transformations allow one to specify an affine transformation matrix of the shape
+
+$$\begin{bmatrix} a & b & e \\ c & d & f \\ 0 & 0 & 1 \\ \end{bmatrix}.$$
 
 
 \begin{lstlisting}[float, language=Haskell, frame=single, breaklines=true, basicstyle=\scriptsize\tt, captionpos=b, caption={barnsley\_fern.ifs, representing \autoref{ifs:barnsley_fern}}, label={listing:barnsley_fern_ifs_file}]
@@ -621,8 +629,6 @@ which is stored as a transformation matrix relative to unit space.
 While the program is running, a user can go back to a more shallow view by pressing `+`[fn:plus], and then when inside one or multiple shallower views,
 `-` can be pressed to undo the last jump.
 
-Care is taken to only allow the jump up if the current camera viewport is fully contained within one mapping's region.
-
 This process was intentionally kept manual, because it allows the user to more easily compare how
 the visualization looks with and without the jumping, and allows for a full exploration of the circumstances
 in which a jump up is and is not actually correct (see autoref:subsection:jumping_restrictions).
@@ -634,7 +640,7 @@ To make it easier to see how an IFS is constructed, as well as easier for a user
 testing the 'self-similarity jumping', it is possible to toggle the rendering of `guides' by pressing the `g' key.
 Similarly, the rendering of points can be toggled by pressing the `p' key (allowing one to see the guides more clearly, when desired).
 
-These 'guides' are the unit squre, after undergoing a sequence of zero, one, two etc. mappings of the IFS.
+These 'guides' are the unit square, after undergoing a sequence of zero, one, two etc. mappings of the IFS.
 Different colors are used for guides at different sequence-depths.
 
 \begin{figure}
@@ -679,6 +685,8 @@ in which the technique outlined in autoref:subsection:self_similarity cannot be 
 
 **** Borders between transformations
 
+\todo[inline]{Explain what these are}
+
 It is rather common to zoom in on the borders between transformations, as this is often
 where interesting visual details of the IFS might appear.
 
@@ -690,7 +698,7 @@ An example can be seen in figure autoref:figure:sierpinsky_transformation_border
 \begin{figure}
 \centering
 \includegraphics[width=0.3\textwidth]{figures/sierpinsky_transformation_borders}
-\caption{In this example the camera viewport (indicated in cyan) overlaps both $f_1$ and $f_2$ of \autoref{ifs:sierpinsky} partially. This case is not handled by \autoref{algorithm:self_similarity_jump_up}. }
+\caption{In this example the camera viewport (indicated in cyan) overlaps (as defined in \autoref{subsection:self_similarity}) both $f_1$ and $f_2$ of \autoref{ifs:sierpinsky} partially. This case is not handled by \autoref{algorithm:self_similarity_jump_up}. }
 \label{figure:sierpinsky_transformation_borders}
 \end{figure}
 
@@ -701,35 +709,40 @@ An example can be seen in figure autoref:figure:sierpinsky_transformation_border
      \begin{subfigure}[b]{\textwidth}
          \centering
          \includegraphics[width=0.6\textwidth]{figures/barnsley_colored_jump1}
-         \caption{Since the camera viewport only sees points of $f_2$, the jump up is proper.}
+         \caption{Since the camera viewport only contains points of $f_2$, the jump up is proper.}
          \label{figure:barnsley_jump_a}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{\textwidth}
          \centering
          \includegraphics[width=0.6\textwidth]{figures/barnsley_colored_jump2}
-         \caption{Since the camera viewport sees both points of $f_2$ and $f_3$, the jump is incorrect. Note the leaf in the lower left missing after the jump.}
+         \caption{Since the camera viewport contains both points of $f_2$ and $f_3$, the jump is incorrect. 
+Note that the leaf in the lower left is missing after the jump.}
          \label{figure:barnsley_jump_b}
      \end{subfigure}
-        \caption{Problems when jumping up on \autoref{ifs:barnsley_fern}. The top row of each figure is `world space' with the camera viewport indicated as white dashed polygon. 
-The bottom row shows the camera viewport.
-Points colored based on their latest mapping. }
+        \caption{Problems when jumping up on \autoref{ifs:barnsley_fern}. 
+The mappings $f_1$, $f_2$ and $f_3$ refer to the mappings of \autoref{ifs:barnsley_fern}. 
+The top row of a) and b) is `world space' with the camera viewport indicated as white dashed polygon. 
+The bottom rows show the camera viewport.
+Points are colored based on their latest mapping. }
         \label{figure:barnsley_jump}
 \end{figure}
 
+A more shallow view of the attractor only actually is self-similar to the current view when
+there are no points transformed by another mapping that end up in the current view.
 
-
-A more shallow view of the attractor only shows the same as a deeper view when
-there are no points transformed by another mapping that end up in the deeper view.
+\todo[inline]{Better explain paragraph above}
 
 When there are points from another mapping in the current view, 
 going to a more shallow view will make points disappear from the perspective of the user.
-In practice, this means that for many IFSs there are large regions in which the technique cannot be used at all.
+In practice, this means that for many IFSs there are large regions in which the technique cannot be used.
 
 Simple IFSs like the Sierpińsky Triangle (autoref:ifs:sierpinsky) in which transformations
-do not overlap, do not exhibit this problem. 
+do not overlap[fn:overlapping_transformations], do not exhibit this problem. 
 Slightly more complex IFSs like the Dragon Curve (autoref:ifs:dragon_curve) or the Barnsley Fern (autoref:ifs:barnsley_fern) however do.
-See autoref:figure:dragon_curve_overlaps for an graphical explanation.
+
+See autoref:figure:barnsley_jump for an example 
+and autoref:figure:dragon_curve_overlaps for a graphical explanation of what regions overlap.
 
 
 This case is annoyingly common and there is no clear solution to alleviate this restriction.
@@ -737,7 +750,11 @@ Furthermore, it is not simple to check whether we are currently in a region that
 as this would require evaluating the IFS itself.
 
 It is possible to take a rough `upper bound' estimate of the disallowed regions by keeping track, 
-per mapping, where the unit square would end up after a couple of mappings with this mapping as last (i.e. most significant) one.
+per mapping $f_i$, what region would be covered by 
+taking the union of transforming the unit square by all $k$-long sequences of mappings that start with $f_i$.
+This estimate increases in precision as $k$ grows.
+
+where the unit square would end up after a few transformation steps with this mapping as last (i.e. most significant) one.
 
 
 \begin{figure}
@@ -752,27 +769,30 @@ per mapping, where the unit square would end up after a couple of mappings with 
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_b}
-         \caption{Subtransformations of $f_1$: $f_1 \circ f_1$ and $f_1 \circ f_2$ (indicated in red)}
+         \caption{Subtransformations of $f_1$: $f_1 \circ f_1$ and $f_1 \circ f_2$ (indicated in shades of red)}
          \label{figure:dragon_curve_b}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_c}
-         \caption{Subtransformations of $f_2$: $f_2 \circ f_1$ and $f_2 \circ f_2$. (indicated in blue)}
+         \caption{Subtransformations of $f_2$: $f_2 \circ f_1$ and $f_2 \circ f_2$. (indicated in shades of blue)}
          \label{figure:dragon_curve_c}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
          \centering
          \includegraphics[width=\textwidth]{figures/dragon_curve_d}
-         \caption{The region in which (b) and (c) overlap (indicated in magenta)}
+         \caption{The region in which (b) and (c) overlap, indicated in shades of magenta)}
          \label{figure:dragon_curve_d}
      \end{subfigure}
-        \caption{Showing the first couple of iterations of rendering the attractor of the dragon curve IFS $D$ (\autoref{ifs:dragon_curve}), and the regions in which (sequences of) transformations overlap.}
+        \caption{Showing the first couple of iterations of rendering the attractor of the dragon curve IFS $D$ (\autoref{ifs:dragon_curve}), and the regions in which (sequences of) transformations overlap (As defined in \autoref{subsection:self_similarity}).}
         \label{figure:dragon_curve_overlaps}
 \end{figure}
 
+\todo[inline]{Increase whitespace between subfigures}
+
+[fn:overlapping_transformations] As defined in \autoref{subsection:self_similarity}.
 
 ** Memory Usage
 
@@ -785,7 +805,10 @@ Stored this way, a point cloud of 100,000,000 points requires 0.596 GiB of GPU m
 and 1,000,000,000 points requires 5.96 GiB.
 For current generation GPUs[fn:GPU2020], this often is more memory than available.
 
-[fn:GPU2020] At the time of writing, high-end consumer GPUs contain somewhere between 2 and 24 GiB of available memory. cite:ign2020topgpus
+\todo[inline]{Elaborate claim. `The latter only'? (see feedback)}
+
+
+[fn:GPU2020] At the time of writing, high-end consumer GPUs contain somewhere between 2 and 24 GiB of available memory cite:ign2020topgpus.
 
 * Conclusion
 \label{section:conclusion}
@@ -802,9 +825,9 @@ at least until a more sophisticated self-similarity detection method is found.
 It is our hope that a more sophisticated way of detecting self-similarity might be found,
 which would make `self-similarity jumping' more practical.
 
-Besides this, while we have shown in a proof-of-concept program that it is possible to render an IFS using a point cloud
-with a reasonable speed, there are many optimizations that could be made to make the program run faster (potentially even in real-time),
-most notably the rendering optimizations listed in autoref:subsection:point_cloud_optimizations
+Besides this, while we have shown in a proof-of-concept program that it is possible to render an IFS using a point cloud,
+there are many optimizations that could be made to make the program run faster (potentially even in real-time),
+most notably the rendering optimizations listed in autoref:subsection:point_cloud_optimizations.
 
 Another venue that could be explored is the rendering of an IFS's attractor at multiple `levels of detail':
 It might be possible to create more detailed local versions of the point cloud (based on the points of the less detailed point cloud) when the user
@@ -823,6 +846,11 @@ which might be worthwhile to be explored further.
 * Iterated Function Systems used
 
 This appendix lists the mapping functions of the IFSs that were used throughout this thesis.
+The \(p\)-values next to each of the mappings references the probability that this mapping ought to be chosen,
+if a chaos game-based rendering method is used (c.f. autoref:subsection:chaos_game).
+
+\todo[inline]{Refer to all 3 examples here.}
+
 
 \begin{ifs}
 \centering
