@@ -55,7 +55,9 @@
 
 #+OPTIONS: toc:4
 
-# \listoftodos
+\listoftodos
+
+\todo[inline]{Turn off todo list}
 
 \pagebreak
 
@@ -64,45 +66,51 @@
   :UNNUMBERED: notoc
   :END:
 
+\todo[inline]{Consider improving formulation of IFSs}
+
 Iterated Function Systems (IFSs) are a mathematical approach to rendering fractals that sees wide usage in the modeling of physical phenomena, 
 image compression, and the creation of abstract art.
-When exploring an IFS interactively, current IFS rendering techniques require a full re-approximation of the IFS' attractor at every frame.
+When exploring an IFS interactively, current IFS rendering techniques require a full re-approximation of the IFS's attractor at every frame.
 
-This thesis proposes a combination of two techniques to enable the faster exploring of IFSs.
-First, a point cloud is used as intermediate attractor approximation, that can be re-used between animation frames.
-Secondly, a technique coined 'self-similarity jumping' is employed to keep the attractor representation detailed, even when zooming in very far.
+This thesis proposes a combination of two techniques to enable faster exploring of IFSs.
+First, a point cloud is used as an intermediate attractor approximation, that can be re-used between animation frames.
+Secondly, a technique coined 'self-similarity jumping' is proposed to keep the attractor representation detailed, even when zooming in very far.
 
 A proof-of-concept computer program has been implemented
 which shows that the employed techniques, while promising, 
 are somewhat restricted in their usefullness because self-similarity jumping cannot be used in all situations.
 
+\pagebreak
+
 * Introduction
 
+\todo[inline]{Consider improving formulation of IFSs}
+
 Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
-by repeatedly applying simple mathematical functions until a fixed point is reached. cite:barnsley1988fractals
+by repeatedly applying simple mathematical functions until a fixed point is reached cite:barnsley1988fractals. 
 IFSs see use in the modeling and rendering of physical phenomena, image compression cite:hart1996fractal and representing gene structures cite:jeffrey1990chaos.
 Sometimes they also are used plainly for the aesthetic beauty of their graphical representations cite:draves2003fractal.
 
 Various computer algorithms to visualize IFSs exist cite:hepting1991rendering.
-However, these all take a single still image as final result. If they want to render an animation,
-this is treated as a sequence of completely separate still images.
+However, these all take a single still image as final result. If these algorithms are employed to render an animation,
+this animation is treated as a sequence of completely separate still images.
 
 This leaves a venue for potential optimization: if there is information that remains the same between animation frames, 
-then we could compute it only once and re-use it for all frames.
+then we could compute this information only once and re-use it for all frames.
 
 For instance, many kinds of animations consist of transformations of the camera viewport w.r.t the viewed fractal over time like translation, rotation and scaling. 
 These transformations do not require alterations to the fractal itself.
 This means that (an approximation of) the fractal might be computed once and then be used for all frames.
 
 Furthermore, because of the self-similar nature of the rendered fractals,
-it might it be possible to simulate zooming in to an arbitrary depth by 'jumping up' to a more shallow camera viewport
-that shares the same self-similarity as the original one.
+it might be possible to simulate zooming in to an arbitrary depth by `jumping up' to a more shallow camera viewport
+that shares the same self-similarity as the original camera viewport.
 
 This thesis is an in-depth investigation of these two ideas.
 
 ** Overview
 
-In the next section, autoref:section:background, Iterated Function Systems will be introduced and pre-existing methods to render their attractors in single-threaded and heavily parallel environments described.
+In the next section, autoref:section:background, Iterated Function Systems are introduced and pre-existing methods to render their attractors in single-threaded and heavily parallel environments described.
 This then leads to a clear definition of the research question in autoref:section:research_question.
 The approach taken to test this question is described in autoref:section:approach, followed by a qualitative discussion of the results in autoref:section:findings.
 We conclude in autoref:section:conclusion and finally hint at some approaches for further work in autoref:section:further_work.
@@ -110,8 +118,8 @@ We conclude in autoref:section:conclusion and finally hint at some approaches fo
 * Background
 \label{section:background}
 
-This section will describe the different building blocks necessary to formulate the research question.
-First, IFSs are formalized, followed by a description of the different ways in which an IFS' attractor can be rendered, 
+This section describes the different building blocks necessary to formulate the research question.
+First, IFSs are formalized, followed by a description of the different ways in which an IFS's attractor can be rendered, 
 and how these techniques might be parallellized.
 
 ** Informal description of an Iterated Function System
@@ -124,15 +132,15 @@ and how these techniques might be parallellized.
 The initial image is just the unit square. We then iteratively combine the results of transforming the current image using one of the three mappings. 
 The letters indicate which (sequence of) transformation(s) resulted in this part of the image.
 Dashed red lines are used for the first four iterations to indicate the self-similarity between the previous iteration and the current one extra clearly.
-Even after a couple of iterations it can be seen that the shape of the original image has no influence on the shape of the attractor.}
+Already after a couple of iterations it can be seen that the shape of the original image has no influence on the shape of the attractor.}
 \label{figure:sierpinsky_iterations}
 \end{figure}
 
 
-Informally, an Iterated Function System is a set of mappings (transformation functions) that, given any input image, can create a new image by
+Informally, an Iterated Function System is a set of mappings (transformation functions) that, given any input image, create a new image by
 
 1. transforming the input image with each of the transformations;
-2. combining all transformed images together. This is the new image.
+2. overlaying all transformed images, forming one new image that is the combination (union) of the transformed images. This is the new image.
 
 This process is then repeated an arbitrary number of times, until changes between the input image and new image are no longer visible to the human eye.
 
@@ -143,27 +151,31 @@ A simple example of this process can be seen in autoref:figure:sierpinsky_iterat
 
 ** Formal definition of an Iterated Function System
 
-Formally, an Iterated Function System consists of a finite set of contraction mappings that map a complete metric space $(\mathcal{M}, d)$ to itself cite:barnsley1988fractals :
+Formally, an Iterated Function System $F$ consists of a finite set of contraction mappings that map a complete metric space[fn:definition_metric_space] $(\mathcal{M}, d)$ to itself cite:barnsley1988fractals:
 
-$$ = \{ f_i : \mathcal{M} \rightarrow \mathcal{M} | i = 1, 2, \ldots, N \}, N \in \mathbb{N}$$
+$$ \mathcal{F} = \{ f_i : \mathcal{M} \rightarrow \mathcal{M}\}_{i=1}^N, N \in \mathbb{N}.$$
 
 All mappings are required to be contractive. This means that for each mapping $f_i$, the distance between every two arbitrary points $a$ and $b$ in $(\mathcal{M}, d)$ 
 needs to be larger than the distance of these points after transforming them:
 
-$$d(f_i(a), f_i(b)) < d(a, b)$$
+$$\forall i \bigl( d(f_i(a), f_i(b)) < d(a, b) \bigr).$$
 
-We can then take the union of performing all of these mappings on any compact set of points $\mathcal{S}_0 \subset \mathcal{M}$. This procedure is called the /Hutchkinson Operator/ ($H$). 
+We can then take the union of performing all of these mappings on any compact set of points $\mathcal{S}_0 \subset \mathcal{M}$. This procedure is called the /Hutchkinson Operator/ and denoted $H$.
 It can be iterated as many times as desired:
 
-$$ \mathcal{S}_{n + 1} = H(\mathcal{S}_n) = \bigcup_{i=1}^{N} f_i(\mathcal{S}_n) $$
+$$ \mathcal{S}_{n + 1} = H(\mathcal{S}_n) = \bigcup_{i=1}^{N} f_i(\mathcal{S}_n), n \in \mathbb{N}.$$
 
-When performed an arbitrary number of times, the fixed-point or attractor, $\mathcal{A}$, of the Iterated Function System is approached:
+When performed an arbitrary number of times, the fixed-point or attractor, $\mathcal{A}$, of $\mathcal{F}$ is approached:
 
-$$\mathcal{A} = \lim_{n \rightarrow \infty} \mathcal{S}_n$$
+$$\mathcal{A} = \lim_{n \rightarrow \infty} \mathcal{S}_n.$$
 
-Curiously, which set of points $\mathcal{S}_0$ we started with makes no difference. (We might even start with a single point.) cite:mendivil2003fractals.
+Curiously, which set of points $\mathcal{S}_0$ we picked does not influence the shape of $\mathcal{A}$ cite:mendivil2003fractals. We might even start with a single point (denoted $z_0$).
+
+[fn:definition_metric_space] A metric space is a set $\mathcal{M}$ together with a /metric/ $d(x, y)$ on that set . The metric is a function that for any two elements (or `points') in $\mathcal{M}$ returns the `distance' between them, for any notion of distance adhering to the `identity of indiscernibles' ($d(x, y)  = 0 \Leftrightarrow x = y$), `symmetry' ($d(x, y) = d(y, x)$) and `triangle inequality' ($d(x, z) \leq d(x, y) + d(y, z)$) properties. Often, $d$ is elided and just $\mathcal{M}$ is used to refer to the metric space when it is clear from context which metric is used.
 
 *** Restriction to affine transformations on the two-dimensional Euclidean plane 
+
+\todo[inline]{Improve info about restrictions (c.f. feedback)}
 
 Most research of IFSs restricts itself to using $\mathbb{R}^2$ as metric space[fn:euclidean] which can easily be rendered to screen or paper.
 Furthermore, most commonly-used IFSs only use /affine transformations/ as mappings.
@@ -175,19 +187,20 @@ Therefore, these are also the restrictions that will be used in this thesis.
 *** The viewport transformation
 \label{subsection:viewport_transformation}
 
-When rendering graphics, we view the world through a (virtual) /camera/ which has a particular frustrum 
-that limits what parts of the world (in this case: the IFS' attractor) ends up on the /viewport/.
+When rendering graphics, we view the world through a (virtual) /camera/ which has a particular frustum 
+that limits what parts of the world (in this case the IFS's attractor) end up on the /viewport/.
 
 **** Scaling vs zooming
 
-Because of the presence of a camera, the part of an object that will be visible in the camera viewport will change when scaling said object.
+Because of the presence of a camera, the part of an object that will be visible in the camera viewport may change when scaling said object.
 We use the term `zooming' to disambugate this type of scaling where a camera is present.
 
-**** Freedom of choosing an initial camera position and frustrum
+**** Freedom of choosing an initial camera position and frustum
 
-For any IFS with mappings we can transform its attractor by any invertible function $t$ by adjusting each of the mappings according to the
-transform theorem: $f_i' = t \cdot f_i \cdot t^{-1}$ cite:barnsley1988fractals. Essentially points are transformed from the new space to the old space, then the mapping is applied, and finally the points are transformed back to the new space.
-This allows users the freedom to choose any desired mappings together with an `initial camera transformation' (i.e. the camera's initial position + frustrum),
+For any IFS we can transform its attractor by any invertible map $t$ by adjusting each of the IFS's mappings according to the
+transform theorem, defined as $f_i' = t \circ f_i \circ t^{-1}$ cite:barnsley1988fractals. 
+Essentially points are transformed from the new (desired) space to the old (user-supplied) space, then the mapping is applied, and finally the points are transformed back to the new space.
+This allows users the freedom to choose any desired mappings together with an `initial camera transformation' (i.e. the camera's initial position + frustum),
 while still allowing all calculations to happen with regard to the unit square (`unit space'), keeping them simple.
 
 [fn:euclidean] More formally, the two-dimensional Euclidean space: $\left(\mathbb{R}^2, d(p, q) = \sqrt{(p - q)^2}\right)$.
@@ -317,7 +330,7 @@ GPU shaders usually operate by running a check for every pixel on the final text
 For other fractals like the Mandelbrot- and Julia-sets, this is a natural fit since the construction of those fractals works exactly in that way.
 
 For an IFS this does not work, as an IFS is created in the other direction. Points end up at some location on the canvas only after transforming many times.
-Attempts to go the other way fall flat, for instance because this would require to invert the IFS' mappings, but they are not guaranteed to be invertible.
+Attempts to go the other way fall flat, for instance because this would require to invert the IFS's mappings, but they are not guaranteed to be invertible.
 
 Instead, General-Purpose GPU-programming (GPGPU) techniques have to be employed, as these are able to use the top-down approach.
 
@@ -357,7 +370,7 @@ to render animations of an Iterated Function System's attractor in which the cam
 * Approach
 \label{section:approach}
 
-To put this to the test, a simple software program was created which calculates the IFS' attractor only once,
+To put this to the test, a simple software program was created which calculates the IFS's attractor only once,
 and then allows a user to interactively zoom and pan the camera around to investigate different parts of the attractor.
 
 ** Design
@@ -770,7 +783,7 @@ For current generation GPUs[fn:GPU2020], this often is more memory than availabl
 * Conclusion
 \label{section:conclusion}
 
-A program was implemented which has shown that there is /some/ merit to rendering an IFS' attractor using a point cloud as re-usable intermediate structure.
+A program was implemented which has shown that there is /some/ merit to rendering an IFS's attractor using a point cloud as re-usable intermediate structure.
 However, the self-similarity detection method that was proposed turns out to be unusable in common cases.
 
 Therefore, the proposed technique can be considered of limited practicality, 
@@ -786,7 +799,7 @@ Besides this, while we have shown in a proof-of-concept program that it is possi
 with a reasonable speed, there are many optimizations that could be made to make the program run faster (potentially even in real-time),
 most notably the rendering optimizations listed in autoref:subsection:point_cloud_optimizations
 
-Another venue that could be explored is the rendering of an IFS' attractor at multiple `levels of detail':
+Another venue that could be explored is the rendering of an IFS's attractor at multiple `levels of detail':
 It might be possible to create more detailed local versions of the point cloud (based on the points of the less detailed point cloud) when the user
 zooms in on a particular region, on demand.
 
