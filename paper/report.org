@@ -199,7 +199,7 @@ We use the term `zooming' to disambugate this type of scaling where a camera is 
 
 For any IFS we can transform its attractor by any invertible map $t$ by adjusting each of the IFS's mappings according to the
 transform theorem, defined as $f_i' = t \circ f_i \circ t^{-1}$ cite:barnsley1988fractals. 
-Essentially points are transformed from the new (desired) space to the old (user-supplied) space, then the mapping is applied, and finally the points are transformed back to the new space.
+Essentially points are transformed from the new (program-desired) space to the old (user-supplied) space, then the mapping is applied, and finally the points are transformed back to the new space.
 This allows users the freedom to choose any desired mappings together with an `initial camera transformation' (i.e. the camera's initial position + frustum),
 while still allowing all calculations to happen with regard to the unit square (`unit space'), keeping them simple.
 
@@ -207,44 +207,50 @@ while still allowing all calculations to happen with regard to the unit square (
 
 ** Rendering an Iterated Function System
 
-A couple of algoritms exist to render the attractor of an Iterated Function System. 
+A couple of algoritms (cite:barnsley1988fractals, cite:hepting1991rendering, cite:lawlor2012gpu) exist to render the attractor of an Iterated Function System. 
 It is impossible to render the attractor exactly, as this would require an infinite number of transformation steps.
 However, we can approximate it until the difference between our approximation and the attractor is smaller than
-the smallest thing we can visually represent (e.g. when rendering to a screen, smaller than the size of a pixel).
+the smallest detail we can visually represent (e.g. when rendering to a screen, smaller than the size of a pixel).
 
 Because we apply $H$ many times and each time consists of taking the union of $N$ different transformations,
 the result can be seen as traversing an (infinitely deep) tree of transformations, 
 where each sub-tree is self-similar to the tree as a whole.
 
+\todo[inline]{Define trees (in a footnote?)}
+
 Different algorithms take different approaches to evaluating this tree up to a chosen finite depth.
 
-More in-depth information about the rendering of Iterated Function Systems can be found cite:hepting1991rendering. 
-Short summaries of the two most common techniques will now follow.
+More in-depth information about the rendering of Iterated Function Systems can be found in cite:hepting1991rendering. 
+Short summaries of the two most common techniques now follow.
 
 *** The deterministic method
 
 In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
 
 1. Pick a starting point $z_0$;
-2. traverse the tree down to the chosen depth $k$, building up a sequence of transformations [fn:function_composition]
+2. traverse the tree down to the chosen depth $k$, keeping track of the traversed sequence of transformations [fn:function_composition]
    $f_{i_k} \circ \ldots \circ f_{i_1}$;
 3. for each node at this depth, evaluate and render $z_k = (f_{i_k} \circ \ldots \circ f_{i_1})(z_0) = f_{i_k-1}(z_{k-1})$.
 
-Since $z_{k} = f_{i_k-1}(z_{k-1})$ this procedure takes, for an approximation that consists of $N$ points, depending on the tree traversal chosen:
+Since $z_{k} = f_{i_k-1}(z_{k-1})$ this procedure takes, for an approximation that consists of $P$ points, depending on the tree traversal chosen:
 
-- a linear amount of memory ( $\mathcal{O}(N)$ ) for a breadth-first tree-traversal;
-- a logarithmic amount of memory ( $\mathcal{O}(\log{N})$ ) for a depth-first tree-traversal.
+- a linear amount of memory ( $\mathcal{O}(P)$ ) for a breadth-first tree-traversal;
+- a logarithmic amount of memory ( $\mathcal{O}(\log{P})$ ) for a depth-first tree-traversal.
+
+\todo[inline]{Explain why. Or refer to external resource?}
 
 The advantage of the breadth-first traversal is that the rendering process can be stopped interactively,
-while the depth-first traversal requires the stopping criterion to be known beforehand. cite:hepting1991rendering
+while the depth-first traversal requires the stopping criterion to be known beforehand cite:hepting1991rendering.
 
-Both kinds of traversals take a linear amount of time ( $\mathcal{O}(n \cdot N) \approx \mathcal{O}(N)$, where $n$ is the number of mappings the IFS consists of).
+Both kinds of traversals take a linear amount of time ( $\mathcal{O}(N \cdot P) \approx \mathcal{O}(P)$, where $N$ is the number of mappings the IFS consists of).
 
 While the deterministic method is easy to understand (and indeed is a direct implementation of the informal process described in autoref:subsection:informal_description),
-it is usually less efficient and more complex to implement on a computer than the algorithm that will be described next.
+it is usually less efficient and more complex to implement on a computer than the algorithm that is described next.
+
+\todo[inline]{Double-check pre/postmultiplication problems}
 
 [fn:function_composition] $\circ$ stands for function composition: $(f \circ g)(x) = f(g(x))$. 
-Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), matrix multiplication is in the opposite order ($f \circ g \Leftrightarrow G \cdot F$)
+Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), the matrix premultiplication resulting in the same transformation is in the opposite order ($f \circ g \Leftrightarrow G \cdot F$). Matrix postmultiplication cannot be (easily) used in all of the presented algorithms, c.f. cite:hepting1991rendering.
 
 *** The chaos game
 \label{subsection:chaos_game}
@@ -264,23 +270,26 @@ Be aware that when affine transformation functions are represented as matrices (
          \caption{10,000,000}
          \label{figure:barnsley_ten_mil}
      \end{subfigure}
-        \caption{The Barnsley Fern (\autoref{ifs:barnsley_fern}), rendered using the chaos game with different amounts of points.}
+        \caption{The Barnsley Fern (\autoref{ifs:barnsley_fern}), rendered using the chaos game with different numbers of points.}
         \label{figure:barnsley_chaos_game_points}
 \end{figure}
 
 
-The /stochastic method/ cite:hepting1991rendering, also known as the /random iteration algorithm/ cite:barnsley1988fractals or more frequently the /chaos game/, works as seen in autoref:chaosGame
+The /stochastic method/ cite:hepting1991rendering, also known as the /random iteration algorithm/ cite:barnsley1988fractals or more frequently the /chaos game/, works as seen in autoref:chaosGame.
 
 \begin{algorithm}
 \caption{the chaos game}
 \label{chaosGame}
-  $n$: the number of mappings the IFS consists of. \\
-  $z$: an arbitrary starting point \\
-  $v$: the camera's view transformation. \\
-  \While{less than $N$ points plotted}{ 
-    $i$: a random integer between $0$ and $n$.  \\
-    render($v(z)$) except during the first $x$ iterations. \\
-    $z = f_i(z)$ \\
+  $N$: the number of mappings of the IFS; \\
+  $z$: a single arbitrary starting point; \\
+  $v$: the camera's view transformation; \\
+  $m = 0$; \\
+  \For{$m \in [0..n + P)$}{ 
+    $i$: a random integer between $0$ and $N$;  \\
+    \If{$m \geq n$}{
+      render($v(z)$) cumulatively; \\
+    }
+    $z = f_i(z)$; \\
   }
 
 \end{algorithm}
@@ -288,15 +297,15 @@ The /stochastic method/ cite:hepting1991rendering, also known as the /random ite
 This method converges to a correct result because of the following two facts:
 
 - because the precision of the canvas we render on is finite, and because all transformations are contracting,
- two points $a$ and $b$ are indistinguishable after only $x$ transformations.
+ two points $a$ and $b$ are indistinguishable after only $n$ transformations.
   In other words, only the latest $x$ transformations determine at what location on the canvas a point will end up (with the latest transformation having the largest effect on the point's final location).[fn:contraction]
 - at each depth in the tree the subtree remains the same, so every sequence of transformations approaches the attractor.
 
-Therefore, all intermediate points after the first $x$ iterations are visually indistinguishable from the a point that is part of the attractor.
-By running this non-deterministic approach for enough iterations we approach a diverse enough set of 'transformation sequences of length $x$' that we end up covering the whole attractor.
+Therefore, all intermediate points after the first $n$ iterations are visually indistinguishable from a point that is part of the attractor.
+By running this non-deterministic approach for sufficiently many iterations we approach a diverse enough set of 'transformation sequences of length $n$' that we end up covering the whole attractor.
 
 The nice thing about the chaos game is that it requires only a constant amount of auxiliary memory, so its memory complexity is $\mathcal{O}(1)$.
-Furthermore, its time complexity is similar to the deterministic method but with a smaller constant factor, at $\mathcal{O}(2(N + x)) \approx \mathcal{O}(N + x)$. [fn:linear_time_chaos_game]
+Furthermore, its time complexity is similar to the deterministic method but with a smaller constant factor, at $\mathcal{O}(2(P + n)) \approx \mathcal{O}(P + n)$. [fn:linear_time_chaos_game]
 
 A disadvantage of the chaos game is that the result is by its very nature /non-deterministic/.
 If not enough points are used, the result might end up `grainy' and it is not predictable what part of the attractor will be covered (see autoref:figure:barnsley_chaos_game_points).
@@ -313,12 +322,12 @@ When highly contracting mappings are chosen less frequently, coverage of the att
 Because of its simplicity and computational efficiency, the chaos game is used more frequently than the deterministic method for practical implementations.
 The chaos game is also easier to parallellize for Graphical Processor Units (GPUs), as will be outlined in the next subsection.
 
-[fn:contraction] Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of $x$) exist cite:hepting1991rendering, 
+[fn:contraction] Methods for precisely determining the lower and upper bounds of IFS contraction for a particular IFS (and therefore the exact value of $n$) exist cite:hepting1991rendering, 
 but are not relevant for this thesis.
 
 [fn:probabilities] These probabilities are often fine-tuned by hand, although algorithms to determine balanced probabilities exist as well cite:hepting1991rendering.
 
-[fn:linear_time_chaos_game] which again is $\approx \mathcal{O}(N)$ when $x << N$ which is often the case.
+[fn:linear_time_chaos_game] which again is $\approx \mathcal{O}(P)$ when $n << P$ which is often the case.
 
 ** Parallellizing IFS rendering by using a Graphical Processor Unit
 
@@ -395,15 +404,15 @@ by transforming all of the points exactly once with the camera's `view transform
 
 This is faster than re-evaluating the whole attractor using the chaos game at every frame which would require transforming all points /many/ times.
 
-Formally, to render an attractor approximation consisting of $N$ points, 
-running the whole chaos game each frame takes $2(N+x)$ transformations per frame (c.f. autoref:subsection:chaos_game). 
-Running this on $p$ parallel threads has a time complexity of $\mathcal{O}(\frac{2(N+px)}{p})$.
+Formally, to render an attractor approximation consisting of $P$ points, 
+running the whole chaos game each frame takes $2(P+n)$ transformations per frame (c.f. autoref:subsection:chaos_game). 
+Running this on $p$ parallel threads has a time complexity of $\mathcal{O}(\frac{2(P+pn)}{p})$.
 
-Unoptimized, it takes $N$ transformations to render a precomputed point cloud to screen each frame 
-(paralellized this corresponds to a time complexity of $\mathcal{O}(\frac{N}{p})$).
-This does not seem very impressive since $\mathcal{O}(\frac{2(N+px)}{p}) \approx \mathcal{O}(\frac{2N}{p}) \approx \mathcal{O}(\frac{N}{p})$,
+Unoptimized, it takes $P$ transformations to render a precomputed point cloud to screen each frame 
+(paralellized this corresponds to a time complexity of $\mathcal{O}(\frac{P}{p})$).
+This does not seem very impressive since $\mathcal{O}(\frac{2(P+pn)}{p}) \approx \mathcal{O}(\frac{2P}{p}) \approx \mathcal{O}(\frac{P}{p})$,
 placing the two approaches in the same order of efficiency. However, it is possible to optimize point cloud-based rendering using the techniques outlined in the next section
-to run in $\mathcal{O}(\frac{\log{N}}{p})$ instead, which is a big improvement.
+to run in $\mathcal{O}(\frac{\log{P}}{p})$ instead, which is a big improvement.
 
 [fn:transformation_composition] We transform each point twice: Once with the view transformation to render the current point to the canvas in relation to the camera,
 and once with the randomly chosen mapping to transform the current point to the next point.
