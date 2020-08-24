@@ -1,5 +1,5 @@
-#+TITLE: \Huge In by Out again
-#+SUBTITLE: Arbitrarily-deep zooming on Iterated Function Systems by `self-similarity jumping'
+#+TITLE: \Huge In by Out Again
+#+SUBTITLE: Arbitrarily-Deep Zooming on Iterated Function Systems by `Self-Similarity Jumping'
 
 #+BIND: org-latex-prefer-user-labels t
 
@@ -57,8 +57,12 @@
 
 # \listoftodos
 
+\pagebreak
 
 * Abstract
+  :PROPERTIES:
+  :UNNUMBERED: notoc
+  :END:
 
 Iterated Function Systems (IFSs) are a mathematical approach to rendering fractals that sees wide usage in the modeling of physical phenomena, 
 image compression, and the creation of abstract art.
@@ -159,7 +163,7 @@ $$\mathcal{A} = \lim_{n \rightarrow \infty} \mathcal{S}_n$$
 
 Curiously, which set of points $\mathcal{S}_0$ we started with makes no difference. (We might even start with a single point.) cite:mendivil2003fractals.
 
-*** Restriction to affine transformations on the two-dimensional euclidean plane 
+*** Restriction to affine transformations on the two-dimensional Euclidean plane 
 
 Most research of IFSs restricts itself to using $\mathbb{R}^2$ as metric space[fn:euclidean] which can easily be rendered to screen or paper.
 Furthermore, most commonly-used IFSs only use /affine transformations/ as mappings.
@@ -533,7 +537,7 @@ The proof-of-concept program allows the customization of the following options
 - `seed`: a number to seed the random number generator with. If not provided, a different arbitrary seed will be used each time.
 - `render\under{}width` and `render\under{}height` set the resolution of the program window that is displayed (defaults to $800 \times 800$).
 
-*** `.ifs' file format
+*** The `.ifs' file format
 
 The configuration language `Dhall' cite:gonzalez2019 was used to 
 easily faciltate the specification of different IFSs.
@@ -772,7 +776,7 @@ However, the self-similarity detection method that was proposed turns out to be 
 Therefore, the proposed technique can be considered of limited practicality, 
 at least until a more sophisticated self-similarity detection method is found.
 
-* Further Work
+* Future Work
 \label{section:further_work}
 
 It is our hope that a more sophisticated way of detecting self-similarity might be found,
@@ -796,7 +800,7 @@ which might be worthwhile to be explored further.
 
 \appendix
 
-* IFSs used
+* Iterated Function Systems used
 
 This appendix lists the mapping functions of the IFSs that were used throughout this thesis.
 
