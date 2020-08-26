@@ -1,0 +1,5 @@
+Attribution of art:
+
+IFS construction: Scott Draves (https://en.wikipedia.org/wiki/File:Ifs-construction.png)
+2D affine transformations: Cmglee (https://commons.wikimedia.org/wiki/File:2D_affine_transformation_matrix.svg)
+

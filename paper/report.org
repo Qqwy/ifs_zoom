@@ -66,9 +66,8 @@
   :UNNUMBERED: notoc
   :END:
 
-\todo[inline]{Consider improving formulation of IFSs}
-
-Iterated Function Systems (IFSs) are a mathematical approach to rendering fractals that sees wide usage in the modeling of physical phenomena, 
+Iterated Function Systems (IFSs) are a mathematical concept which, amongst other uses, 
+is used for rendering fractals that sees wide usage in the modeling of physical phenomena, 
 image compression, and the creation of abstract art.
 When exploring an IFS interactively, current IFS rendering techniques require a full re-approximation of the IFS's attractor at every frame.
 
@@ -84,9 +83,7 @@ are somewhat restricted in their usefullness because self-similarity jumping can
 
 * Introduction
 
-\todo[inline]{Consider improving formulation of IFSs}
-
-Iterated Function Systems (IFSs) are a method to generate infinitely detailed fractal images 
+Iterated Function Systems (IFSs) are a mathematical concept which, amongst other uses, is used to generate infinitely detailed fractal images 
 by repeatedly applying simple mathematical functions until a fixed point is reached cite:barnsley1988fractals. 
 IFSs see use in the modeling and rendering of physical phenomena, image compression cite:hart1996fractal and representing gene structures cite:jeffrey1990chaos.
 Sometimes they also are used plainly for the aesthetic beauty of their graphical representations cite:draves2003fractal.
@@ -150,6 +147,7 @@ A simple example of this process can be seen in autoref:figure:sierpinsky_iterat
 
 
 ** Formal definition of an Iterated Function System
+\label{subsection:formal_ifs_definition}
 
 Formally, an Iterated Function System $F$ consists of a finite set of contraction mappings that map a complete metric space[fn:definition_metric_space] $(\mathcal{M}, d)$ to itself cite:barnsley1988fractals:
 
@@ -175,13 +173,11 @@ Curiously, which set of points $\mathcal{S}_0$ we picked does not influence the 
 
 *** Restriction to affine transformations on the two-dimensional Euclidean plane 
 
-\todo[inline]{Improve info about restrictions (c.f. feedback)}
+IFSs are traditionally using $\mathbb{R}^2$ as metric space[fn:euclidean] (which can easily be rendered to screen or paper),
+and only use /affine transformations/ as mappings.
 
-Most research of IFSs restricts itself to using $\mathbb{R}^2$ as metric space[fn:euclidean] which can easily be rendered to screen or paper.
-Furthermore, most commonly-used IFSs only use /affine transformations/ as mappings.
-
-It is very practical to work in this restricted domain 
-and potentially generalize obtained results to a wider domain later.
+It is very practical to work in this restricted scenario 
+and potentially generalize obtained results to a wider number of scenarios later.
 Therefore, these are also the restrictions that will be used in this thesis.
 
 *** The viewport transformation
@@ -209,37 +205,39 @@ while still allowing all calculations to happen with regard to the unit square (
 
 A couple of algoritms (cite:barnsley1988fractals, cite:hepting1991rendering, cite:lawlor2012gpu) exist to render the attractor of an Iterated Function System. 
 It is impossible to render the attractor exactly, as this would require an infinite number of transformation steps.
-However, we can approximate it until the difference between our approximation and the attractor is smaller than
-the smallest detail we can visually represent (e.g. when rendering to a screen, smaller than the size of a pixel).
+However, in practice we can stop applying transformation steps when the difference between our approximation and the attractor is smaller than
+the smallest detail we can visually distinguish (e.g. when rendering to a screen, smaller than the size of a pixel).
+The number of iterations (i.e. transformations) to reach this point we call $k$[fn:calculating_k].
 
-Because we apply $H$ many times and each time consists of taking the union of $N$ different transformations,
-the result can be seen as traversing an (infinitely deep) tree of transformations, 
-where each sub-tree is self-similar to the tree as a whole.
+Therefore, to render the attractor approximation on a computer, 
+we have to look up all possible sequences of transformations of length $k$,
+and then take the union of applying all of these sequences to our initial image[fn:single_point].
 
-\todo[inline]{Define trees (in a footnote?)}
-
-Different algorithms take different approaches to evaluating this tree up to a chosen finite depth.
+The difficult part here is to gather all possible \(k\)-length transformation-sequences.
 
 More in-depth information about the rendering of Iterated Function Systems can be found in cite:hepting1991rendering. 
 Short summaries of the two most common techniques now follow.
 
+[fn:single_point] As already mentioned in autoref:subsection:formal_ifs_definition, we usually take a single point $z_0$ as input image for simplicity. In other words, $S_0 = \{z_0\}$.
+[fn:calculating_k] It is possible to calculate $k$ precisely if you know the precision of your canvas and the `contraction factor' of the IFS. C.f. cite:barnsley1988fractals.
+
 *** The deterministic method
 
-In this approach we evaluate the whole tree up to a chosen depth. The algorithm works as follows:
+One way of looking at this problem, is to consider all possible transformation-combinations together as an (infinite) tree[fn:trees].
+We now only have to traverse this tree up to the depth $k$.
+
+The algorithm works as follows:
 
 1. Pick a starting point $z_0$;
-2. traverse the tree down to the chosen depth $k$, keeping track of the traversed sequence of transformations [fn:function_composition]
-   $f_{i_k} \circ \ldots \circ f_{i_1}$;
+2. traverse the tree down to the chosen depth $k$, keeping track of the traversed sequence of transformations [fn:function_composition] $f_{i_k} \circ \ldots \circ f_{i_1}$;
 3. for each node at this depth, evaluate and render $z_k = (f_{i_k} \circ \ldots \circ f_{i_1})(z_0) = f_{i_k-1}(z_{k-1})$.
 
 Since $z_{k} = f_{i_k-1}(z_{k-1})$ this procedure takes, for an approximation that consists of $P$ points, depending on the tree traversal chosen:
 
-- a linear amount of memory ( $\mathcal{O}(P)$ ) for a breadth-first tree-traversal;
-- a logarithmic amount of memory ( $\mathcal{O}(\log{P})$ ) for a depth-first tree-traversal.
+- a linear amount of memory ( $\mathcal{O}(P)$ ) for a breadth-first tree-traversal[fn:bft];
+- a logarithmic amount of memory ( $\mathcal{O}(\log{P})$ ) for a depth-first tree-traversal[fn:dft].
 
-\todo[inline]{Explain why. Or refer to external resource?}
-
-The advantage of the breadth-first traversal is that the rendering process can be stopped interactively,
+One advantage of the breadth-first traversal is that the rendering process can be stopped interactively,
 while the depth-first traversal requires the stopping criterion to be known beforehand cite:hepting1991rendering.
 
 Both kinds of traversals take a linear amount of time ( $\mathcal{O}(N \cdot P) \approx \mathcal{O}(P)$, where $N$ is the number of mappings the IFS consists of).
@@ -247,10 +245,14 @@ Both kinds of traversals take a linear amount of time ( $\mathcal{O}(N \cdot P) 
 While the deterministic method is easy to understand (and indeed is a direct implementation of the informal process described in autoref:subsection:informal_description),
 it is usually less efficient and more complex to implement on a computer than the algorithm that is described next.
 
-\todo[inline]{Double-check pre/postmultiplication problems}
-
 [fn:function_composition] $\circ$ stands for function composition: $(f \circ g)(x) = f(g(x))$. 
-Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), the matrix premultiplication resulting in the same transformation is in the opposite order ($f \circ g \Leftrightarrow G \cdot F$). Matrix postmultiplication cannot be (easily) used in all of the presented algorithms, c.f. cite:hepting1991rendering.
+Be aware that when affine transformation functions are represented as matrices (e.g. $F$ and $G$), 
+the matrix premultiplication resulting in the same transformation is in the opposite order ($f \circ g \Leftrightarrow G \cdot F$). 
+
+[fn:bft] For any breadth-first traversal, we need to keep track of all nodes that have not been expanded deep enough, therefore the linear amount of memory required.
+[fn:dft] For any depth-first traversal, we (only) need to keep track of all parents of the current node, to go back up to the current node's parent once this node's subtree was fully traversed. Therefore, only a logarithmic amount of memory is required.
+[fn:trees] An in-depth description of what trees are and how the various tree-traversals that are briefly mentioned work is outside of the scope of this thesis as the deterministic method that uses trees is itself only mentioned for the sake of comparison with the new approach that is based on the chaos game.
+ We refer to cite:hepting1991rendering for a deeper understanding of trees, tree traversals and the deterministic method of rendering IFS attractors.
 
 *** The chaos game
 \label{subsection:chaos_game}
@@ -514,8 +516,6 @@ As an example, say we are viewing the lower left leaf of a fractal fern (autoref
 If we now `jump up' we use points from virtually the whole fern.
 To make these points still look visually identical from the lower left leaf, we have to alter the points' colors so they get the same reddish hues.
 
-\todo[inline]{Picture of example fern with fancy coloring?}
-
 ** Implementation
 
 \begin{figure}
@@ -649,7 +649,7 @@ Different colors are used for guides at different sequence-depths.
          \centering
          \includegraphics[width=\textwidth]{figures/barnsley_points}
          \caption{only points}
-         \label{figure:barnsley_guides}
+         \label{figure:barnsley_points}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.3\textwidth}
@@ -685,13 +685,12 @@ in which the technique outlined in autoref:subsection:self_similarity cannot be 
 
 **** Borders between transformations
 
-\todo[inline]{Explain what these are}
+It is rather common to zoom in on the borders between two regions of points, where each region contains points that have had a different transformation applied to them as most recent one. 
+This is often where interesting visual details of the IFS might appear.
 
-It is rather common to zoom in on the borders between transformations, as this is often
-where interesting visual details of the IFS might appear.
-
-However, autoref:algorithm:self_similarity_jump_up is not able to handle borders between transformations,
-thus making it useless in these scenarios.
+However, autoref:algorithm:self_similarity_jump_up is not able to handle these `borders' between transformation regions,
+as the camera `overlaps multiple mapping regions' (using the definition of subsection:self_similarity),
+it is contained in neither and therefore the algorithm cannot fine a self-similarity to jump up to even if there is one.
 
 An example can be seen in figure autoref:figure:sierpinsky_transformation_borders.
 
@@ -849,7 +848,8 @@ This appendix lists the mapping functions of the IFSs that were used throughout 
 The \(p\)-values next to each of the mappings references the probability that this mapping ought to be chosen,
 if a chaos game-based rendering method is used (c.f. autoref:subsection:chaos_game).
 
-\todo[inline]{Refer to all 3 examples here.}
+# \todo[inline]{Refer examples with something more descriptive than 'IFS A.1'.}
+# Decided against it.
 
 
 \begin{ifs}
