@@ -1,4 +1,13 @@
 {-# LANGUAGE ViewPatterns #-}
+{- |
+
+Hides the implementation details of transformations.
+To the outside world they are opaque,
+and only the operations we require are exported from this module.
+
+Secretly they are 3x3 matrices.
+
+-}
 module Lib.Transformation
   ( Transformation
   , Probability

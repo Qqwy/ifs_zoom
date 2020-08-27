@@ -61,7 +61,6 @@ chaosGame :: Acc IFS -- ^ A description of the IFS' transformations + probabilit
   -> Acc (Vector Point) -- ^ A representation of the resulting point cloud.
 chaosGame transformations n_points_per_thread paralellism random_matrix =
   random_matrix
-  -- Lib.Random.randomMatrix paralellism n_points_per_thread seed
   |> map word64ToFloatPair
   |> fillChaosGameMatrix transformations
   |> flatten

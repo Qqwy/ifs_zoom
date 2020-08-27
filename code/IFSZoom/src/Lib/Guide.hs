@@ -1,3 +1,10 @@
+{- |
+
+Module to render 'guideś'. These are four-point polygons
+which indicate (rough estimates of) regions in which all points have had
+a particular transformation applied to them.
+
+-}
 module Lib.Guide
   ( drawGuides
   , allCombinations
