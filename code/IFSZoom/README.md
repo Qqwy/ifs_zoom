@@ -44,6 +44,7 @@ To build this project:
   - Use `stack run` to run the main application binary. 
   - Use `stack ghci` to run an interactive shell in which the modules the binary contains are in scope to test/explore indiual parts.
   - Use `stack test` to run the test suite.
+  - Use `stack haddock` to build the documentation (including the documentation of all dependencies; there is no simple way to turn this off...)
 
 ## How to run
 
