@@ -112,6 +112,8 @@ This then leads to a clear definition of the research question in autoref:sectio
 The approach taken to test this question is described in autoref:section:approach, followed by a qualitative discussion of the results in autoref:section:findings.
 We conclude in autoref:section:conclusion and finally hint at some approaches for further work in autoref:section:further_work.
 
+From time to time document refers to particular IFSs. Rather than interspersing their definitions with the main text, they are collected in autoref:appendix:ifss.
+
 * Background
 \label{section:background}
 
@@ -848,6 +850,8 @@ which might be worthwhile to be explored further.
 \appendix
 
 * Iterated Function Systems used
+  
+\label{appendix:ifss}
 
 This appendix lists the mapping functions of the IFSs that were used throughout this thesis.
 The \(p\)-values next to each of the mappings references the probability that this mapping ought to be chosen,
