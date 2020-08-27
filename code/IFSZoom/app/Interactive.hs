@@ -2,6 +2,13 @@
 {-# LANGUAGE NamedFieldPuns      #-}
 {-# LANGUAGE TemplateHaskell     #-}
 
+{- |
+
+The module that runs the main interactive GUI program loop.
+
+It wraps the `Input` and `SimState` modules, and extends their workings with some effect-full operations.
+
+-}
 module Interactive
   ( run
   ) where

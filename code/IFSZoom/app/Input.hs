@@ -1,8 +1,16 @@
 {-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE NamedFieldPuns      #-}
 {-# LANGUAGE TemplateHaskell     #-}
-module Input where
 
+{- |
+
+This module concerns itself with the (effect-free) parts of event-handling,
+like turning mouse interactions to dragging/zooming events.
+
+It is essentially an intermediate layer between the 'raw' events
+and the 'semantic' events that SimState digests.
+-}
+module Input where
 
 import Pipe
 
@@ -43,8 +51,6 @@ initial =
   , _show_points = True
   , _jump = Nothing
   }
-
-
 
 -- | Transforms user actions on the keyboard + mouse
 -- to a more abstract 'input' format

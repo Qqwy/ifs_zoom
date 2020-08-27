@@ -2,6 +2,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{-|
+Module defining+parsing the IFS file format specification.
+-}
 module IFSConfig
   ( main
   , read
@@ -37,7 +40,6 @@ data TransformationWithProbability = TransformationWithProbability
    probability :: Double
   }
   deriving (Generic, Show)
--- makeLenses ''TransformationWithProbability
 instance FromDhall TransformationWithProbability
 
 data IFS = IFS
@@ -45,7 +47,6 @@ data IFS = IFS
   , initialCamera :: Transformation
   }
   deriving (Generic, Show)
--- makeLenses ''IFS
 instance FromDhall IFS
 
 main :: Text -> IO ()
@@ -56,9 +57,6 @@ main filename = do
 read :: Text -> IO IFS
 read filename = do
   input auto filename
-
--- transformationToSixtuple :: Transformation -> (Double, Double, Double, Double, Double, Double)
--- transformationToSixtuple t = (t^.a, t^.b, t^.c, t^.d, t^.e, t^.f)
 
 transformationWithProbabilityToSixtuplePair :: TransformationWithProbability -> ((Float, Float, Float, Float, Float, Float), Float)
 transformationWithProbabilityToSixtuplePair TransformationWithProbability {transformation = t, probability = p} =

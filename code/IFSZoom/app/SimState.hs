@@ -1,6 +1,16 @@
 {-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE NamedFieldPuns      #-}
 {-# LANGUAGE TemplateHaskell     #-}
+
+{- |
+
+Side-effect-free module that manages the main state of the simulation, dispatching to rendering on the GPU when necessary (and only then).
+
+Input handling is done in two steps:
+1. Update the `Input` part based on the 'raw' event;
+2. Update the `SimState` based on the changes to the 'semantic' event(s) of the updated `Input` structure.
+
+-}
 module SimState where
 
 import Pipe

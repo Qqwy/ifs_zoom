@@ -8,6 +8,9 @@
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
 --
+-- Main entry-point of the application.
+--
+-- Most actual work of the program happens inside `Interactive`; only some set-up logic happens here.
 
 module Main where
 

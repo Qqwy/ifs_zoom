@@ -1,3 +1,8 @@
+{- |
+
+Contains small functions that are used in multiple places.
+
+-}
 module Helper (
   bitsList,
   expandBits,

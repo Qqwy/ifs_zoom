@@ -1,5 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+{- |
+
+Parser for the various command-line options that the program allows.
+
+-}
 module Options
   ( parseCommandLineOptions
   , commandLineOptionsWithHelp

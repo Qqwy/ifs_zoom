@@ -9,6 +9,9 @@
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
 --
+-- Main entry-point of the `domain model' part of the application.
+-- This module re-exports some of the nested module's types
+-- so that we can e.g. write `Lib.Camera === Lib.Camera.Camera`
 
 module Lib
   ( naivePointCloudToPicture

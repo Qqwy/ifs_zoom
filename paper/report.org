@@ -55,9 +55,9 @@
 
 #+OPTIONS: toc:4
 
-\listoftodos
+# \listoftodos
 
-\todo[inline]{Turn off todo list}
+# \todo[inline]{Turn off todo list}
 
 \pagebreak
 
@@ -336,12 +336,15 @@ However, optimizing IFS rendering to run well on GPU-architectures is a bit of a
 GPU shaders usually operate by running a check for every pixel on the final texture (i.e. canvas), to determine its color.
 For other fractals like the Mandelbrot- and Julia-sets, this is a natural fit since the construction of those fractals works exactly in that way.
 
-For an IFS this does not work, as an IFS is created in the other direction. Points end up at some location on the canvas only after transforming many times.
-Attempts to go the other way fall flat, for instance because this would require to invert the IFS's mappings, but they are not guaranteed to be invertible.
-
-\todo[inline]{But what if they are invertible?}
+For an IFS this does not work, as an IFS is created in the other direction. 
+Points end up at some location on the canvas only after transforming many times.
+Attempts to go the other way fall flat, for instance because this would require to invert the IFS's mappings, 
+but they are not guaranteed to be invertible[fn:what_if_they_areinvertible].
 
 Instead, General-Purpose GPU-programming (GPGPU) techniques have to be employed, as these are able to use the top-down approach.
+
+[fn:what_if_they_areinvertible] If we restrict the functions to invertible ones, then it is possible to directly use GPU textures.
+See also autoref:subsection:deterministic_gpu.
 
 *** The chaos game on the GPU
 \label{subsection:chaos_game_gpu}
@@ -361,6 +364,8 @@ An exciting approach taken in cite:lawlor2012gpu /does/ use the deterministic me
 by using the fast inverse square root operation together with a few other tricks, 
 even unbounded (noncontracting) and nonlinear IFSs can be efficiently
 evaluated using the deterministic method, programmed in normal GPU shaders that manipulate a couple of GPU textures.
+
+This technique does require that all the mappings of the IFS are invertible.
 
 * Research Question
 \label{section:research_question}
@@ -710,8 +715,8 @@ An example can be seen in figure autoref:figure:sierpinsky_transformation_border
          \includegraphics[width=0.6\textwidth]{figures/barnsley_colored_jump1}
          \caption{Since the camera viewport only contains points of $f_2$, the jump up is proper.}
          \label{figure:barnsley_jump_a}
+         \vspace*{5mm}
      \end{subfigure}
-     \hfill
      \begin{subfigure}[b]{\textwidth}
          \centering
          \includegraphics[width=0.6\textwidth]{figures/barnsley_colored_jump2}
@@ -728,9 +733,9 @@ Points are colored based on their latest mapping. }
 \end{figure}
 
 A more shallow view of the attractor only actually is self-similar to the current view when
-there are no points transformed by another mapping that end up in the current view.
-
-\todo[inline]{Better explain paragraph above}
+the points in the current view all have had the same mapping applied to them as most recent one.
+If the view contains some points from a different mapping as well, 
+then there is no guarantee that these will exist after the jump up.
 
 When there are points from another mapping in the current view, 
 going to a more shallow view will make points disappear from the perspective of the user.
@@ -750,7 +755,7 @@ as this would require evaluating the IFS itself.
 
 It is possible to take a rough `upper bound' estimate of the disallowed regions by keeping track, 
 per mapping $f_i$, what region would be covered by 
-taking the union of transforming the unit square by all $k$-long sequences of mappings that start with $f_i$.
+taking the union of transforming the unit square by all \(k\)-long sequences of mappings that start with $f_i$.
 This estimate increases in precision as $k$ grows.
 
 where the unit square would end up after a few transformation steps with this mapping as last (i.e. most significant) one.
@@ -763,6 +768,7 @@ where the unit square would end up after a few transformation steps with this ma
          \includegraphics[width=\textwidth]{figures/dragon_curve_a}
          \caption{The unit square (indicated in white) transformed by $f_1$ and $f_2$ (indicated in green)}
          \label{figure:dragon_curve_a}
+         \vspace*{5mm}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
@@ -770,6 +776,7 @@ where the unit square would end up after a few transformation steps with this ma
          \includegraphics[width=\textwidth]{figures/dragon_curve_b}
          \caption{Subtransformations of $f_1$: $f_1 \circ f_1$ and $f_1 \circ f_2$ (indicated in shades of red)}
          \label{figure:dragon_curve_b}
+         \vspace*{5mm}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
@@ -777,6 +784,7 @@ where the unit square would end up after a few transformation steps with this ma
          \includegraphics[width=\textwidth]{figures/dragon_curve_c}
          \caption{Subtransformations of $f_2$: $f_2 \circ f_1$ and $f_2 \circ f_2$. (indicated in shades of blue)}
          \label{figure:dragon_curve_c}
+         \vspace*{5mm}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.4\textwidth}
@@ -784,28 +792,25 @@ where the unit square would end up after a few transformation steps with this ma
          \includegraphics[width=\textwidth]{figures/dragon_curve_d}
          \caption{The region in which (b) and (c) overlap, indicated in shades of magenta)}
          \label{figure:dragon_curve_d}
+         \vspace*{5mm}
      \end{subfigure}
         \caption{Showing the first couple of iterations of rendering the attractor of the dragon curve IFS $D$ (\autoref{ifs:dragon_curve}), and the regions in which (sequences of) transformations overlap (As defined in \autoref{subsection:self_similarity}).}
         \label{figure:dragon_curve_overlaps}
 \end{figure}
-
-\todo[inline]{Increase whitespace between subfigures}
 
 [fn:overlapping_transformations] As defined in \autoref{subsection:self_similarity}.
 
 ** Memory Usage
 
 Point clouds take up a lot of memory on the GPU. To render a fractal at reasonable detail, depending on the particular IFS,
-hundreds of millions if not billions of points are necessary.
+hundreds of millions if not tens of billions of points are necessary.
 
 A reasonable way to store a point cloud is by using 32 bits for each of the two coordinates of a point. 
 This means that one point takes up exactly one machine word of a 64-bit computer system.
 Stored this way, a point cloud of 100,000,000 points requires 0.596 GiB of GPU memory,
 and 1,000,000,000 points requires 5.96 GiB.
-For current generation GPUs[fn:GPU2020], this often is more memory than available.
-
-\todo[inline]{Elaborate claim. `The latter only'? (see feedback)}
-
+If we want to increase the detail of the IFSs slightly more or for instance want to add colour information to the points,
+we require more memory than is available to current generation GPUs[fn:GPU2020].
 
 [fn:GPU2020] At the time of writing, high-end consumer GPUs contain somewhere between 2 and 24 GiB of available memory cite:ign2020topgpus.
 
